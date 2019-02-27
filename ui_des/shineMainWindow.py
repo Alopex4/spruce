@@ -109,9 +109,11 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
 
         # Task 1
+        # Define the rank
         self.rank = self.getRank()
 
         # Task 2
+        # Action tiggered connect
         self.action_close.triggered.connect(self.close)
         self.action_Rank.triggered.connect(self.showRankDialog)
         self.action_Save.triggered.connect(self.showSaveFile)
@@ -123,43 +125,20 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Task 3
         # Control Dock initial
         self.ctlDockLineEditSet(False)
+        self.ctlRemainWidgetInit()
 
-        # Scan Dock, conciseTable, verboseTab, decodeTab initial
-        self.scanDock.setEnabled(False)
-        self.conciseInfoTable.setEnabled(False)
-        self.verboseInfoTab.setEnabled(False)
-        self.decodeInfoTab.setEnabled(False)
-
+    # ---------------
+    # define the rank
+    # ---------------
     def getRank(self):
         """ Manage the rank info """
+
         rootPrivilege = self.rootPrivilegeCheck()
         networkStartUp = self.networkStartUpCheck()
         ipRouting = self.ipRoutingCheck()
         tcpdumpState = self.tcpdumpCheck()
         rank = rootPrivilege | networkStartUp | ipRouting | tcpdumpState
         return rank
-
-    def ctlDockLineEditSet(self, state=False):
-        """ Control panel dock line edit widget state setting """
-
-        self.nameLineEdit.setEnabled(state)
-        self.ipLineEdit.setEnabled(state)
-        self.macLineEdit.setEnabled(state)
-        self.vendorLineEdit.setEnabled(state)
-        self.netmaskLineEdit.setEnabled(state)
-
-        self.gwIpLineEdit.setEnabled(state)
-        self.gwMacLineEdit.setEnabled(state)
-        self.gwVendorLineEdit.setEnabled(state)
-
-    def unlockTrigger(self):
-        situation = self.unlockButton.text()
-        if situation == 'unlock':
-            self.ctlDockLineEditSet(True)
-            self.unlockButton.setText('lock')
-        elif situation == 'lock':
-            self.ctlDockLineEditSet(False)
-            self.unlockButton.setText('unlock')
 
     def rootPrivilegeCheck(self):
         """ Return 1 if effect user id equal 0 else return 0 """
@@ -194,6 +173,9 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         cmd = 'tcpdump -h 2> /dev/null'
         return 8 if os.system(cmd) == 0 else 0
 
+    # ----------------
+    # Action triggered
+    # ----------------
     def showRankDialog(self):
         """ 
             Menubar --> About --> &rank 
@@ -247,8 +229,44 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             Menubar --> About --> &author
             show author dialog information
         """
+
         auhtorDialog = Ui_AuthorDialog(self)
         auhtorDialog.exec_()
+
+    def unlockTrigger(self):
+        """ Unlock/Lock the network tab editline box """
+
+        situation = self.unlockButton.text()
+        if situation == 'unlock':
+            self.ctlDockLineEditSet(True)
+            self.unlockButton.setText('lock')
+        elif situation == 'lock':
+            self.ctlDockLineEditSet(False)
+            self.unlockButton.setText('unlock')
+
+    # --------------
+    # widget initial
+    # --------------
+    def ctlDockLineEditSet(self, state=False):
+        """ Control panel dock line edit widget state setting """
+
+        self.nameLineEdit.setEnabled(state)
+        self.ipLineEdit.setEnabled(state)
+        self.macLineEdit.setEnabled(state)
+        self.vendorLineEdit.setEnabled(state)
+        self.netmaskLineEdit.setEnabled(state)
+
+        self.gwIpLineEdit.setEnabled(state)
+        self.gwMacLineEdit.setEnabled(state)
+        self.gwVendorLineEdit.setEnabled(state)
+
+    def ctlRemainWidgetInit(self):
+        """Scan Dock, conciseTable, verboseTab, decodeTab initial"""
+
+        self.scanDock.setEnabled(False)
+        self.conciseInfoTable.setEnabled(False)
+        self.verboseInfoTab.setEnabled(False)
+        self.decodeInfoTab.setEnabled(False)
 
 
 if __name__ == '__main__':
