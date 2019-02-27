@@ -6,8 +6,6 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-import sys
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
@@ -31,6 +29,12 @@ class Ui_Dialog(object):
         self.authorLabel.setFont(font)
         self.authorLabel.setObjectName("authorLabel")
         self.verticalLayout.addWidget(self.authorLabel)
+        self.projectLabel = QtWidgets.QLabel(Dialog)
+        font = QtGui.QFont()
+        font.setFamily("DejaVu Sans")
+        self.projectLabel.setFont(font)
+        self.projectLabel.setObjectName("projectLabel")
+        self.verticalLayout.addWidget(self.projectLabel)
         self.contacLabel = QtWidgets.QLabel(Dialog)
         font = QtGui.QFont()
         font.setFamily("DejaVu Sans")
@@ -44,16 +48,8 @@ class Ui_Dialog(object):
         self.versionLabel.setObjectName("versionLabel")
         self.verticalLayout.addWidget(self.versionLabel)
         self.verticalLayout_2.addLayout(self.verticalLayout)
-        self.buttonBox = QtWidgets.QDialogButtonBox(Dialog)
-        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel
-                                          | QtWidgets.QDialogButtonBox.Ok)
-        self.buttonBox.setObjectName("buttonBox")
-        self.verticalLayout_2.addWidget(self.buttonBox)
 
         self.retranslateUi(Dialog)
-        self.buttonBox.accepted.connect(Dialog.accept)
-        self.buttonBox.rejected.connect(Dialog.reject)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
@@ -61,27 +57,14 @@ class Ui_Dialog(object):
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
         self.iconLabel.setText(_translate("Dialog", "icon"))
         self.authorLabel.setText(_translate("Dialog", "author: Alopex Cheung"))
+        self.projectLabel.setText(
+            _translate(
+                "Dialog",
+                "project: <a href=\'https://github.com/Alopex4/spruce\'>spruce</a>"
+            ))
         self.contacLabel.setText(
-            "contact: <a href=\"mailto:alopex4@163.com\">alopex4@163.com</a> \n"
-            "")
+            _translate(
+                "Dialog",
+                "contact: <a href=\"mailto:alopex4@163.com\">alopex4@163.com</a> \n"
+                ""))
         self.versionLabel.setText(_translate("Dialog", "version: 0.12"))
-
-
-class Ui_AuthorDialog(QtWidgets.QDialog, Ui_Dialog):
-    def __init__(self, parent=None):
-        super(QtWidgets.QDialog, self).__init__(parent)
-        self.setupUi(self)
-        self.setWindowIcon(QtGui.QIcon('../spruce.ico'))
-        self.setWindowTitle('current state')
-        self.setFixedSize(272, 440)
-        self.iconLabel.clear()
-        author_icon = QtGui.QPixmap('../spruce.ico')
-        self.iconLabel.setPixmap(author_icon)
-        self.contacLabel.setText("<a href='http://www.google.com'>Welcome to google</a>")
-
-
-if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
-    author = Ui_AuthorDialog()
-    author.show()
-    sys.exit(app.exec_())

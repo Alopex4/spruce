@@ -11,7 +11,8 @@ from PyQt5 import QtGui
 from PyQt5 import QtCore
 
 from mainWindow import Ui_MainWindow
-from rankDialog import Ui_RankDialog
+from shineDialog import Ui_RankDialog
+from shineDialog import Ui_AuthorDialog
 
 
 class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -108,17 +109,14 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
 
         # Task 1
-        rootPrivilege = self.rootPrivilegeCheck()
-        networkStartUp = self.networkStartUpCheck()
-        ipRouting = self.ipRoutingCheck()
-        tcpdumpState = self.tcpdumpCheck()
-        self.rank = rootPrivilege | networkStartUp | ipRouting | tcpdumpState
+        self.rank = self.getRank()
 
         # Task 2
         self.action_close.triggered.connect(self.close)
         self.action_Rank.triggered.connect(self.showRankDialog)
         self.action_Save.triggered.connect(self.showSaveFile)
         self.action_Open.triggered.connect(self.showOpenFile)
+        self.action_Author.triggered.connect(self.showAuthorDialog)
 
         self.unlockButton.clicked.connect(self.unlockTrigger)
 
@@ -131,6 +129,15 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.conciseInfoTable.setEnabled(False)
         self.verboseInfoTab.setEnabled(False)
         self.decodeInfoTab.setEnabled(False)
+
+    def getRank(self):
+        """ Manage the rank info """
+        rootPrivilege = self.rootPrivilegeCheck()
+        networkStartUp = self.networkStartUpCheck()
+        ipRouting = self.ipRoutingCheck()
+        tcpdumpState = self.tcpdumpCheck()
+        rank = rootPrivilege | networkStartUp | ipRouting | tcpdumpState
+        return rank
 
     def ctlDockLineEditSet(self, state=False):
         """ Control panel dock line edit widget state setting """
@@ -193,6 +200,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             show root, network, routing, tcpdump all right or not
         """
 
+        self.rank = self.getRank()
         rankDialog = Ui_RankDialog(self)
         true_ico = QtGui.QPixmap('../true.ico')
         false_ico = QtGui.QPixmap('../false.ico')
@@ -233,6 +241,14 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # _ --> file types
         openFileName, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, 'open file', '.', "packet files (*.pcap)")
+
+    def showAuthorDialog(self):
+        """
+            Menubar --> About --> &author
+            show author dialog information
+        """
+        auhtorDialog = Ui_AuthorDialog(self)
+        auhtorDialog.exec_()
 
 
 if __name__ == '__main__':
