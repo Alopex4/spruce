@@ -8,7 +8,6 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -128,97 +127,76 @@ class Ui_MainWindow(object):
         self.controlDock.setObjectName("controlDock")
         self.controlDockContents = QtWidgets.QWidget()
         self.controlDockContents.setObjectName("controlDockContents")
-        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(
-            self.controlDockContents)
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.controlDockContents)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.controlTabManage = QtWidgets.QTabWidget(self.controlDockContents)
         self.controlTabManage.setTabBarAutoHide(False)
         self.controlTabManage.setObjectName("controlTabManage")
-        self.networklTab = QtWidgets.QWidget()
-        self.networklTab.setObjectName("networklTab")
-        self.formLayout = QtWidgets.QFormLayout(self.networklTab)
+        self.networkTab = QtWidgets.QWidget()
+        self.networkTab.setObjectName("networkTab")
+        self.formLayout = QtWidgets.QFormLayout(self.networkTab)
         self.formLayout.setObjectName("formLayout")
-        self.nameLabel = QtWidgets.QLabel(self.networklTab)
+        self.nameLabel = QtWidgets.QLabel(self.networkTab)
         self.nameLabel.setObjectName("nameLabel")
-        self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole,
-                                  self.nameLabel)
-        self.nameLineEdit = QtWidgets.QLineEdit(self.networklTab)
+        self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.nameLabel)
+        self.nameLineEdit = QtWidgets.QLineEdit(self.networkTab)
         self.nameLineEdit.setObjectName("nameLineEdit")
-        self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole,
-                                  self.nameLineEdit)
-        self.ipLabel = QtWidgets.QLabel(self.networklTab)
+        self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.nameLineEdit)
+        self.ipLabel = QtWidgets.QLabel(self.networkTab)
         self.ipLabel.setObjectName("ipLabel")
-        self.formLayout.setWidget(2, QtWidgets.QFormLayout.LabelRole,
-                                  self.ipLabel)
-        self.ipLineEdit = QtWidgets.QLineEdit(self.networklTab)
+        self.formLayout.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.ipLabel)
+        self.ipLineEdit = QtWidgets.QLineEdit(self.networkTab)
         self.ipLineEdit.setObjectName("ipLineEdit")
-        self.formLayout.setWidget(2, QtWidgets.QFormLayout.FieldRole,
-                                  self.ipLineEdit)
-        self.macLabel = QtWidgets.QLabel(self.networklTab)
+        self.formLayout.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.ipLineEdit)
+        self.macLabel = QtWidgets.QLabel(self.networkTab)
         self.macLabel.setObjectName("macLabel")
-        self.formLayout.setWidget(3, QtWidgets.QFormLayout.LabelRole,
-                                  self.macLabel)
-        self.macLineEdit = QtWidgets.QLineEdit(self.networklTab)
+        self.formLayout.setWidget(3, QtWidgets.QFormLayout.LabelRole, self.macLabel)
+        self.macLineEdit = QtWidgets.QLineEdit(self.networkTab)
         self.macLineEdit.setObjectName("macLineEdit")
-        self.formLayout.setWidget(3, QtWidgets.QFormLayout.FieldRole,
-                                  self.macLineEdit)
-        self.vendorLabel = QtWidgets.QLabel(self.networklTab)
+        self.formLayout.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.macLineEdit)
+        self.vendorLabel = QtWidgets.QLabel(self.networkTab)
         self.vendorLabel.setObjectName("vendorLabel")
-        self.formLayout.setWidget(4, QtWidgets.QFormLayout.LabelRole,
-                                  self.vendorLabel)
-        self.vendorLineEdit = QtWidgets.QLineEdit(self.networklTab)
+        self.formLayout.setWidget(4, QtWidgets.QFormLayout.LabelRole, self.vendorLabel)
+        self.vendorLineEdit = QtWidgets.QLineEdit(self.networkTab)
         self.vendorLineEdit.setObjectName("vendorLineEdit")
-        self.formLayout.setWidget(4, QtWidgets.QFormLayout.FieldRole,
-                                  self.vendorLineEdit)
-        self.netmaskLabel = QtWidgets.QLabel(self.networklTab)
+        self.formLayout.setWidget(4, QtWidgets.QFormLayout.FieldRole, self.vendorLineEdit)
+        self.netmaskLabel = QtWidgets.QLabel(self.networkTab)
         self.netmaskLabel.setObjectName("netmaskLabel")
-        self.formLayout.setWidget(5, QtWidgets.QFormLayout.LabelRole,
-                                  self.netmaskLabel)
-        self.netmaskLineEdit = QtWidgets.QLineEdit(self.networklTab)
+        self.formLayout.setWidget(5, QtWidgets.QFormLayout.LabelRole, self.netmaskLabel)
+        self.netmaskLineEdit = QtWidgets.QLineEdit(self.networkTab)
         self.netmaskLineEdit.setObjectName("netmaskLineEdit")
-        self.formLayout.setWidget(5, QtWidgets.QFormLayout.FieldRole,
-                                  self.netmaskLineEdit)
-        self.gwIpLabel = QtWidgets.QLabel(self.networklTab)
+        self.formLayout.setWidget(5, QtWidgets.QFormLayout.FieldRole, self.netmaskLineEdit)
+        self.gwIpLabel = QtWidgets.QLabel(self.networkTab)
         self.gwIpLabel.setObjectName("gwIpLabel")
-        self.formLayout.setWidget(7, QtWidgets.QFormLayout.LabelRole,
-                                  self.gwIpLabel)
-        self.gwMacLineEdit = QtWidgets.QLineEdit(self.networklTab)
+        self.formLayout.setWidget(7, QtWidgets.QFormLayout.LabelRole, self.gwIpLabel)
+        self.gwMacLineEdit = QtWidgets.QLineEdit(self.networkTab)
         self.gwMacLineEdit.setObjectName("gwMacLineEdit")
-        self.formLayout.setWidget(7, QtWidgets.QFormLayout.FieldRole,
-                                  self.gwMacLineEdit)
-        self.gwVendorLabel = QtWidgets.QLabel(self.networklTab)
+        self.formLayout.setWidget(7, QtWidgets.QFormLayout.FieldRole, self.gwMacLineEdit)
+        self.gwVendorLabel = QtWidgets.QLabel(self.networkTab)
         self.gwVendorLabel.setObjectName("gwVendorLabel")
-        self.formLayout.setWidget(10, QtWidgets.QFormLayout.LabelRole,
-                                  self.gwVendorLabel)
-        self.gwVendorLineEdit = QtWidgets.QLineEdit(self.networklTab)
+        self.formLayout.setWidget(10, QtWidgets.QFormLayout.LabelRole, self.gwVendorLabel)
+        self.gwVendorLineEdit = QtWidgets.QLineEdit(self.networkTab)
         self.gwVendorLineEdit.setObjectName("gwVendorLineEdit")
-        self.formLayout.setWidget(10, QtWidgets.QFormLayout.FieldRole,
-                                  self.gwVendorLineEdit)
-        self.refreshButton = QtWidgets.QPushButton(self.networklTab)
+        self.formLayout.setWidget(10, QtWidgets.QFormLayout.FieldRole, self.gwVendorLineEdit)
+        self.refreshButton = QtWidgets.QPushButton(self.networkTab)
         self.refreshButton.setObjectName("refreshButton")
-        self.formLayout.setWidget(13, QtWidgets.QFormLayout.FieldRole,
-                                  self.refreshButton)
-        self.localLabel = QtWidgets.QLabel(self.networklTab)
+        self.formLayout.setWidget(13, QtWidgets.QFormLayout.FieldRole, self.refreshButton)
+        self.localLabel = QtWidgets.QLabel(self.networkTab)
         self.localLabel.setObjectName("localLabel")
-        self.formLayout.setWidget(0, QtWidgets.QFormLayout.LabelRole,
-                                  self.localLabel)
-        self.gwLabel = QtWidgets.QLabel(self.networklTab)
+        self.formLayout.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.localLabel)
+        self.gwLabel = QtWidgets.QLabel(self.networkTab)
         self.gwLabel.setObjectName("gwLabel")
-        self.formLayout.setWidget(6, QtWidgets.QFormLayout.LabelRole,
-                                  self.gwLabel)
-        self.gwMacLabel = QtWidgets.QLabel(self.networklTab)
+        self.formLayout.setWidget(6, QtWidgets.QFormLayout.LabelRole, self.gwLabel)
+        self.gwMacLabel = QtWidgets.QLabel(self.networkTab)
         self.gwMacLabel.setObjectName("gwMacLabel")
-        self.formLayout.setWidget(8, QtWidgets.QFormLayout.LabelRole,
-                                  self.gwMacLabel)
-        self.gwIpLineEdit = QtWidgets.QLineEdit(self.networklTab)
+        self.formLayout.setWidget(8, QtWidgets.QFormLayout.LabelRole, self.gwMacLabel)
+        self.gwIpLineEdit = QtWidgets.QLineEdit(self.networkTab)
         self.gwIpLineEdit.setObjectName("gwIpLineEdit")
-        self.formLayout.setWidget(8, QtWidgets.QFormLayout.FieldRole,
-                                  self.gwIpLineEdit)
-        self.unlockButton = QtWidgets.QPushButton(self.networklTab)
+        self.formLayout.setWidget(8, QtWidgets.QFormLayout.FieldRole, self.gwIpLineEdit)
+        self.unlockButton = QtWidgets.QPushButton(self.networkTab)
         self.unlockButton.setObjectName("unlockButton")
-        self.formLayout.setWidget(13, QtWidgets.QFormLayout.LabelRole,
-                                  self.unlockButton)
-        self.controlTabManage.addTab(self.networklTab, "")
+        self.formLayout.setWidget(13, QtWidgets.QFormLayout.LabelRole, self.unlockButton)
+        self.controlTabManage.addTab(self.networkTab, "")
         self.scanTab = QtWidgets.QWidget()
         self.scanTab.setObjectName("scanTab")
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.scanTab)
@@ -306,16 +284,13 @@ class Ui_MainWindow(object):
         self.formLayout_4.setObjectName("formLayout_4")
         self.searchLabel = QtWidgets.QLabel(self.searchTab)
         self.searchLabel.setObjectName("searchLabel")
-        self.formLayout_4.setWidget(0, QtWidgets.QFormLayout.LabelRole,
-                                    self.searchLabel)
+        self.formLayout_4.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.searchLabel)
         self.searchLineEdit = QtWidgets.QLineEdit(self.searchTab)
         self.searchLineEdit.setObjectName("searchLineEdit")
-        self.formLayout_4.setWidget(0, QtWidgets.QFormLayout.FieldRole,
-                                    self.searchLineEdit)
+        self.formLayout_4.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.searchLineEdit)
         self.searchButton = QtWidgets.QPushButton(self.searchTab)
         self.searchButton.setObjectName("searchButton")
-        self.formLayout_4.setWidget(1, QtWidgets.QFormLayout.FieldRole,
-                                    self.searchButton)
+        self.formLayout_4.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.searchButton)
         self.controlTabManage.addTab(self.searchTab, "")
         self.ipinfoTab = QtWidgets.QWidget()
         self.ipinfoTab.setObjectName("ipinfoTab")
@@ -323,20 +298,16 @@ class Ui_MainWindow(object):
         self.formLayout_3.setObjectName("formLayout_3")
         self.sipLabel = QtWidgets.QLabel(self.ipinfoTab)
         self.sipLabel.setObjectName("sipLabel")
-        self.formLayout_3.setWidget(0, QtWidgets.QFormLayout.LabelRole,
-                                    self.sipLabel)
+        self.formLayout_3.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.sipLabel)
         self.sipLineEdit = QtWidgets.QLineEdit(self.ipinfoTab)
         self.sipLineEdit.setObjectName("sipLineEdit")
-        self.formLayout_3.setWidget(0, QtWidgets.QFormLayout.FieldRole,
-                                    self.sipLineEdit)
+        self.formLayout_3.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.sipLineEdit)
         self.sipTextEdit = QtWidgets.QTextEdit(self.ipinfoTab)
         self.sipTextEdit.setObjectName("sipTextEdit")
-        self.formLayout_3.setWidget(1, QtWidgets.QFormLayout.SpanningRole,
-                                    self.sipTextEdit)
+        self.formLayout_3.setWidget(1, QtWidgets.QFormLayout.SpanningRole, self.sipTextEdit)
         self.sipButton = QtWidgets.QPushButton(self.ipinfoTab)
         self.sipButton.setObjectName("sipButton")
-        self.formLayout_3.setWidget(2, QtWidgets.QFormLayout.LabelRole,
-                                    self.sipButton)
+        self.formLayout_3.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.sipButton)
         self.controlTabManage.addTab(self.ipinfoTab, "")
         self.horizontalLayout_2.addWidget(self.controlTabManage)
         self.controlDock.setWidget(self.controlDockContents)
@@ -492,39 +463,24 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "Length"))
         item = self.conciseInfoTable.horizontalHeaderItem(6)
         item.setText(_translate("MainWindow", "Info"))
-        self.verboseInfoTab.setTabText(
-            self.verboseInfoTab.indexOf(self.linkTab),
-            _translate("MainWindow", "link"))
-        self.verboseInfoTab.setTabText(
-            self.verboseInfoTab.indexOf(self.interTab),
-            _translate("MainWindow", "internet"))
-        self.verboseInfoTab.setTabText(
-            self.verboseInfoTab.indexOf(self.transTab),
-            _translate("MainWindow", "transport"))
-        self.verboseInfoTab.setTabText(
-            self.verboseInfoTab.indexOf(self.appTab),
-            _translate("MainWindow", "application"))
-        self.decodeInfoTab.setTabText(
-            self.decodeInfoTab.indexOf(self.rawTab),
-            _translate("MainWindow", "raw binary"))
-        self.decodeInfoTab.setTabText(
-            self.decodeInfoTab.indexOf(self.hexTab),
-            _translate("MainWindow", "hex decode"))
+        self.verboseInfoTab.setTabText(self.verboseInfoTab.indexOf(self.linkTab), _translate("MainWindow", "link"))
+        self.verboseInfoTab.setTabText(self.verboseInfoTab.indexOf(self.interTab), _translate("MainWindow", "internet"))
+        self.verboseInfoTab.setTabText(self.verboseInfoTab.indexOf(self.transTab), _translate("MainWindow", "transport"))
+        self.verboseInfoTab.setTabText(self.verboseInfoTab.indexOf(self.appTab), _translate("MainWindow", "application"))
+        self.decodeInfoTab.setTabText(self.decodeInfoTab.indexOf(self.rawTab), _translate("MainWindow", "raw binary"))
+        self.decodeInfoTab.setTabText(self.decodeInfoTab.indexOf(self.hexTab), _translate("MainWindow", "hex decode"))
         self.menu_File.setTitle(_translate("MainWindow", "&File"))
         self.menu_export.setTitle(_translate("MainWindow", "&export"))
-        self.menuNetwork_info.setTitle(
-            _translate("MainWindow", "&network info"))
+        self.menuNetwork_info.setTitle(_translate("MainWindow", "&network info"))
         self.menuLAN_info.setTitle(_translate("MainWindow", "&LAN info"))
-        self.menuPackets_info.setTitle(
-            _translate("MainWindow", "&packets info"))
+        self.menuPackets_info.setTitle(_translate("MainWindow", "&packets info"))
         self.menuCapture.setTitle(_translate("MainWindow", "&Capture"))
         self.menuStatistic.setTitle(_translate("MainWindow", "&Statistic"))
         self.menu_protocol.setTitle(_translate("MainWindow", "&protocol"))
         self.menu_length.setTitle(_translate("MainWindow", "&length"))
         self.menu_time.setTitle(_translate("MainWindow", "&time"))
         self.menuAbout.setTitle(_translate("MainWindow", "&About"))
-        self.controlDock.setWindowTitle(
-            _translate("MainWindow", "Control Panel"))
+        self.controlDock.setWindowTitle(_translate("MainWindow", "Control Panel"))
         self.nameLabel.setText(_translate("MainWindow", "Name"))
         self.ipLabel.setText(_translate("MainWindow", "IP"))
         self.macLabel.setText(_translate("MainWindow", "Mac"))
@@ -537,16 +493,12 @@ class Ui_MainWindow(object):
         self.gwLabel.setText(_translate("MainWindow", ">>> Gateway"))
         self.gwMacLabel.setText(_translate("MainWindow", "Mac"))
         self.unlockButton.setText(_translate("MainWindow", "unlock"))
-        self.controlTabManage.setTabText(
-            self.controlTabManage.indexOf(self.networklTab),
-            _translate("MainWindow", "network"))
+        self.controlTabManage.setTabText(self.controlTabManage.indexOf(self.networkTab), _translate("MainWindow", "network"))
         self.rangeLabel.setText(_translate("MainWindow", "Range"))
         self.rangeButton.setText(_translate("MainWindow", "range scan"))
         self.maskLabel.setText(_translate("MainWindow", "Mask"))
         self.maskButton.setText(_translate("MainWindow", "mask scan"))
-        self.controlTabManage.setTabText(
-            self.controlTabManage.indexOf(self.scanTab),
-            _translate("MainWindow", "scan"))
+        self.controlTabManage.setTabText(self.controlTabManage.indexOf(self.scanTab), _translate("MainWindow", "scan"))
         self.intGroupBox.setTitle(_translate("MainWindow", "Internet Layer"))
         self.ipv4CheckBox.setText(_translate("MainWindow", "IPv4"))
         self.icmpCheckBox.setText(_translate("MainWindow", "ICMP"))
@@ -554,8 +506,7 @@ class Ui_MainWindow(object):
         self.TranGroupBox.setTitle(_translate("MainWindow", "Transport Layer"))
         self.udpCheckBox.setText(_translate("MainWindow", "UDP"))
         self.tcpCheckBox.setText(_translate("MainWindow", "TCP"))
-        self.appGroupBox.setTitle(
-            _translate("MainWindow", "Application Layer"))
+        self.appGroupBox.setTitle(_translate("MainWindow", "Application Layer"))
         self.ftpCheckBox.setText(_translate("MainWindow", "FTP"))
         self.telCheckBox.setText(_translate("MainWindow", "Telnet"))
         self.sshCheckBox.setText(_translate("MainWindow", "SSH"))
@@ -563,19 +514,13 @@ class Ui_MainWindow(object):
         self.httpCheckBox.setText(_translate("MainWindow", "HTTP(s)"))
         self.optGroupBox.setTitle(_translate("MainWindow", "Option"))
         self.allRadioButton.setText(_translate("MainWindow", "all "))
-        self.controlTabManage.setTabText(
-            self.controlTabManage.indexOf(self.filterTab),
-            _translate("MainWindow", "filter"))
+        self.controlTabManage.setTabText(self.controlTabManage.indexOf(self.filterTab), _translate("MainWindow", "filter"))
         self.searchLabel.setText(_translate("MainWindow", "Search"))
         self.searchButton.setText(_translate("MainWindow", "search"))
-        self.controlTabManage.setTabText(
-            self.controlTabManage.indexOf(self.searchTab),
-            _translate("MainWindow", "search"))
+        self.controlTabManage.setTabText(self.controlTabManage.indexOf(self.searchTab), _translate("MainWindow", "search"))
         self.sipLabel.setText(_translate("MainWindow", "search IP"))
         self.sipButton.setText(_translate("MainWindow", "seach"))
-        self.controlTabManage.setTabText(
-            self.controlTabManage.indexOf(self.ipinfoTab),
-            _translate("MainWindow", "ipinfo"))
+        self.controlTabManage.setTabText(self.controlTabManage.indexOf(self.ipinfoTab), _translate("MainWindow", "ipinfo"))
         self.scanDock.setWindowTitle(_translate("MainWindow", "Scan Panel"))
         self.analysisPushButton.setText(_translate("MainWindow", "analysis"))
         self.stopPushButton.setText(_translate("MainWindow", "stop"))
@@ -611,3 +556,4 @@ class Ui_MainWindow(object):
         self.action_close.setShortcut(_translate("MainWindow", "Ctrl+Q"))
         self.action_rank.setText(_translate("MainWindow", "&rank"))
         self.action_Rank.setText(_translate("MainWindow", "&rank"))
+

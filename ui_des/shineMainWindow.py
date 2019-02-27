@@ -14,8 +14,24 @@ from mainWindow import Ui_MainWindow
 from shineDialog import Ui_RankDialog
 from shineDialog import Ui_AuthorDialog
 
+ROOT = 1
+NETWORK = 2
+ROUTING = 4
+TCPDUMP = 8
+
 
 class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+    # range scan regular express
+    rangeRegex = ("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}"
+                  "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])-"
+                  "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
+
+    # mask scan regular express
+    maskRegex = (
+        "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}"
+        "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])/([1-9]|[1-2][0-9]|3[0-2])$"
+    )
+
     def __init__(self, parent=None):
         super(QtWidgets.QMainWindow, self).__init__(parent)
         self.setupUi(self)
@@ -120,12 +136,13 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.action_Open.triggered.connect(self.showOpenFile)
         self.action_Author.triggered.connect(self.showAuthorDialog)
 
-        self.unlockButton.clicked.connect(self.unlockTrigger)
-
         # Task 3
         # Control Dock initial
         self.ctlDockLineEditSet(False)
-        self.ctlRemainWidgetInit()
+        self.ctlPanelTabSwitch()
+        self.ctlPanelContInit()
+        self.ctlRemainInit()
+        self.unlockButton.clicked.connect(self.unlockTrigger)
 
     # ---------------
     # define the rank
@@ -190,7 +207,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Use `and` operator to get current active level
         statue_list = [
             true_ico if self.rank & i == i else false_ico
-            for i in [1, 2, 4, 8]
+            for i in [ROOT, NETWORK, ROUTING, TCPDUMP]
         ]
         rankDialog.rootStateLabel.setPixmap(statue_list.pop(0))
         rankDialog.netStateLabel.setPixmap(statue_list.pop(0))
@@ -233,16 +250,16 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         auhtorDialog = Ui_AuthorDialog(self)
         auhtorDialog.exec_()
 
-    def unlockTrigger(self):
-        """ Unlock/Lock the network tab editline box """
+    def _exportFmtTpl(self, dialogName, fileFilter, dirctory='.'):
+        """ 
+            Menubar --> File --> export ---> ... 
+            Export csv, json, plaint text format template 
+        """
 
-        situation = self.unlockButton.text()
-        if situation == 'unlock':
-            self.ctlDockLineEditSet(True)
-            self.unlockButton.setText('lock')
-        elif situation == 'lock':
-            self.ctlDockLineEditSet(False)
-            self.unlockButton.setText('unlock')
+        # _ -> file type
+        saveFileName, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, dialogName, dirctory, fileFilter)
+        return saveFileName
 
     # --------------
     # widget initial
@@ -260,7 +277,80 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.gwMacLineEdit.setEnabled(state)
         self.gwVendorLineEdit.setEnabled(state)
 
-    def ctlRemainWidgetInit(self):
+    def unlockTrigger(self):
+        """ Unlock/Lock the network tab editline box """
+
+        situation = self.unlockButton.text()
+        if situation == 'unlock':
+            self.ctlDockLineEditSet(True)
+            self.unlockButton.setText('lock')
+        elif situation == 'lock':
+            self.ctlDockLineEditSet(False)
+            self.unlockButton.setText('unlock')
+
+    def ctlPanelTabSwitch(self):
+        """
+            Control panel tab widget active/deactive, according to the rank level
+            NETWORK --> search tab, ipinfo tab
+            ROOT, NETWORK --> network tab, scan tab
+            ROOT, NETWORK, TCPDUMP --> filter tab
+        """
+
+        if self.rank & NETWORK == NETWORK:
+            self.searchTab.setEnabled(True)
+            self.ipinfoTab.setEnabled(True)
+        else:
+            self.searchTab.setEnabled(False)
+            self.ipinfoTab.setEnabled(False)
+
+        if ((ROOT | NETWORK) & self.rank) == (ROOT | NETWORK):
+            self.networkTab.setEnabled(True)
+            self.scanTab.setEnabled(True)
+        else:
+            self.networkTab.setEnabled(False)
+            self.scanTab.setEnabled(False)
+
+        if ((ROOT | NETWORK | TCPDUMP) & self.rank) == (ROOT | NETWORK
+                                                        | TCPDUMP):
+            self.filterTab.setEnabled(True)
+        else:
+            self.filterTab.setEnabled(False)
+
+    def ctlPanelContInit(self):
+        """ 
+            Control panel all contain widget need a initial status
+            NetworkTab --> lock all lineEdit
+            ScanTab --> paceholder and match pattern(range: 192.168.1.1-100, 
+                mask: 192.168.1.1/24)
+            FilterTab --> auto choose `all` 
+            SearchTab --> paceholder and tips
+            ipinfo --> paceholder and tips 
+        """
+        # Network Tab
+        self.ctlDockLineEditSet(False)
+
+        # Scan Tab
+        self.rangeLineEdit.setPlaceholderText('eg: 192.168.1-100')
+        rangeRegex = QtCore.QRegExp(ShineMainWindow.rangeRegex)
+        rangeValidator = QtGui.QRegExpValidator(rangeRegex, self.rangeLineEdit)
+        self.rangeLineEdit.setValidator(rangeValidator)
+        self.rangeLineEdit.setToolTip('Input Example: 192.168.1.1-100')
+        self.rangeLineEdit.setAlignment(QtCore.Qt.AlignCenter)
+
+        self.maskLineEdit.setPlaceholderText('eg: 192.168.1/24')
+        maskRegex = QtCore.QRegExp(ShineMainWindow.maskRegex)
+        maskValidator = QtGui.QRegExpValidator(maskRegex, self.maskLineEdit)
+        self.maskLineEdit.setValidator(maskValidator)
+        self.maskLineEdit.setToolTip('Input Example: 192.168.1.1/24')
+        self.maskLineEdit.setAlignment(QtCore.Qt.AlignCenter)
+
+        # Filter tab
+        self.allRadioButton.setChecked(True)
+        self.intGroupBox.setEnabled(False)
+        self.TranGroupBox.setEnabled(False)
+        self.appGroupBox.setEnabled(False)
+
+    def ctlRemainInit(self):
         """Scan Dock, conciseTable, verboseTab, decodeTab initial"""
 
         self.scanDock.setEnabled(False)
