@@ -13,6 +13,7 @@ from PyQt5 import QtCore
 from mainWindow import Ui_MainWindow
 from shineDialog import Ui_RankDialog
 from shineDialog import Ui_AuthorDialog
+from shineDialog import ui_FilterDialog
 
 ROOT = 1
 NETWORK = 2
@@ -135,6 +136,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.action_Save.triggered.connect(self.showSaveFile)
         self.action_Open.triggered.connect(self.showOpenFile)
         self.action_Author.triggered.connect(self.showAuthorDialog)
+        self.action_Filter.triggered.connect(self.showFilterDialog)
 
         # Task 3
         # Control Dock initial
@@ -261,6 +263,15 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self, dialogName, dirctory, fileFilter)
         return saveFileName
 
+    def showFilterDialog(self):
+        """
+            Menubar --> Option --> &filter
+            show filter dialog information
+        """
+
+        self.filterDialog = ui_FilterDialog(self)
+        self.filterDialog.exec_()
+
     # --------------
     # widget initial
     # --------------
@@ -293,7 +304,6 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             Control panel tab widget active/deactive, according to the rank level
             NETWORK --> search tab, ipinfo tab
             ROOT, NETWORK --> network tab, scan tab
-            ROOT, NETWORK, TCPDUMP --> filter tab
         """
 
         if self.rank & NETWORK == NETWORK:
@@ -310,19 +320,12 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.networkTab.setEnabled(False)
             self.scanTab.setEnabled(False)
 
-        if ((ROOT | NETWORK | TCPDUMP) & self.rank) == (ROOT | NETWORK
-                                                        | TCPDUMP):
-            self.filterTab.setEnabled(True)
-        else:
-            self.filterTab.setEnabled(False)
-
     def ctlPanelContInit(self):
         """ 
             Control panel all contain widget need a initial status
             NetworkTab --> lock all lineEdit
             ScanTab --> paceholder and match pattern(range: 192.168.1.1-100, 
                 mask: 192.168.1.1/24)
-            FilterTab --> auto choose `all` 
             SearchTab --> paceholder and tips
             ipinfo --> paceholder and tips 
         """
@@ -343,12 +346,6 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.maskLineEdit.setValidator(maskValidator)
         self.maskLineEdit.setToolTip('Input Example: 192.168.1.1/24')
         self.maskLineEdit.setAlignment(QtCore.Qt.AlignCenter)
-
-        # Filter tab
-        self.allRadioButton.setChecked(True)
-        self.intGroupBox.setEnabled(False)
-        self.TranGroupBox.setEnabled(False)
-        self.appGroupBox.setEnabled(False)
 
     def ctlRemainInit(self):
         """Scan Dock, conciseTable, verboseTab, decodeTab initial"""

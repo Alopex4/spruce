@@ -7,9 +7,15 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from rankDialog import Ui_Form as shineRankDialoge
 from authorDialog import Ui_Dialog as shineAuthorDialog
+from filterDialog import Ui_Dialog as shineFilterDialog
 
 
 class Ui_RankDialog(QtWidgets.QDialog, shineRankDialoge):
+    """
+        Rank dialog widget.
+        Check root privilege, network status, ip routing, tcpdump install
+    """
+
     def __init__(self, parent=None):
         super(QtWidgets.QDialog, self).__init__(parent)
         self.setupUi(self)
@@ -36,11 +42,17 @@ class Ui_RankDialog(QtWidgets.QDialog, shineRankDialoge):
 
 
 class Ui_AuthorDialog(QtWidgets.QDialog, shineAuthorDialog):
+    """
+        Author dialog widget.
+        Display show author informaiton
+        include project webside, author contact
+    """
+
     def __init__(self, parent=None):
         super(QtWidgets.QDialog, self).__init__(parent)
         self.setupUi(self)
         self.setWindowIcon(QtGui.QIcon('../spruce.ico'))
-        self.setWindowTitle('current state')
+        self.setWindowTitle('about author')
         self.setFixedSize(272, 440)
         self.iconLabel.clear()
         author_icon = QtGui.QPixmap('../spruce.ico')
@@ -54,8 +66,35 @@ class Ui_AuthorDialog(QtWidgets.QDialog, shineAuthorDialog):
         self.versionLabel.setAlignment(QtCore.Qt.AlignCenter)
 
 
+class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
+    """
+        Filter dialog widget.
+        Pass info to tcpdump generate an filter codes.
+    """
+
+    def __init__(self, parent=None):
+        super(QtWidgets.QDialog, self).__init__(parent)
+        self.setupUi(self)
+        self.setWindowIcon(QtGui.QIcon('../spruce.ico'))
+        self.setWindowTitle('packets filter')
+        self.setFixedSize(260, 420)
+        self.disableRadio.clicked.connect(lambda: self._containsUnlock(False))
+        self.enableRaido.clicked.connect(lambda: self._containsUnlock(True))
+        self.buttonBox.clicked.connect(lambda: self.setFilter('clicked hit'))
+        self.buttonBox.rejected.connect(lambda: self.setFilter('rejectd hit'))
+        self.disableRadio.click()
+
+    def setFilter(self, text):
+        print(text)
+
+    def _containsUnlock(self, status):
+        self.intGroupBox.setEnabled(status)
+        self.tranGroupBox.setEnabled(status)
+        self.appGroupBox.setEnabled(status)
+
+
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-    author = Ui_AuthorDialog()
+    author = ui_FilterDialog()
     author.show()
     sys.exit(app.exec_())

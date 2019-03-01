@@ -228,14 +228,6 @@
     <addaction name="menu_length"/>
     <addaction name="menu_time"/>
    </widget>
-   <widget class="QMenu" name="menu_Option">
-    <property name="title">
-     <string>&amp;Option</string>
-    </property>
-    <addaction name="separator"/>
-    <addaction name="action_Filter"/>
-    <addaction name="separator"/>
-   </widget>
    <widget class="QMenu" name="menu_About">
     <property name="title">
      <string>&amp;About</string>
@@ -246,11 +238,19 @@
     <addaction name="separator"/>
     <addaction name="action_Rank"/>
    </widget>
+   <widget class="QMenu" name="menu_Option">
+    <property name="title">
+     <string>&amp;Option</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="action_Filter"/>
+    <addaction name="separator"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Capture"/>
    <addaction name="menu_Statistic"/>
-   <addaction name="menu_Option"/>
    <addaction name="menu_About"/>
+   <addaction name="menu_Option"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="controlDock">
