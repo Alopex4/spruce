@@ -22,12 +22,16 @@ TCPDUMP = 8
 
 
 class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
-    # range scan regular express
+    # IP regular express
+    ipRegex = ("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}"
+               "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
+
+    # Range scan regular express
     rangeRegex = ("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}"
                   "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])-"
                   "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
 
-    # mask scan regular express
+    # Mask scan regular express
     maskRegex = (
         "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}"
         "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])/([1-9]|[1-2][0-9]|3[0-2])$"
@@ -137,6 +141,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.action_Open.triggered.connect(self.showOpenFile)
         self.action_Author.triggered.connect(self.showAuthorDialog)
         self.action_Filter.triggered.connect(self.showFilterDialog)
+        self.action_RefreshRank.triggered.connect(self.refreshRank)
 
         # Task 3
         # Control Dock initial
@@ -267,10 +272,27 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
             Menubar --> Option --> &filter
             show filter dialog information
+            ROOT, NETWORK, tcpdump --> network tab, scan tab
         """
 
-        self.filterDialog = ui_FilterDialog(self)
-        self.filterDialog.exec_()
+        if ((ROOT | NETWORK | TCPDUMP) & self.rank) == (ROOT | NETWORK
+                                                        | TCPDUMP):
+            self.filterDialog = ui_FilterDialog(self)
+            self.filterDialog.exec_()
+        else:
+            tips = '''Check `about --> rank` more details. 
+                \nTips: Make sure you already install tcpdump!'''
+
+            QtWidgets.QMessageBox.warning(self, 'filter warning', tips)
+
+    def refreshRank(self):
+        """
+            Menubar --> Option --> &refresh rank
+            Manipulate to refresh the rank so the tabs can be active/deactive again
+        """
+
+        self.rank = self.getRank()
+        self.ctlPanelTabSwitch()
 
     # --------------
     # widget initial
@@ -329,23 +351,56 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             SearchTab --> paceholder and tips
             ipinfo --> paceholder and tips 
         """
+
         # Network Tab
         self.ctlDockLineEditSet(False)
 
         # Scan Tab
-        self.rangeLineEdit.setPlaceholderText('eg: 192.168.1-100')
         rangeRegex = QtCore.QRegExp(ShineMainWindow.rangeRegex)
         rangeValidator = QtGui.QRegExpValidator(rangeRegex, self.rangeLineEdit)
         self.rangeLineEdit.setValidator(rangeValidator)
+        self.rangeLineEdit.setPlaceholderText('eg: 192.168.1-100')
         self.rangeLineEdit.setToolTip('Input Example: 192.168.1.1-100')
+        self.rangeLineEdit.setStatusTip('Input Example: 192.168.1.1-100')
         self.rangeLineEdit.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.maskLineEdit.setPlaceholderText('eg: 192.168.1/24')
         maskRegex = QtCore.QRegExp(ShineMainWindow.maskRegex)
         maskValidator = QtGui.QRegExpValidator(maskRegex, self.maskLineEdit)
         self.maskLineEdit.setValidator(maskValidator)
+        self.maskLineEdit.setPlaceholderText('eg: 192.168.1/24')
         self.maskLineEdit.setToolTip('Input Example: 192.168.1.1/24')
+        self.maskLineEdit.setStatusTip('Input Example: 192.168.1.1/24')
         self.maskLineEdit.setAlignment(QtCore.Qt.AlignCenter)
+
+        # Search Tab
+        self.searchLineEdit.setPlaceholderText('eg: http or https')
+        self.searchLineEdit.setToolTip('search protocol')
+        self.searchLineEdit.setStatusTip(
+            'display the specific protocol after you start analysis')
+        self.searchButton.setEnabled(False)
+
+        # Info Tab
+        ipRegex = QtCore.QRegExp(ShineMainWindow.rangeRegex)
+        ipValidator = QtGui.QRegExpValidator(rangeRegex, self.sipLineEdit)
+        self.sipLineEdit.setValidator(ipValidator)
+        self.sipLineEdit.setPlaceholderText('8.8.8.8')
+        self.sipLineEdit.setStatusTip('Input an ip you want to query')
+        self.sipLineEdit.setToolTip('eg: 8.8.8.8')
+
+        demoText = """{
+    "ip": "8.8.8.8",
+    "hostname": "google-public-dns-a.google.com",
+    "city": "Mountain View",
+    "region": "California",
+    "country": "US",
+    "loc": "37.3860,-122.0840",
+    "postal": "94035",
+    "phone": "650",
+    "org": "AS15169 Google LLC"
+}
+        """
+        self.sipTextEdit.setPlaceholderText(demoText)
+        self.sipButton.clicked.connect(self.searchIPInfo)
 
     def ctlRemainInit(self):
         """Scan Dock, conciseTable, verboseTab, decodeTab initial"""
@@ -354,6 +409,22 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.conciseInfoTable.setEnabled(False)
         self.verboseInfoTab.setEnabled(False)
         self.decodeInfoTab.setEnabled(False)
+
+    def searchIPInfo(self):
+        """ Searh ip information(JSON format) and display it in the textEdit """
+
+        self.sipTextEdit.clear()
+        ip = self.sipLineEdit.text()
+        token = '80977e50c0ef36'
+        url = 'http://ipinfo.io/{searchIP}?token={token}'.format(
+            searchIP=ip, token=token)
+        try:
+            ipJSON = requests.get(url, timeout=0.5).text
+        except requests.ConnectionError:
+            QtWidgets.QMessageBox.information(
+                self, 'Search Info', 'Make sure your network is stable')
+        else:
+            self.sipTextEdit.setText(ipJSON)
 
 
 if __name__ == '__main__':

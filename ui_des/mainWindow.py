@@ -370,6 +370,8 @@ class Ui_MainWindow(object):
         self.action_Rank.setObjectName("action_Rank")
         self.action_Filter = QtWidgets.QAction(MainWindow)
         self.action_Filter.setObjectName("action_Filter")
+        self.action_RefreshRank = QtWidgets.QAction(MainWindow)
+        self.action_RefreshRank.setObjectName("action_RefreshRank")
         self.menuNetwork_info.addAction(self.actionExportCSV)
         self.menuNetwork_info.addAction(self.actionExportJSON)
         self.menuNetwork_info.addAction(self.actionExportPlain)
@@ -408,6 +410,7 @@ class Ui_MainWindow(object):
         self.menu_Option.addSeparator()
         self.menu_Option.addAction(self.action_Filter)
         self.menu_Option.addSeparator()
+        self.menu_Option.addAction(self.action_RefreshRank)
         self.menu_About.addAction(self.action_Help)
         self.menu_About.addSeparator()
         self.menu_About.addAction(self.action_Author)
@@ -544,3 +547,5 @@ class Ui_MainWindow(object):
         self.action_rank.setText(_translate("MainWindow", "&rank"))
         self.action_Rank.setText(_translate("MainWindow", "&rank"))
         self.action_Filter.setText(_translate("MainWindow", "&filter"))
+        self.action_RefreshRank.setText(
+            _translate("MainWindow", "&refresh rank"))
