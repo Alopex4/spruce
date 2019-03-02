@@ -459,13 +459,13 @@
        </widget>
        <widget class="QWidget" name="ipinfoTab">
         <attribute name="title">
-         <string>query</string>
+         <string>ipinfo</string>
         </attribute>
         <layout class="QFormLayout" name="formLayout_3">
          <item row="0" column="0">
           <widget class="QLabel" name="sipLabel">
            <property name="text">
-            <string>Query IP</string>
+            <string>search IP</string>
            </property>
           </widget>
          </item>
@@ -478,7 +478,7 @@
          <item row="2" column="0">
           <widget class="QPushButton" name="sipButton">
            <property name="text">
-            <string>query</string>
+            <string>seach</string>
            </property>
           </widget>
          </item>

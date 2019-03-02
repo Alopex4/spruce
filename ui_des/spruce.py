@@ -4,10 +4,11 @@
 import sys
 from PyQt5 import QtWidgets
 # from mainWindow import Ui_MainWindow
-from shineMainWindow import ShineMainWindow
+# from shineMainWindow import ShineMainWindow
+from brightMainWindow import BrightMainWindow
 
 
-class Spruce(ShineMainWindow):
+class Spruce(BrightMainWindow):
     def __init__(self):
         super().__init__()
 

@@ -356,16 +356,16 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ctlDockLineEditSet(False)
 
         # Scan Tab
-        rangeRegex = QtCore.QRegExp(ShineMainWindow.rangeRegex)
-        rangeValidator = QtGui.QRegExpValidator(rangeRegex, self.rangeLineEdit)
+        rangeRegexExp = QtCore.QRegExp(ShineMainWindow.rangeRegex)
+        rangeValidator = QtGui.QRegExpValidator(rangeRegexExp, self.rangeLineEdit)
         self.rangeLineEdit.setValidator(rangeValidator)
         self.rangeLineEdit.setPlaceholderText('eg: 192.168.1-100')
         self.rangeLineEdit.setToolTip('Input Example: 192.168.1.1-100')
         self.rangeLineEdit.setStatusTip('Input Example: 192.168.1.1-100')
         self.rangeLineEdit.setAlignment(QtCore.Qt.AlignCenter)
 
-        maskRegex = QtCore.QRegExp(ShineMainWindow.maskRegex)
-        maskValidator = QtGui.QRegExpValidator(maskRegex, self.maskLineEdit)
+        maskRegexExp = QtCore.QRegExp(ShineMainWindow.maskRegex)
+        maskValidator = QtGui.QRegExpValidator(maskRegexExp, self.maskLineEdit)
         self.maskLineEdit.setValidator(maskValidator)
         self.maskLineEdit.setPlaceholderText('eg: 192.168.1/24')
         self.maskLineEdit.setToolTip('Input Example: 192.168.1.1/24')
@@ -380,12 +380,13 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.searchButton.setEnabled(False)
 
         # Info Tab
-        ipRegex = QtCore.QRegExp(ShineMainWindow.rangeRegex)
-        ipValidator = QtGui.QRegExpValidator(rangeRegex, self.sipLineEdit)
+        ipRegexExp = QtCore.QRegExp(ShineMainWindow.ipRegex)
+        ipValidator = QtGui.QRegExpValidator(ipRegexExp, self.sipLineEdit)
         self.sipLineEdit.setValidator(ipValidator)
-        self.sipLineEdit.setPlaceholderText('8.8.8.8')
-        self.sipLineEdit.setStatusTip('Input an ip you want to query')
-        self.sipLineEdit.setToolTip('eg: 8.8.8.8')
+        self.sipLineEdit.setPlaceholderText('eg: 8.8.8.8')
+        self.sipLineEdit.setStatusTip(
+            'Input an ip you want to query (defulat: query your public ip)')
+        self.sipLineEdit.setToolTip('Input Example: 8.8.8.8')
 
         demoText = """{
     "ip": "8.8.8.8",
@@ -400,6 +401,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 }
         """
         self.sipTextEdit.setPlaceholderText(demoText)
+        self.sipTextEdit.setReadOnly(True)
         self.sipButton.clicked.connect(self.searchIPInfo)
 
     def ctlRemainInit(self):

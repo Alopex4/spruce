@@ -423,7 +423,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menu_About.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.verboseInfoTab.setCurrentIndex(3)
+        self.verboseInfoTab.setCurrentIndex(0)
         self.decodeInfoTab.setCurrentIndex(0)
         self.controlTabManage.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -506,11 +506,11 @@ class Ui_MainWindow(object):
         self.controlTabManage.setTabText(
             self.controlTabManage.indexOf(self.searchTab),
             _translate("MainWindow", "search"))
-        self.sipLabel.setText(_translate("MainWindow", "search IP"))
-        self.sipButton.setText(_translate("MainWindow", "seach"))
+        self.sipLabel.setText(_translate("MainWindow", "Query IP"))
+        self.sipButton.setText(_translate("MainWindow", "query"))
         self.controlTabManage.setTabText(
             self.controlTabManage.indexOf(self.ipinfoTab),
-            _translate("MainWindow", "ipinfo"))
+            _translate("MainWindow", "query"))
         self.scanDock.setWindowTitle(_translate("MainWindow", "Scan Panel"))
         self.analysisPushButton.setText(_translate("MainWindow", "analysis"))
         self.stopPushButton.setText(_translate("MainWindow", "stop"))

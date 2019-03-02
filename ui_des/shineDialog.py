@@ -44,7 +44,7 @@ class Ui_RankDialog(QtWidgets.QDialog, shineRankDialoge):
 class Ui_AuthorDialog(QtWidgets.QDialog, shineAuthorDialog):
     """
         Author dialog widget.
-        Display show author informaiton
+        Display the author informaiton
         include project webside, author contact
     """
 
