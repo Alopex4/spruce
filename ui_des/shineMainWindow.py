@@ -145,7 +145,8 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Task 3
         # Control Dock initial
-        self.ctlDockLineEditSet(False)
+        self.unlockButton.setVisible(False)
+        self.netLineEditRO(True)
         self.ctlPanelTabSwitch()
         self.ctlPanelContInit()
         self.ctlRemainInit()
@@ -297,28 +298,28 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # --------------
     # widget initial
     # --------------
-    def ctlDockLineEditSet(self, state=False):
+    def netLineEditRO(self, state=False):
         """ Control panel dock line edit widget state setting """
 
-        self.nameLineEdit.setEnabled(state)
-        self.ipLineEdit.setEnabled(state)
-        self.macLineEdit.setEnabled(state)
-        self.vendorLineEdit.setEnabled(state)
-        self.netmaskLineEdit.setEnabled(state)
+        self.nameLineEdit.setReadOnly(state)
+        self.ipLineEdit.setReadOnly(state)
+        self.macLineEdit.setReadOnly(state)
+        self.vendorLineEdit.setReadOnly(state)
+        self.netmaskLineEdit.setReadOnly(state)
 
-        self.gwIpLineEdit.setEnabled(state)
-        self.gwMacLineEdit.setEnabled(state)
-        self.gwVendorLineEdit.setEnabled(state)
+        self.gwIpLineEdit.setReadOnly(state)
+        self.gwMacLineEdit.setReadOnly(state)
+        self.gwVendorLineEdit.setReadOnly(state)
 
     def unlockTrigger(self):
         """ Unlock/Lock the network tab editline box """
 
         situation = self.unlockButton.text()
         if situation == 'unlock':
-            self.ctlDockLineEditSet(True)
+            self.netLineEditRO(False)
             self.unlockButton.setText('lock')
         elif situation == 'lock':
-            self.ctlDockLineEditSet(False)
+            self.netLineEditRO(True)
             self.unlockButton.setText('unlock')
 
     def ctlPanelTabSwitch(self):
@@ -353,11 +354,12 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
 
         # Network Tab
-        self.ctlDockLineEditSet(False)
+        self.netLineEditRO(True)
 
         # Scan Tab
         rangeRegexExp = QtCore.QRegExp(ShineMainWindow.rangeRegex)
-        rangeValidator = QtGui.QRegExpValidator(rangeRegexExp, self.rangeLineEdit)
+        rangeValidator = QtGui.QRegExpValidator(rangeRegexExp,
+                                                self.rangeLineEdit)
         self.rangeLineEdit.setValidator(rangeValidator)
         self.rangeLineEdit.setPlaceholderText('eg: 192.168.1-100')
         self.rangeLineEdit.setToolTip('Input Example: 192.168.1.1-100')

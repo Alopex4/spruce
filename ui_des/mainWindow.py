@@ -184,10 +184,6 @@ class Ui_MainWindow(object):
         self.gwIpLabel.setObjectName("gwIpLabel")
         self.formLayout.setWidget(7, QtWidgets.QFormLayout.LabelRole,
                                   self.gwIpLabel)
-        self.gwMacLineEdit = QtWidgets.QLineEdit(self.networkTab)
-        self.gwMacLineEdit.setObjectName("gwMacLineEdit")
-        self.formLayout.setWidget(7, QtWidgets.QFormLayout.FieldRole,
-                                  self.gwMacLineEdit)
         self.gwVendorLabel = QtWidgets.QLabel(self.networkTab)
         self.gwVendorLabel.setObjectName("gwVendorLabel")
         self.formLayout.setWidget(10, QtWidgets.QFormLayout.LabelRole,
@@ -212,14 +208,18 @@ class Ui_MainWindow(object):
         self.gwMacLabel.setObjectName("gwMacLabel")
         self.formLayout.setWidget(8, QtWidgets.QFormLayout.LabelRole,
                                   self.gwMacLabel)
-        self.gwIpLineEdit = QtWidgets.QLineEdit(self.networkTab)
-        self.gwIpLineEdit.setObjectName("gwIpLineEdit")
-        self.formLayout.setWidget(8, QtWidgets.QFormLayout.FieldRole,
-                                  self.gwIpLineEdit)
         self.unlockButton = QtWidgets.QPushButton(self.networkTab)
         self.unlockButton.setObjectName("unlockButton")
         self.formLayout.setWidget(13, QtWidgets.QFormLayout.LabelRole,
                                   self.unlockButton)
+        self.gwIpLineEdit = QtWidgets.QLineEdit(self.networkTab)
+        self.gwIpLineEdit.setObjectName("gwIpLineEdit")
+        self.formLayout.setWidget(7, QtWidgets.QFormLayout.FieldRole,
+                                  self.gwIpLineEdit)
+        self.gwMacLineEdit = QtWidgets.QLineEdit(self.networkTab)
+        self.gwMacLineEdit.setObjectName("gwMacLineEdit")
+        self.formLayout.setWidget(8, QtWidgets.QFormLayout.FieldRole,
+                                  self.gwMacLineEdit)
         self.controlTabManage.addTab(self.networkTab, "")
         self.scanTab = QtWidgets.QWidget()
         self.scanTab.setObjectName("scanTab")
