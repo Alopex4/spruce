@@ -178,7 +178,8 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         try:
             page = requests.get(test_web, timeout=timeout)
             return 2
-        except requests.ConnectionError:
+        except (requests.ConnectionError, requests.ConnectTimeout,
+                requests.ReadTimeout):
             return 0
 
     def ipRoutingCheck(self):
@@ -257,17 +258,6 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         auhtorDialog = Ui_AuthorDialog(self)
         auhtorDialog.exec_()
-
-    def _exportFmtTpl(self, dialogName, fileFilter, dirctory='.'):
-        """ 
-            Menubar --> File --> export ---> ... 
-            Export csv, json, plaint text format template 
-        """
-
-        # _ -> file type
-        saveFileName, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, dialogName, dirctory, fileFilter)
-        return saveFileName
 
     def showFilterDialog(self):
         """
