@@ -3,6 +3,7 @@
     "python.pythonPath": "/usr/bin/python3",
     "python.autoComplete.extraPaths": [
         "/home/alopex/.local/lib/python3.5/site-packages/",
-        "/usr/local/lib/python3.5/dist-packages/pygame"
+        "/usr/local/lib/python3.5/dist-packages/pygame",
+        "/home/alopex/Desktop/spruce/ui_des"
     ],
 }

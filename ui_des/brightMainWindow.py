@@ -49,8 +49,20 @@ class BrightMainWindow(ShineMainWindow):
         self.inetName = netifaces.gateways()['default'][netifaces.AF_INET][1]
         self.ipAddr = netifaces.ifaddresses(
             self.inetName)[netifaces.AF_INET][0]['addr']
-        self.macAddr = netifaces.ifaddresses(
-            self.inetName)[netifaces.AF_LINK][0]['addr']
+        # try:
+        #     self.macAddr = netifaces.ifaddresses(
+        #         self.inetName)[netifaces.AF_LINK][0]['addr']
+        # except KeyError:
+        #     for inet in netifaces.interfaces():
+        #         try:
+        #             netifaces.ifaddresses(inet)[netifaces.AF_INET6]
+        #         except KeyError:
+        #             continue
+        #         else:
+        #             self.macAddr = netifaces.ifaddresses(inet)[
+        #                 netifaces.AF_LINK][0]['addr']
+        #             break
+
         self.netMask = netifaces.ifaddresses(
             self.inetName)[netifaces.AF_INET][0]['netmask']
         self.vendor = self._macQueryVendor(self.macAddr)
@@ -58,6 +70,7 @@ class BrightMainWindow(ShineMainWindow):
         # Task 2
         # Accquire gateway info
         self.gwIpAddr = netifaces.gateways()['default'][netifaces.AF_INET][0]
+
         cmd = "cat /proc/net/arp | sed -n '2p' | xargs  | cut -d ' ' -f4"
         r = subprocess.check_output(cmd, shell=True)
         self.gwMacAddr = r.decode('utf-8').replace('\n', '')
