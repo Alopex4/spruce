@@ -84,8 +84,8 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def shineProgressBar(self):
         """ Set process bar look much better """
 
-        self.scanProgressBar.setMinimum = 100
-        self.scanProgressBar.setMaximum = 100
+        self.scanProgressBar.setMinimum(100)
+        self.scanProgressBar.setMaximum(100)
         self.scanProgressBar.setValue(0)
         # self.scanProgressBar.setProperty("value", 0)
         self.scanProgressBar.setTextVisible(False)
@@ -412,7 +412,12 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def ctlRemainInit(self):
         """Scan Dock, conciseTable, verboseTab, decodeTab initial"""
 
+        # Scan dock
         self.scanDock.setEnabled(False)
+        self.analysisButton.setEnabled(False)
+        self.stopButton.setEnabled(False)
+
+        # Table and Tabs
         self.conciseInfoTable.setEnabled(False)
         self.verboseInfoTab.setEnabled(False)
         self.decodeInfoTab.setEnabled(False)
@@ -427,7 +432,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             searchIP=ip, token=token)
         try:
             ipJSON = requests.get(url, timeout=0.5).text
-        except requests.ConnectionError:
+        except (requests.ConnectionError, requests.exceptions.ReadTimeout):
             QtWidgets.QMessageBox.information(
                 self, 'Search Info', 'Make sure your network is stable')
         else:

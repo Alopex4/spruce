@@ -162,6 +162,7 @@ class BrightMainWindow(ShineMainWindow):
             Format the network information thought JSON format
             File --> export --> networkInfo --> Json
         """
+
         saveFileName = self._exportFmtTpl('save network JSON file',
                                           'csv files(*.json)', '.json')
         if saveFileName:
@@ -221,13 +222,70 @@ class BrightMainWindow(ShineMainWindow):
     def scanLanNet(self, scanTarget):
         """ 
             Handle the scaning thread 
-            When the scan parameter is wrong, emit the message
+            Pass which scan button your clik to scan dock
+            When the scan parameter is wrong, emit tips message
         """
-        self.scanWorker = ScanThread(self.inetName, scanTarget, parten=self)
-        self.scanWorker.warnSingle.connect(self.scanWarnMessage)
+
+        if '-' in scanTarget:
+            scanMethod = 'range scan'
+        else:
+            scanMethod = 'mask scan'
+        self.scanDock.setWindowTitle('{}: {}'.format(
+            self.scanDock.windowTitle(), scanMethod))
+
+        self.scanWorker = ScanThread(self.inetName, scanTarget)
+        self.scanWorker.finishSignal.connect(self.notifyRelatePanel)
+        self.scanWorker.warnSignal.connect(self.scanWarnMessage)
+        self.scanWorker.updateSignal.connect(self.scanNodeInsert)
         self.scanWorker.start()
 
     def scanWarnMessage(self, title, warningTips):
         """ Display scan Warning message """
 
         QtWidgets.QMessageBox.warning(self, title, warningTips)
+
+    def notifyRelatePanel(self, finish):
+        """
+            Notify the scan panel/scan tab that the scan process is begin or finish 
+            status --> False --> begin
+            status --> True --> finish
+                begin:
+                    clear the nodeList 
+                    progressBar begin loop
+                    rangeScanButton / maskScanButton disable
+                    rangeScanLineEdit / maskScanLineEdit disable
+
+                finish:
+                    progressBar finish loop
+                    rangeScanButton / maskScanButton enable
+                    rangeScanLineEdit / maskScanLineEdit enable
+        """
+
+        self.scanDock.setEnabled(True)
+        if not finish:
+            self.nodeListWidget.clear()
+            self.scanProgressBar.setMaximum(0)
+            self.scanProgressBar.setMaximum(0)
+            self.scanProgressBar.setValue(0)
+
+            self.rangeButton.setEnabled(False)
+            self.rangeLineEdit.setEnabled(False)
+            self.maskButton.setEnabled(False)
+            self.maskLineEdit.setEnabled(False)
+
+        else:
+            self.scanProgressBar.setMaximum(100)
+            self.scanProgressBar.setMinimum(100)
+            self.scanProgressBar.setValue(100)
+
+            self.rangeButton.setEnabled(True)
+            self.rangeLineEdit.setEnabled(True)
+            self.maskButton.setEnabled(True)
+            self.maskLineEdit.setEnabled(True)
+
+    def scanNodeInsert(self, nodeDict):
+        """
+            Insert the scanning nodes to table
+        """
+
+        # self.polishNode(tuple)
