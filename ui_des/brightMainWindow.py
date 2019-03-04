@@ -221,20 +221,14 @@ class BrightMainWindow(ShineMainWindow):
 
     def scanLanNet(self, scanTarget):
         """ 
-            Handle the scaning thread 
-            Pass which scan button your clik to scan dock
+            Scan thread work to scan Lan network
+            Scan thread signal mapping
             When the scan parameter is wrong, emit tips message
         """
 
-        if '-' in scanTarget:
-            scanMethod = 'range scan'
-        else:
-            scanMethod = 'mask scan'
-        self.scanDock.setWindowTitle('{}: {}'.format(
-            self.scanDock.windowTitle(), scanMethod))
-
-        self.scanWorker = ScanThread(self.inetName, scanTarget)
-        self.scanWorker.finishSignal.connect(self.notifyRelatePanel)
+        self.scanWorker = ScanThread(self.inetName, scanTarget, self.gwIpAddr)
+        self.scanWorker.finishSignal[bool, str].connect(self.notifyRelatePanel)
+        self.scanWorker.finishSignal[bool].connect(self.notifyRelatePanel)
         self.scanWorker.warnSignal.connect(self.scanWarnMessage)
         self.scanWorker.updateSignal.connect(self.scanNodeInsert)
         self.scanWorker.start()
@@ -244,26 +238,35 @@ class BrightMainWindow(ShineMainWindow):
 
         QtWidgets.QMessageBox.warning(self, title, warningTips)
 
-    def notifyRelatePanel(self, finish):
+    def notifyRelatePanel(self, finish, scanTarget=None):
         """
             Notify the scan panel/scan tab that the scan process is begin or finish 
+            Clear the listNode, append scan method name
+
             status --> False --> begin
             status --> True --> finish
                 begin:
                     clear the nodeList 
                     progressBar begin loop
-                    rangeScanButton / maskScanButton disable
-                    rangeScanLineEdit / maskScanLineEdit disable
+                    lock button/lineEdit
 
                 finish:
                     progressBar finish loop
-                    rangeScanButton / maskScanButton enable
-                    rangeScanLineEdit / maskScanLineEdit enable
+                    unlock button/lineEdit
         """
+
+        self.nodeListWidget.clear()
+
+        if scanTarget:
+            if '-' in scanTarget:
+                scanMethod = 'range scan'
+            else:
+                scanMethod = 'mask scan'
+            self.scanDock.setWindowTitle('{}: {}'.format(
+                'Scan Panel', scanMethod))
 
         self.scanDock.setEnabled(True)
         if not finish:
-            self.nodeListWidget.clear()
             self.scanProgressBar.setMaximum(0)
             self.scanProgressBar.setMaximum(0)
             self.scanProgressBar.setValue(0)
