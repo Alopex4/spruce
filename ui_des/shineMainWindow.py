@@ -125,7 +125,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 * network startup --> without affect --> without ipinfo search  --> value 0000 0010
                 * ip routing      --> without affect --> without remote sniffer --> value 0000 0100
                 * tcpdump install --> without affect --> without filter feature --> value 0000 1000
-            2. action trigger connect
+            2. action trigger connect and menu status setting
             3. widget status initial
         """
 
@@ -142,6 +142,19 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.action_Author.triggered.connect(self.showAuthorDialog)
         self.action_Filter.triggered.connect(self.showFilterDialog)
         self.action_RefreshRank.triggered.connect(self.refreshRank)
+        # Memu status setting
+        self.action_Save.setEnabled(False)
+        self.menuNetwork_info.setEnabled(False)
+        self.menu_export.setEnabled(False)
+        self.menuLAN_info.setEnabled(False)
+        self.menuPackets_info.setEnabled(False)
+        self.action_Start.setEnabled(False)
+        self.action_Stop.setEnabled(False)
+        self.action_Restart.setEnabled(False)
+        self.action_Filter.setEnabled(False)
+        self.menu_time.setEnabled(False)
+        self.menu_protocol.setEnabled(False)
+        self.menu_length.setEnabled(False)
 
         # Task 3
         # Control Dock initial

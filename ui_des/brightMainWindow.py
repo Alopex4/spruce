@@ -25,7 +25,8 @@ class BrightMainWindow(ShineMainWindow):
 
         self.refreshButton.clicked.connect(self.refreshBtnClick)
         self.actionNetCSV.triggered.connect(self.netCsvExport)
-        self.actionNetJSON.triggered.connect(self.netJsonExpor)
+        self.actionNetJSON.triggered.connect(self.netJsonExport)
+        self.actionNetPlain.triggered.connect(self.netPlainExport)
 
     def refreshBtnClick(self):
         """
@@ -42,6 +43,7 @@ class BrightMainWindow(ShineMainWindow):
                 * Gateway Vendor --> via MAC and OUI.csv
             3. Display the information to the lineEdit
             4. Scan tab fill the lineEdit
+            5. Export Menu active
         """
 
         # Task 1
@@ -49,20 +51,8 @@ class BrightMainWindow(ShineMainWindow):
         self.inetName = netifaces.gateways()['default'][netifaces.AF_INET][1]
         self.ipAddr = netifaces.ifaddresses(
             self.inetName)[netifaces.AF_INET][0]['addr']
-        # try:
-        #     self.macAddr = netifaces.ifaddresses(
-        #         self.inetName)[netifaces.AF_LINK][0]['addr']
-        # except KeyError:
-        #     for inet in netifaces.interfaces():
-        #         try:
-        #             netifaces.ifaddresses(inet)[netifaces.AF_INET6]
-        #         except KeyError:
-        #             continue
-        #         else:
-        #             self.macAddr = netifaces.ifaddresses(inet)[
-        #                 netifaces.AF_LINK][0]['addr']
-        #             break
-
+        self.macAddr = netifaces.ifaddresses(
+            self.inetName)[netifaces.AF_LINK][0]['addr']
         self.netMask = netifaces.ifaddresses(
             self.inetName)[netifaces.AF_INET][0]['netmask']
         self.vendor = self._macQueryVendor(self.macAddr)
@@ -99,6 +89,11 @@ class BrightMainWindow(ShineMainWindow):
         #     "background-color: rgb(159, 232, 170); color: black;")
         # self.rangeLineEdit.setStyleSheet(
         #     "background-color: rgb(159, 232, 170); color: black")
+
+        # Task 5
+        # Export menu active
+        self.menu_export.setEnabled(True)
+        self.menuNetwork_info.setEnabled(True)
 
     def _scanParameter(self, ipAddr, netMask):
         """ 
@@ -156,7 +151,7 @@ class BrightMainWindow(ShineMainWindow):
                 writer.writeheader()
                 writer.writerow(dict(zip(fieldNames, fieldDatas)))
 
-    def netJsonExpor(self):
+    def netJsonExport(self):
         """ 
             Format the network information thought JSON format
             File --> export --> networkInfo --> Json
@@ -179,6 +174,28 @@ class BrightMainWindow(ShineMainWindow):
             }
             with open(saveFileName, 'w') as jsonFile:
                 json.dump(networkInfo, jsonFile, indent=4)
+
+    def netPlainExport(self):
+        """ 
+            Format the network information thought JSON format
+            File --> export --> networkInfo --> Plain text
+        """
+        saveFileName = self._exportFmtTpl('save network txt file',
+                                          'plain text files(*.txt)', '.txt')
+        if saveFileName:
+            fieldNames = [
+                'Interface name', 'IP address', 'Mac address', 'Vendor',
+                'Gateway IP address', 'Gateway Mac address', 'Gateway Vendor'
+            ]
+            fieldDatas = [
+                self.inetName, self.ipAddr, self.macAddr, self.vendor,
+                self.gwIpAddr, self.gwMacAddr, self.gwVendor
+            ]
+            netwokInfo = tuple(zip(fieldNames, fieldDatas))
+            with open(saveFileName, 'w') as plainFile:
+                for itmes in netwokInfo:
+                    plainFile.writelines('{key}: {value}\n'.format(
+                        key=itmes[0], value=itmes[1]))
 
     def _exportFmtTpl(self, dialogName, fileFilter, suffix, dirctory='.'):
         """ 
