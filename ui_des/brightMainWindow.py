@@ -9,6 +9,7 @@ from PyQt5 import QtWidgets
 import netifaces
 
 from shineMainWindow import ShineMainWindow
+from scanThread import ScanThread
 
 
 class BrightMainWindow(ShineMainWindow):
@@ -27,6 +28,11 @@ class BrightMainWindow(ShineMainWindow):
         self.actionNetCSV.triggered.connect(self.netCsvExport)
         self.actionNetJSON.triggered.connect(self.netJsonExport)
         self.actionNetPlain.triggered.connect(self.netPlainExport)
+
+        self.rangeButton.clicked.connect(
+            lambda: self.scanLanNet(self.rangeLineEdit.text()))
+        self.maskButton.clicked.connect(
+            lambda: self.scanLanNet(self.maskLineEdit.text()))
 
     def refreshBtnClick(self):
         """
@@ -211,3 +217,17 @@ class BrightMainWindow(ShineMainWindow):
             if suffix not in saveFileName:
                 saveFileName = saveFileName + suffix
         return saveFileName
+
+    def scanLanNet(self, scanTarget):
+        """ 
+            Handle the scaning thread 
+            When the scan parameter is wrong, emit the message
+        """
+        self.scanWorker = ScanThread(self.inetName, scanTarget, parten=self)
+        self.scanWorker.warnSingle.connect(self.scanWarnMessage)
+        self.scanWorker.start()
+
+    def scanWarnMessage(self, title, warningTips):
+        """ Display scan Warning message """
+
+        QtWidgets.QMessageBox.warning(self, title, warningTips)
