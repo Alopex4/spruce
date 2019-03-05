@@ -143,6 +143,20 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.action_Filter.triggered.connect(self.showFilterDialog)
         self.action_RefreshRank.triggered.connect(self.refreshRank)
         # Memu status setting
+        self.menuInit()
+
+        # Task 3
+        # Control Dock initial
+        self.unlockButton.setVisible(False)
+        self.netLineEditRO(True)
+        self.ctlPanelTabSwitch()
+        self.ctlPanelContInit()
+        self.ctlRemainInit()
+        self.unlockButton.clicked.connect(self.unlockTrigger)
+
+    def menuInit(self):
+        """ Menu action initial"""
+
         self.action_Save.setEnabled(False)
         self.menuNetwork_info.setEnabled(False)
         self.menu_export.setEnabled(False)
@@ -155,15 +169,6 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.menu_time.setEnabled(False)
         self.menu_protocol.setEnabled(False)
         self.menu_length.setEnabled(False)
-
-        # Task 3
-        # Control Dock initial
-        self.unlockButton.setVisible(False)
-        self.netLineEditRO(True)
-        self.ctlPanelTabSwitch()
-        self.ctlPanelContInit()
-        self.ctlRemainInit()
-        self.unlockButton.clicked.connect(self.unlockTrigger)
 
     # ---------------
     # define the rank
@@ -293,10 +298,33 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
             Menubar --> Option --> &refresh rank
             Manipulate to refresh the rank so the tabs can be active/deactive again
+            Network tab and scan tab should be clear
+            Initial the menu status again
+            Scan panel clear
         """
 
         self.rank = self.getRank()
         self.ctlPanelTabSwitch()
+        self.clearTabsText()
+        self.menuInit()
+        self.nodeListWidget.clear()
+
+    def clearTabsText(self):
+        """ Clean network tab and scan tab text info """
+
+        # Network tab
+        self.nameLineEdit.clear()
+        self.ipLineEdit.clear()
+        self.macLineEdit.clear()
+        self.vendorLineEdit.clear()
+        self.netmaskLineEdit.clear()
+        self.gwIpLineEdit.clear()
+        self.gwMacLineEdit.clear()
+        self.gwVendorLineEdit.clear()
+
+        # Scan tab
+        self.rangeLineEdit.clear()
+        self.maskLineEdit.clear()
 
     # --------------
     # widget initial

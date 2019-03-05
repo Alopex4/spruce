@@ -4,9 +4,11 @@
 import csv
 import json
 import subprocess
+from functools import namedtuple
 
-from PyQt5 import QtWidgets
 import netifaces
+from PyQt5 import QtWidgets
+from PyQt5 import QtGui
 
 from shineMainWindow import ShineMainWindow
 from scanThread import ScanThread
@@ -225,9 +227,11 @@ class BrightMainWindow(ShineMainWindow):
             Scan thread signal mapping
             When the scan parameter is wrong, emit tips message
         """
+        self.node = namedtuple('ItemNode',
+                               ['ipAddr', 'macAddr', 'vendor', 'sort'])
 
         self.scanWorker = ScanThread(self.inetName, scanTarget, self.macAddr,
-                                     self.gwIpAddr)
+                                     self.gwIpAddr, self.node)
         self.scanWorker.finishSignal[bool, str].connect(self.notifyRelatePanel)
         self.scanWorker.finishSignal[bool].connect(self.notifyRelatePanel)
         self.scanWorker.warnSignal.connect(self.scanWarnMessage)
@@ -256,8 +260,6 @@ class BrightMainWindow(ShineMainWindow):
                     unlock button/lineEdit
         """
 
-        self.nodeListWidget.clear()
-
         if scanTarget:
             if '-' in scanTarget:
                 scanMethod = 'range scan'
@@ -276,6 +278,7 @@ class BrightMainWindow(ShineMainWindow):
             self.rangeLineEdit.setEnabled(False)
             self.maskButton.setEnabled(False)
             self.maskLineEdit.setEnabled(False)
+            self.nodeListWidget.clear()
 
         else:
             self.scanProgressBar.setMaximum(100)
@@ -287,9 +290,35 @@ class BrightMainWindow(ShineMainWindow):
             self.maskButton.setEnabled(True)
             self.maskLineEdit.setEnabled(True)
 
-    def scanNodeInsert(self, nodeDict):
+    def scanNodeInsert(self, nodesList):
         """
             Insert the scanning nodes to table
+            1. Insert local node to nodesList
+            2. Insert node to listNodeWidget
         """
 
-        # self.polishNode(tuple)
+        # Insert local node
+        localNode = self.node(self.ipAddr, self.macAddr, self.vendor, 'local')
+        nodesList.insert(0, localNode)
+
+        # Insert node to list widget
+        for node in nodesList:
+            nodeItem = QtWidgets.QListWidgetItem()
+            nodeItem.setText('{} ({})'.format(node.vendor[:10], node.ipAddr))
+            nodeIco = self._selectIco(node.sort)
+            icoFile = '{}/{}'.format('..', nodeIco)
+            nodeItem.setIcon(QtGui.QIcon(icoFile))
+            self.nodeListWidget.addItem(nodeItem)
+
+        print(nodesList)
+
+    def _selectIco(self, sort):
+        """ Via node sort to select ico file"""
+
+        if sort == 'local':
+            icoFileName = 'local.ico'
+        elif sort == 'gateway':
+            icoFileName = 'gateway.ico'
+        else:
+            icoFileName = 'remote.ico'
+        return icoFileName

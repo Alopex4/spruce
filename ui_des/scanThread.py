@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import csv
-from functools import namedtuple
 
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
@@ -16,14 +15,13 @@ class ScanThread(QtCore.QThread):
     warnSignal = QtCore.pyqtSignal(str, str)
     updateSignal = QtCore.pyqtSignal(list)
 
-    def __init__(self, inetName, scanTarget, macAddr, gwIpAddr):
+    def __init__(self, inetName, scanTarget, macAddr, gwIpAddr, node):
         super().__init__()
         self.name = inetName
         self.target = scanTarget
         self.macAddr = macAddr
         self.gwIpAddr = gwIpAddr
-        self.itemNode = namedtuple('ItemNode',
-                                   ['ipAddr', 'macAddr', 'vendor', 'sort'])
+        self.itemNode = node
 
     def warningEmit(self):
         """ Parameter invalid emit the warning Signal """
@@ -72,7 +70,8 @@ class ScanThread(QtCore.QThread):
                         itemNodes.append(self._addingNode(mac, ipaddr))
                         macSet.add(mac)
 
-        print(itemNodes)
+        # print(itemNodes)
+        self.updateSignal.emit(itemNodes)
         self.finishSignal[bool].emit(True)
 
     def _addingNode(self, mac, ipaddr):
@@ -86,9 +85,9 @@ class ScanThread(QtCore.QThread):
         """ Define what node type(sort) it is"""
 
         if ipaddr == self.gwIpAddr:
-            return 'Gateway'
+            return 'gateway'
         else:
-            return 'Other'
+            return 'remote'
 
     def _macQueryVendor(self, macAddr):
         """ 
