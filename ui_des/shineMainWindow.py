@@ -379,7 +379,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             Control panel all contain widget need a initial status
             NetworkTab --> lock all lineEdit
             ScanTab --> paceholder and match pattern(range: 192.168.1.1-100, 
-                mask: 192.168.1.1/24)
+                mask: 192.168.1.0/24)
             SearchTab --> paceholder and tips
             ipinfo --> paceholder and tips 
         """

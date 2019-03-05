@@ -223,15 +223,21 @@ class BrightMainWindow(ShineMainWindow):
 
     def scanLanNet(self, scanTarget):
         """ 
+            Store a nodesList data
             Scan thread work to scan Lan network
             Scan thread signal mapping
             When the scan parameter is wrong, emit tips message
         """
+
+        self.nodeItems = []
         self.node = namedtuple('ItemNode',
                                ['ipAddr', 'macAddr', 'vendor', 'sort'])
+        localNode = self.node(self.ipAddr, self.macAddr, self.vendor, 'local')
+        self.nodeItems.append(localNode)
 
         self.scanWorker = ScanThread(self.inetName, scanTarget, self.macAddr,
-                                     self.gwIpAddr, self.node)
+                                     self.gwIpAddr, self.node, self.nodeItems)
+
         self.scanWorker.finishSignal[bool, str].connect(self.notifyRelatePanel)
         self.scanWorker.finishSignal[bool].connect(self.notifyRelatePanel)
         self.scanWorker.warnSignal.connect(self.scanWarnMessage)
@@ -291,26 +297,23 @@ class BrightMainWindow(ShineMainWindow):
             self.maskLineEdit.setEnabled(True)
 
     def scanNodeInsert(self, nodesList):
-        """
-            Insert the scanning nodes to table
-            1. Insert local node to nodesList
-            2. Insert node to listNodeWidget
+        """ 
+            Insert the scanning nodes to table 
+            1. Assign nodelist to nodeItems
+            2. Traverse  all the nodeItems
         """
 
-        # Insert local node
-        localNode = self.node(self.ipAddr, self.macAddr, self.vendor, 'local')
-        nodesList.insert(0, localNode)
+        self.nodeItems = nodesList
 
-        # Insert node to list widget
         for node in nodesList:
-            nodeItem = QtWidgets.QListWidgetItem()
-            nodeItem.setText('{} ({})'.format(node.vendor[:10], node.ipAddr))
-            nodeIco = self._selectIco(node.sort)
-            icoFile = '{}/{}'.format('..', nodeIco)
-            nodeItem.setIcon(QtGui.QIcon(icoFile))
-            self.nodeListWidget.addItem(nodeItem)
+            Item = QtWidgets.QListWidgetItem()
+            Item.setText('{} ({})'.format(node.vendor[:10], node.ipAddr))
+            nodeIcon = self._selectIco(node.sort)
+            icoFile = '{}/{}'.format('..', nodeIcon)
+            Item.setIcon(QtGui.QIcon(icoFile))
+            self.nodeListWidget.addItem(Item)
 
-        print(nodesList)
+        print(self.nodeItems)
 
     def _selectIco(self, sort):
         """ Via node sort to select ico file"""

@@ -15,13 +15,15 @@ class ScanThread(QtCore.QThread):
     warnSignal = QtCore.pyqtSignal(str, str)
     updateSignal = QtCore.pyqtSignal(list)
 
-    def __init__(self, inetName, scanTarget, macAddr, gwIpAddr, node):
+    def __init__(self, inetName, scanTarget, macAddr, gwIpAddr, node,
+                 nodeItem):
         super().__init__()
         self.name = inetName
         self.target = scanTarget
         self.macAddr = macAddr
         self.gwIpAddr = gwIpAddr
-        self.itemNode = node
+        self.node = node
+        self.nodeItems = nodeItem
 
     def warningEmit(self):
         """ Parameter invalid emit the warning Signal """
@@ -42,7 +44,7 @@ class ScanThread(QtCore.QThread):
         """
 
         macSet = set()
-        itemNodes = []
+        scanFail = False
 
         for times in range(1, 7):
             try:
@@ -55,6 +57,7 @@ class ScanThread(QtCore.QThread):
 
             except (OSError, ValueError):
                 self.warningEmit()
+                scanFail = True
                 break
             else:
                 for _, rcv in ans:
@@ -63,22 +66,23 @@ class ScanThread(QtCore.QThread):
 
                     if times == 1:
                         self.finishSignal[bool, str].emit(False, self.target)
-                        itemNodes.append(self._addingNode(mac, ipaddr))
+                        self.nodeItems.append(self._addingNode(mac, ipaddr))
                         macSet.add(mac)
 
                     if (times != 1) and (mac not in macSet):
-                        itemNodes.append(self._addingNode(mac, ipaddr))
+                        self.nodeItems.append(self._addingNode(mac, ipaddr))
                         macSet.add(mac)
 
-        # print(itemNodes)
-        self.updateSignal.emit(itemNodes)
+        # print(self.nodeItem)
+        if not scanFail and len(self.nodeItems) > 1:
+            self.updateSignal.emit(self.nodeItems)
         self.finishSignal[bool].emit(True)
 
     def _addingNode(self, mac, ipaddr):
         """ Generate adding node info"""
 
-        node = self.itemNode(ipaddr, mac, self._macQueryVendor(mac),
-                             self._defineNodeType(ipaddr))
+        node = self.node(ipaddr, mac, self._macQueryVendor(mac),
+                         self._defineNodeType(ipaddr))
         return node
 
     def _defineNodeType(self, ipaddr):
