@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import csv
+from functools import namedtuple
 
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
@@ -15,14 +16,17 @@ class ScanThread(QtCore.QThread):
     warnSignal = QtCore.pyqtSignal(str, str)
     updateSignal = QtCore.pyqtSignal(list)
 
-    def __init__(self, inetName, scanTarget, gwIpAddr):
+    def __init__(self, inetName, scanTarget, macAddr, gwIpAddr):
         super().__init__()
         self.name = inetName
         self.target = scanTarget
+        self.macAddr = macAddr
         self.gwIpAddr = gwIpAddr
+        self.itemNode = namedtuple('ItemNode',
+                                   ['ipAddr', 'macAddr', 'vendor', 'sort'])
 
     def warningEmit(self):
-        """ Emit the warning Signal """
+        """ Parameter invalid emit the warning Signal """
 
         warningTips = 'Doubble check your parameter\nMark sure it is correct\n'
         title = 'Scan Warn!'
@@ -31,60 +35,60 @@ class ScanThread(QtCore.QThread):
     def run(self):
         """ 
             Override the start method to scan active hosts
-            1. Emit finishSignal(False) --> lock the scan panel
+            1. Emit finishSignal(False) --> let brightMainWIndow know about it
             2. Begin to scaning host via arp packets querys
-                * Parameter correct --> emit updateSignal(tuple) scan host data(ip, mac, vendor)
+                * Parameter correct --> emit updateSignal(tuple)
+                    updateSignal contain (mac, ip, )
                 * Parameter incorrect --> emit warnSignal(str) tips message
-            3. Emit finishSignal(True) --> unlock the scan panel
+            3. Emit finishSignal(True) --> let brightMainWIndow know about it
         """
 
         macSet = set()
-        macIpItem = []
-        times = 1
+        itemNodes = []
 
-        for _ in range(6):
+        for times in range(1, 7):
             try:
                 ans, _ = srp(
-                    Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=self.target),
+                    Ether(src=self.macAddr, dst="ff:ff:ff:ff:ff:ff") / ARP(
+                        hwsrc=self.macAddr, pdst=self.target),
                     timeout=0.2,
                     iface=self.name,
                     inter=0.002)
+
             except (OSError, ValueError):
                 self.warningEmit()
                 break
             else:
-
                 for _, rcv in ans:
                     ipaddr = rcv.sprintf(r"%ARP.psrc%")
                     mac = rcv.sprintf(r"%Ether.src%")
-                    macSet.add(mac)
 
                     if times == 1:
                         self.finishSignal[bool, str].emit(False, self.target)
-                        macIpItem.append(self._addingNode(mac, ipaddr))
+                        itemNodes.append(self._addingNode(mac, ipaddr))
+                        macSet.add(mac)
 
                     if (times != 1) and (mac not in macSet):
-                        print('hello')
-                        macIpItem.append(self._addingNode(mac, ipaddr))
+                        itemNodes.append(self._addingNode(mac, ipaddr))
+                        macSet.add(mac)
 
-                times += 1
-        print(macIpItem)
+        print(itemNodes)
         self.finishSignal[bool].emit(True)
 
     def _addingNode(self, mac, ipaddr):
         """ Generate adding node info"""
 
-        node = (mac, ipaddr, self._macQueryVendor(mac),
-                self._defineNodeType(ipaddr))
+        node = self.itemNode(ipaddr, mac, self._macQueryVendor(mac),
+                             self._defineNodeType(ipaddr))
         return node
 
     def _defineNodeType(self, ipaddr):
-        """ Define what node type it is"""
+        """ Define what node type(sort) it is"""
 
         if ipaddr == self.gwIpAddr:
             return 'Gateway'
         else:
-            return 'Other host'
+            return 'Other'
 
     def _macQueryVendor(self, macAddr):
         """ 
@@ -99,4 +103,4 @@ class ScanThread(QtCore.QThread):
             for row in ouiReader:
                 if macOui in row:
                     return row[2]
-            return 'None'
+            return '**Vendor not fond**'

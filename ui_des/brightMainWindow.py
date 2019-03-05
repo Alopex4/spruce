@@ -226,7 +226,8 @@ class BrightMainWindow(ShineMainWindow):
             When the scan parameter is wrong, emit tips message
         """
 
-        self.scanWorker = ScanThread(self.inetName, scanTarget, self.gwIpAddr)
+        self.scanWorker = ScanThread(self.inetName, scanTarget, self.macAddr,
+                                     self.gwIpAddr)
         self.scanWorker.finishSignal[bool, str].connect(self.notifyRelatePanel)
         self.scanWorker.finishSignal[bool].connect(self.notifyRelatePanel)
         self.scanWorker.warnSignal.connect(self.scanWarnMessage)
