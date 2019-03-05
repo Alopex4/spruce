@@ -400,9 +400,9 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         maskRegexExp = QtCore.QRegExp(ShineMainWindow.maskRegex)
         maskValidator = QtGui.QRegExpValidator(maskRegexExp, self.maskLineEdit)
         self.maskLineEdit.setValidator(maskValidator)
-        self.maskLineEdit.setPlaceholderText('eg: 192.168.1/24')
-        self.maskLineEdit.setToolTip('Input Example: 192.168.1.1/24')
-        self.maskLineEdit.setStatusTip('Input Example: 192.168.1.1/24')
+        self.maskLineEdit.setPlaceholderText('eg: 192.168.0/24')
+        self.maskLineEdit.setToolTip('Input Example: 192.168.1.0/24')
+        self.maskLineEdit.setStatusTip('Input Example: 192.168.1.0/24')
         self.maskLineEdit.setAlignment(QtCore.Qt.AlignCenter)
 
         # Search Tab

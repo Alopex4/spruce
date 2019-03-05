@@ -69,7 +69,7 @@ class BrightMainWindow(ShineMainWindow):
         # Accquire gateway info
         self.gwIpAddr = netifaces.gateways()['default'][netifaces.AF_INET][0]
 
-        cmd = "cat /proc/net/arp | sed -n '2p' | xargs  | cut -d ' ' -f4"
+        cmd = "cat /proc/net/arp | grep '0x2' | xargs  | cut -d ' ' -f4"
         r = subprocess.check_output(cmd, shell=True)
         self.gwMacAddr = r.decode('utf-8').replace('\n', '')
         self.gwVendor = self._macQueryVendor(self.gwMacAddr)
@@ -141,23 +141,20 @@ class BrightMainWindow(ShineMainWindow):
             File --> export --> networkInfo --> Csv
         """
 
-        saveFileName = self._exportFmtTpl('save network csv file',
-                                          'csv files(*.csv)', '.csv')
-        if saveFileName:
-            with open(saveFileName, 'w') as csvFile:
-                fieldNames = [
-                    'Interface name', 'IP address', 'Mac address', 'Vendor',
-                    'Gateway IP address', 'Gateway Mac address',
-                    'Gateway Vendor'
-                ]
-                fieldDatas = [
-                    self.inetName, self.ipAddr, self.macAddr, self.vendor,
-                    self.gwIpAddr, self.gwMacAddr, self.gwVendor
-                ]
+        networkData = []
+        fieldNames = [
+            'Interface name', 'IP address', 'Mac address', 'Vendor',
+            'Gateway IP address', 'Gateway Mac address', 'Gateway Vendor'
+        ]
+        fieldDatas = [
+            self.inetName, self.ipAddr, self.macAddr, self.vendor,
+            self.gwIpAddr, self.gwMacAddr, self.gwVendor
+        ]
+        networkData.append(fieldNames)
+        networkData.append(fieldDatas)
 
-                writer = csv.DictWriter(csvFile, fieldnames=fieldNames)
-                writer.writeheader()
-                writer.writerow(dict(zip(fieldNames, fieldDatas)))
+        self._fileExportTpl('save network csv file', 'csv files(*.csv)',
+                            '.csv', 'csv', networkData)
 
     def netJsonExport(self):
         """ 
@@ -165,44 +162,76 @@ class BrightMainWindow(ShineMainWindow):
             File --> export --> networkInfo --> Json
         """
 
-        saveFileName = self._exportFmtTpl('save network JSON file',
-                                          'csv files(*.json)', '.json')
-        if saveFileName:
-            networkInfo = {
-                'local': {
-                    'Interface name': self.inetName,
-                    'IP address': self.ipAddr,
-                    'Mac address': self.macAddr,
-                    'Vendor': self.vendor
-                },
-                'gateway': {
-                    'IP address': self.gwIpAddr,
-                    'Mac addres': self.gwMacAddr,
-                    'Vendor': self.gwVendor
-                }
+        networkInfo = {
+            'local': {
+                'Interface name': self.inetName,
+                'IP address': self.ipAddr,
+                'Mac address': self.macAddr,
+                'Vendor': self.vendor
+            },
+            'gateway': {
+                'IP address': self.gwIpAddr,
+                'Mac addres': self.gwMacAddr,
+                'Vendor': self.gwVendor
             }
-            with open(saveFileName, 'w') as jsonFile:
-                json.dump(networkInfo, jsonFile, indent=4)
+        }
+        self._fileExportTpl('save network JSON file', 'csv files(*.json)',
+                            '.json', 'json', networkInfo)
 
     def netPlainExport(self):
         """ 
             Format the network information thought JSON format
             File --> export --> networkInfo --> Plain text
         """
-        saveFileName = self._exportFmtTpl('save network txt file',
-                                          'plain text files(*.txt)', '.txt')
-        if saveFileName:
-            fieldNames = [
-                'Interface name', 'IP address', 'Mac address', 'Vendor',
-                'Gateway IP address', 'Gateway Mac address', 'Gateway Vendor'
-            ]
-            fieldDatas = [
-                self.inetName, self.ipAddr, self.macAddr, self.vendor,
-                self.gwIpAddr, self.gwMacAddr, self.gwVendor
-            ]
-            netwokInfo = tuple(zip(fieldNames, fieldDatas))
+
+        networkData = []
+        fieldNames = [
+            'Interface name', 'IP address', 'Mac address', 'Vendor',
+            'Gateway IP address', 'Gateway Mac address', 'Gateway Vendor'
+        ]
+        fieldDatas = [
+            self.inetName, self.ipAddr, self.macAddr, self.vendor,
+            self.gwIpAddr, self.gwMacAddr, self.gwVendor
+        ]
+        networkData.append(fieldNames)
+        networkData.append(fieldDatas)
+        self._fileExportTpl('save network txt file', 'plain text files(*.txt)',
+                            '.txt', 'plain', networkData)
+
+    def _fileExportTpl(self,
+                       dialogName,
+                       fileFilter,
+                       suffix,
+                       fmt,
+                       data,
+                       dirctory='.'):
+        """
+            General public file format export template
+            According `fmt` save file in different way
+        """
+
+        saveFileName = self._exportFmtTpl(dialogName, fileFilter, suffix)
+
+        if fmt == 'csv':
+            # data = [[fieldNames_list], [fieldDatas_list]]
+            fieldNames, fieldDatas = data
+            saveRow = dict(zip(fieldNames, fieldDatas))
+            with open(saveFileName, 'w') as csvFile:
+                writer = csv.DictWriter(csvFile, fieldnames=fieldNames)
+                writer.writeheader()
+                writer.writerow(saveRow)
+
+        elif fmt == 'json':
+            # data = JSON foramt
+            with open(saveFileName, 'w') as jsonFile:
+                json.dump(data, jsonFile, indent=4)
+
+        elif fmt == 'plain':
+            # data = [[fieldNames_list], [fieldDatas_list]]
+            fieldNames, fieldDatas = data
+            saveData = tuple(zip(fieldNames, fieldDatas))
             with open(saveFileName, 'w') as plainFile:
-                for itmes in netwokInfo:
+                for itmes in saveData:
                     plainFile.writelines('{key}: {value}\n'.format(
                         key=itmes[0], value=itmes[1]))
 
@@ -284,6 +313,7 @@ class BrightMainWindow(ShineMainWindow):
             self.rangeLineEdit.setEnabled(False)
             self.maskButton.setEnabled(False)
             self.maskLineEdit.setEnabled(False)
+            self.menuLAN_info.setEnabled(False)
             self.nodeListWidget.clear()
 
         else:
@@ -301,6 +331,7 @@ class BrightMainWindow(ShineMainWindow):
             Insert the scanning nodes to table 
             1. Assign nodelist to nodeItems
             2. Traverse  all the nodeItems
+            3. Active menu bar export --> LAN info
         """
 
         self.nodeItems = nodesList
@@ -313,6 +344,7 @@ class BrightMainWindow(ShineMainWindow):
             Item.setIcon(QtGui.QIcon(icoFile))
             self.nodeListWidget.addItem(Item)
 
+        self.menuLAN_info.setEnabled(True)
         print(self.nodeItems)
 
     def _selectIco(self, sort):
