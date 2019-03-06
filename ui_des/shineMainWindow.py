@@ -11,6 +11,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtCore
 
 from mainWindow import Ui_MainWindow
+from queryThread import QueryThread
 from shineDialog import Ui_RankDialog
 from shineDialog import Ui_AuthorDialog
 from shineDialog import ui_FilterDialog
@@ -121,60 +122,28 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def shineInitUI(self):
         """ Initial all the widget status
             1. define the rank
-                * root privilege  --> without affect --> application error      --> value 0000 0001
-                * network startup --> without affect --> without ipinfo search  --> value 0000 0010
-                * ip routing      --> without affect --> without remote sniffer --> value 0000 0100
-                * tcpdump install --> without affect --> without filter feature --> value 0000 1000
-            2. action trigger connect and menu status setting
+            2. action trigger connect
             3. widget status initial
         """
 
         # Task 1
-        # Define the rank
         self.rank = self.getRank()
-
         # Task 2
-        # Action tiggered connect
-        self.action_close.triggered.connect(self.close)
-        self.action_Rank.triggered.connect(self.showRankDialog)
-        self.action_Save.triggered.connect(self.showSaveFile)
-        self.action_Open.triggered.connect(self.showOpenFile)
-        self.action_Author.triggered.connect(self.showAuthorDialog)
-        self.action_Filter.triggered.connect(self.showFilterDialog)
-        self.action_RefreshRank.triggered.connect(self.refreshRank)
-        # Memu status setting
-        self.menuInit()
-
+        self.triggerInit()
         # Task 3
-        # Control Dock initial
-        self.unlockButton.setVisible(False)
-        self.netLineEditRO(True)
-        self.ctlPanelTabSwitch()
-        self.ctlPanelContInit()
-        self.ctlRemainInit()
-        self.unlockButton.clicked.connect(self.unlockTrigger)
-
-    def menuInit(self):
-        """ Menu action initial"""
-
-        self.action_Save.setEnabled(False)
-        self.menuNetwork_info.setEnabled(False)
-        self.menu_export.setEnabled(False)
-        self.menuLAN_info.setEnabled(False)
-        self.menuPackets_info.setEnabled(False)
-        self.action_Start.setEnabled(False)
-        self.action_Stop.setEnabled(False)
-        self.action_Restart.setEnabled(False)
-        self.action_Filter.setEnabled(False)
-        self.menu_time.setEnabled(False)
-        self.menu_protocol.setEnabled(False)
-        self.menu_length.setEnabled(False)
+        self.allWidgetInit()
 
     # ---------------
     # define the rank
     # ---------------
     def getRank(self):
-        """ Manage the rank info """
+        """ 
+            Manage the rank info 
+                * root privilege  --> without affect --> application error      --> value 0000 0001
+                * network startup --> without affect --> without ipinfo search  --> value 0000 0010
+                * ip routing      --> without affect --> without remote sniffer --> value 0000 0100
+                * tcpdump install --> without affect --> without filter feature --> value 0000 1000
+        """
 
         rootPrivilege = self.rootPrivilegeCheck()
         networkStartUp = self.networkStartUpCheck()
@@ -220,6 +189,17 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # ----------------
     # Action triggered
     # ----------------
+    def triggerInit(self):
+        """ menu acion trigger initial """
+
+        self.action_close.triggered.connect(self.close)
+        self.action_Rank.triggered.connect(self.showRankDialog)
+        self.action_Save.triggered.connect(self.showSaveFile)
+        self.action_Open.triggered.connect(self.showOpenFile)
+        self.action_Author.triggered.connect(self.showAuthorDialog)
+        self.action_Filter.triggered.connect(self.showFilterDialog)
+        self.action_RefreshRank.triggered.connect(self.refreshRank)
+
     def showRankDialog(self):
         """ 
             Menubar --> About --> &rank 
@@ -232,14 +212,20 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         false_ico = QtGui.QPixmap('../false.ico')
 
         # Use `and` operator to get current active level
-        statue_list = [
+        stateIconList = [
             true_ico if self.rank & i == i else false_ico
             for i in [ROOT, NETWORK, ROUTING, TCPDUMP]
         ]
-        rankDialog.rootStateLabel.setPixmap(statue_list.pop(0))
-        rankDialog.netStateLabel.setPixmap(statue_list.pop(0))
-        rankDialog.routingStateLabel.setPixmap(statue_list.pop(0))
-        rankDialog.dumpStateLabel.setPixmap(statue_list.pop(0))
+        # Store all the rankDialog label widget
+        stateLabelList = [
+            rankDialog.rootStateLabel, rankDialog.netStateLabel,
+            rankDialog.routingStateLabel, rankDialog.dumpStateLabel
+        ]
+
+        # label --> label widget
+        # icon --> pixmap object
+        for label, icon in zip(stateLabelList, stateIconList):
+            label.setPixmap(icon)
 
         rankDialog.exec_()
 
@@ -297,61 +283,59 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def refreshRank(self):
         """
             Menubar --> Option --> &refresh rank
-            Manipulate to refresh the rank so the tabs can be active/deactive again
-            Network tab and scan tab should be clear
-            Initial the menu status again
-            Scan panel clear
+            1. refresh the rank
+            2. clear all the text
         """
 
         self.rank = self.getRank()
-        self.ctlPanelTabSwitch()
-        self.clearTabsText()
-        self.menuInit()
-        self.nodeListWidget.clear()
-
-    def clearTabsText(self):
-        """ Clean network tab and scan tab text info """
-
-        # Network tab
-        self.nameLineEdit.clear()
-        self.ipLineEdit.clear()
-        self.macLineEdit.clear()
-        self.vendorLineEdit.clear()
-        self.netmaskLineEdit.clear()
-        self.gwIpLineEdit.clear()
-        self.gwMacLineEdit.clear()
-        self.gwVendorLineEdit.clear()
-
-        # Scan tab
-        self.rangeLineEdit.clear()
-        self.maskLineEdit.clear()
+        self.allWidgetInit()
 
     # --------------
     # widget initial
     # --------------
-    def netLineEditRO(self, state=False):
-        """ Control panel dock line edit widget state setting """
+    def allWidgetInit(self):
+        """ 
+            Manage all the widget initial
+                * menu action
+                * control panel
+                * scan panel
+                * concise table
+                * verbose tab
+                * decode tabs
+            clean all the text
+        """
 
-        self.nameLineEdit.setReadOnly(state)
-        self.ipLineEdit.setReadOnly(state)
-        self.macLineEdit.setReadOnly(state)
-        self.vendorLineEdit.setReadOnly(state)
-        self.netmaskLineEdit.setReadOnly(state)
+        # Menu initial
+        self.menuInit()
 
-        self.gwIpLineEdit.setReadOnly(state)
-        self.gwMacLineEdit.setReadOnly(state)
-        self.gwVendorLineEdit.setReadOnly(state)
+        # control panel
+        self.ctlPanelTabSwitch()
+        self.ctlPanelContInit()
 
-    def unlockTrigger(self):
-        """ Unlock/Lock the network tab editline box """
+        # scanDock, conciseTable, verboseTabs, decoceTabs
+        self.RemainWidgetInit()
 
-        situation = self.unlockButton.text()
-        if situation == 'unlock':
-            self.netLineEditRO(False)
-            self.unlockButton.setText('lock')
-        elif situation == 'lock':
-            self.netLineEditRO(True)
-            self.unlockButton.setText('unlock')
+        # clean all text
+        self.clearAllText()
+
+        # Obsolete object
+        self.unlockButton.setVisible(False)
+
+    def menuInit(self):
+        """ Menu action initial """
+
+        self.action_Save.setEnabled(False)
+        self.menuNetwork_info.setEnabled(False)
+        self.menu_export.setEnabled(False)
+        self.menuLAN_info.setEnabled(False)
+        self.menuPackets_info.setEnabled(False)
+        self.action_Start.setEnabled(False)
+        self.action_Stop.setEnabled(False)
+        self.action_Restart.setEnabled(False)
+        self.action_Filter.setEnabled(False)
+        self.menu_time.setEnabled(False)
+        self.menu_protocol.setEnabled(False)
+        self.menu_length.setEnabled(False)
 
     def ctlPanelTabSwitch(self):
         """
@@ -385,7 +369,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
 
         # Network Tab
-        self.netLineEditRO(True)
+        self._netLineEditRO(True)
 
         # Scan Tab
         rangeRegexExp = QtCore.QRegExp(ShineMainWindow.rangeRegex)
@@ -437,34 +421,121 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sipTextEdit.setReadOnly(True)
         self.sipButton.clicked.connect(self.searchIPInfo)
 
-    def ctlRemainInit(self):
-        """Scan Dock, conciseTable, verboseTab, decodeTab initial"""
+    def _netLineEditRO(self, state=False):
+        """ Control panel dock line edit widget state setting """
 
-        # Scan dock
-        self.scanDock.setEnabled(False)
-        self.analysisButton.setEnabled(False)
-        self.stopButton.setEnabled(False)
+        self.nameLineEdit.setReadOnly(state)
+        self.ipLineEdit.setReadOnly(state)
+        self.macLineEdit.setReadOnly(state)
+        self.vendorLineEdit.setReadOnly(state)
+        self.netmaskLineEdit.setReadOnly(state)
 
-        # Table and Tabs
-        self.conciseInfoTable.setEnabled(False)
-        self.verboseInfoTab.setEnabled(False)
-        self.decodeInfoTab.setEnabled(False)
+        self.gwIpLineEdit.setReadOnly(state)
+        self.gwMacLineEdit.setReadOnly(state)
+        self.gwVendorLineEdit.setReadOnly(state)
 
     def searchIPInfo(self):
         """ Searh ip information(JSON format) and display it in the textEdit """
 
         self.sipTextEdit.clear()
         ip = self.sipLineEdit.text()
-        token = '80977e50c0ef36'
-        url = 'http://ipinfo.io/{searchIP}?token={token}'.format(
-            searchIP=ip, token=token)
-        try:
-            ipJSON = requests.get(url, timeout=0.5).text
-        except (requests.ConnectionError, requests.exceptions.ReadTimeout):
-            QtWidgets.QMessageBox.information(
-                self, 'Search Info', 'Make sure your network is stable')
-        else:
-            self.sipTextEdit.setText(ipJSON)
+
+        self.queryWorker = QueryThread(ip)
+        self.queryWorker.infoSignal.connect(self.queryInfo)
+        self.queryWorker.finishSignal.connect(self.queryButton)
+        self.queryWorker.jsonSignal.connect(self.queryDisplay)
+        self.queryWorker.start()
+
+        # Destroyed while thread is still running
+        # Solution https://blog.csdn.net/suli_fly/article/details/21627535
+        self.queryWorker.wait()
+
+    def queryInfo(self, title, tips):
+        """ When info raise show the message info """
+
+        QtWidgets.QMessageBox.information(self, title, tips)
+
+    def queryButton(self, done):
+        """
+            done --> False --> lock button
+            done --> true --> unlock button
+        """
+
+        self.sipButton.setEnabled(done)
+
+    def queryDisplay(self, jsonStr):
+        """ Display the json text in textEdit """
+
+        self.sipTextEdit.setText(jsonStr)
+
+    def RemainWidgetInit(self):
+        """ Scan Dock, conciseTable, verboseTab, decodeTab initial """
+
+        # Scan dock
+        self.analysisButton.setText('analysis')
+        self.analysisButton.setEnabled(False)
+        self.stopButton.setEnabled(False)
+
+        # conciseTable
+        self.conciseInfoTable.setEnabled(False)
+
+        # verboseTabs
+        self.linkTab.setEnabled(False)
+        self.interTab.setEnabled(False)
+        self.transTab.setEnabled(False)
+        self.appTab.setEnabled(False)
+        self.verboseInfoTab.setEnabled(False)
+
+        # decode tabs
+        self.rawTab.setEnabled(False)
+        self.hexTab.setEnabled(False)
+        self.decodeInfoTab.setEnabled(False)
+
+    def clearAllText(self):
+        """ Clear all the text in the widget """
+
+        # Controal tabs
+        self._clearCtlTabsText()
+
+        # NodeList
+        self.nodeListWidget.clear()
+
+        # Concise Table
+        self.conciseInfoTable.clearContents()
+
+        # Verbose tabs
+        self.linkTextEdit.clear()
+        self.interTextEdit.clear()
+        self.TransTextEdit.clear()
+
+        # Decode tabs
+        self.appTextEdit.clear()
+        self.rawTextEdit.clear()
+        self.hexTextEdit.clear()
+
+    def _clearCtlTabsText(self):
+        """ Clean control panel tabs text info """
+
+        # Network tab
+        self.nameLineEdit.clear()
+        self.ipLineEdit.clear()
+        self.macLineEdit.clear()
+        self.vendorLineEdit.clear()
+        self.netmaskLineEdit.clear()
+        self.gwIpLineEdit.clear()
+        self.gwMacLineEdit.clear()
+        self.gwVendorLineEdit.clear()
+
+        # Scan tab
+        self.rangeLineEdit.clear()
+        self.maskLineEdit.clear()
+
+        # Search tab
+        self.searchLineEdit.clear()
+
+        # Query tab
+        self.sipLineEdit.clear()
+        self.sipTextEdit.clear()
 
 
 if __name__ == '__main__':
