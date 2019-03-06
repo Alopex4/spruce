@@ -1,0 +1,15 @@
+ip address: 192.168.100.2
+mac address: 90:48:9a:72:1d:55
+vendor: Hon Hai Precision Ind. Co.,Ltd.
+sort: local
+
+ip address: 192.168.100.1
+mac address: 70:af:6a:e7:7e:2e
+vendor: SHENZHEN FENGLIAN TECHNOLOGY CO., LTD.
+sort: gateway
+
+ip address: 192.168.100.3
+mac address: ac:37:43:a0:f8:d3
+vendor: HTC Corporation
+sort: remote
+

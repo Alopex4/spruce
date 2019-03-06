@@ -1,0 +1,20 @@
+[
+    {
+        "sort": "local",
+        "ip address": "192.168.100.2",
+        "vendor": "Hon Hai Precision Ind. Co.,Ltd.",
+        "mac address": "90:48:9a:72:1d:55"
+    },
+    {
+        "sort": "gateway",
+        "ip address": "192.168.100.1",
+        "vendor": "SHENZHEN FENGLIAN TECHNOLOGY CO., LTD.",
+        "mac address": "70:af:6a:e7:7e:2e"
+    },
+    {
+        "sort": "remote",
+        "ip address": "192.168.100.3",
+        "vendor": "HTC Corporation",
+        "mac address": "ac:37:43:a0:f8:d3"
+    }
+]

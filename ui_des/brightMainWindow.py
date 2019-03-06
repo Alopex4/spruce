@@ -31,6 +31,9 @@ class BrightMainWindow(ShineMainWindow):
         self.actionNetCSV.triggered.connect(self.netCsvExport)
         self.actionNetJSON.triggered.connect(self.netJsonExport)
         self.actionNetPlain.triggered.connect(self.netPlainExport)
+        self.actionLANCSV.triggered.connect(self.lanCsvExport)
+        self.actionLANJSON.triggered.connect(self.lanJsonExport)
+        self.actionLANPlain.triggered.connect(self.lanPlainExport)
 
         # Config/Scan panel button mapping
         self.refreshButton.clicked.connect(self.refreshBtnClick)
@@ -158,9 +161,12 @@ class BrightMainWindow(ShineMainWindow):
         ipRange = '{}-10'.format(ipSegment)
         return ipMask, ipRange
 
+    # --------------
+    # network export
+    # --------------
     def netCsvExport(self):
         """ 
-            Format the network information thought csv format
+            Format the network information to csv format
             File --> export --> networkInfo --> Csv
         """
 
@@ -181,7 +187,7 @@ class BrightMainWindow(ShineMainWindow):
 
     def netJsonExport(self):
         """ 
-            Format the network information thought JSON format
+            Format the network information to JSON format
             File --> export --> networkInfo --> Json
         """
 
@@ -203,7 +209,7 @@ class BrightMainWindow(ShineMainWindow):
 
     def netPlainExport(self):
         """ 
-            Format the network information thought JSON format
+            Format the network information to JSON format
             File --> export --> networkInfo --> Plain text
         """
 
@@ -221,11 +227,69 @@ class BrightMainWindow(ShineMainWindow):
         self._fileExportTpl('save network txt file', 'plain text files(*.txt)',
                             '.txt', networkData)
 
+    # ----------
+    # LAN export
+    # ----------
+    def lanCsvExport(self):
+        """
+            Format the LAN information to Csv format
+            File --> export --> LAN info --> CSV
+        """
+
+        lanData = []
+        fieldNames = ['ip address', 'mac address', 'vendor', 'sort']
+        fieldDatas = self.nodeItems
+        lanData.append(fieldNames)
+        lanData.append(fieldDatas)
+
+        self._fileExportTpl(
+            'save network csv file',
+            'csv files(*.csv)',
+            '.csv',
+            lanData,
+            csvRows=True)
+
+    def lanJsonExport(self):
+        """
+            Format the LAN information to Json format
+            File --> export --> LAN info --> JSON
+        """
+
+        nodeDict = self.nodeItems
+        nodeNames = ['ip address', 'mac address', 'vendor', 'sort']
+        lanData = [
+            dict(zip(nodeNames, nodeDict[i])) for i in range(len(nodeDict))
+        ]
+
+        self._fileExportTpl('save network JSON file', 'csv files(*.json)',
+                            '.json', lanData)
+
+    def lanPlainExport(self):
+        """
+            Format the LAN information to plain text format
+            File --> export --> LAN info --> Plain
+        """
+
+        lanData = []
+        fieldNames = ['ip address', 'mac address', 'vendor', 'sort']
+        fieldDatas = self.nodeItems
+        lanData.append(fieldNames)
+        lanData.append(fieldDatas)
+
+        self._fileExportTpl(
+            'save network txt file',
+            'plain text files(*.txt)',
+            '.txt',
+            lanData,
+            txtRows=True)
+
     def _fileExportTpl(self,
                        dialogName,
                        fileFilter,
                        suffix,
                        data,
+                       csvRows=False,
+                       txtRows=False,
                        dirctory='.'):
         """
             General public file format export template
@@ -237,11 +301,19 @@ class BrightMainWindow(ShineMainWindow):
         if 'csv' in suffix:
             # data = [[fieldNames_list], [fieldDatas_list]]
             fieldNames, fieldDatas = data
-            saveRow = dict(zip(fieldNames, fieldDatas))
+
             with open(saveFileName, 'w') as csvFile:
                 writer = csv.DictWriter(csvFile, fieldnames=fieldNames)
                 writer.writeheader()
-                writer.writerow(saveRow)
+                if csvRows:
+                    saveRows = [
+                        dict(zip(fieldNames, fieldDatas[i]))
+                        for i in range(len(fieldDatas))
+                    ]
+                    writer.writerows(saveRows)
+                else:
+                    saveRow = dict(zip(fieldNames, fieldDatas))
+                    writer.writerow(saveRow)
 
         elif 'json' in suffix:
             # data = JSON foramt
@@ -251,11 +323,22 @@ class BrightMainWindow(ShineMainWindow):
         elif 'txt' in suffix:
             # data = [[fieldNames_list], [fieldDatas_list]]
             fieldNames, fieldDatas = data
-            saveData = tuple(zip(fieldNames, fieldDatas))
             with open(saveFileName, 'w') as plainFile:
-                for itmes in saveData:
-                    plainFile.writelines('{key}: {value}\n'.format(
-                        key=itmes[0], value=itmes[1]))
+                if txtRows:
+                    saveData = [
+                        tuple(zip(fieldNames, fieldDatas[i]))
+                        for i in range(len(fieldDatas))
+                    ]
+                    for items in saveData:
+                        for k, v in items:
+                            plainFile.writelines('{key}: {value}\n'.format(
+                                key=k, value=v))
+                        plainFile.writelines('\n')
+                else:
+                    saveData = tuple(zip(fieldNames, fieldDatas))
+                    for itmes in saveData:
+                        plainFile.writelines('{key}: {value}\n'.format(
+                            key=itmes[0], value=itmes[1]))
 
     def _exportFmtTpl(self, dialogName, fileFilter, suffix, dirctory='.'):
         """ 
