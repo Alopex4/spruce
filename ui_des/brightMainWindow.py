@@ -35,13 +35,16 @@ class BrightMainWindow(ShineMainWindow):
         self.actionLANJSON.triggered.connect(self.lanJsonExport)
         self.actionLANPlain.triggered.connect(self.lanPlainExport)
 
-        # Config/Scan panel button mapping
+        # Config panel button mapping
         self.refreshButton.clicked.connect(self.refreshBtnClick)
         self.rangeButton.clicked.connect(
             lambda: self.scanLanNet(self.rangeLineEdit.text()))
         self.maskButton.clicked.connect(
             lambda: self.scanLanNet(self.maskLineEdit.text()))
         self.sipButton.clicked.connect(self.queryIPInfo)
+
+        # Scan panel button mapping
+        self.nodeListWidget.itemSelectionChanged.connect(self.changAnalBtn)
 
     def refreshBtnClick(self):
         """
@@ -357,12 +360,14 @@ class BrightMainWindow(ShineMainWindow):
 
     def scanLanNet(self, scanTarget):
         """ 
+            Reset the nodeListWidget current row avoid index out or range
             Store a nodesList data
             Scan thread work to scan Lan network
             Scan thread signal mapping
             When the scan parameter is wrong, emit tips message
         """
 
+        self.nodeListWidget.setCurrentRow(-1)
         self.nodeItems = []
         self.node = namedtuple('ItemNode',
                                ['ipAddr', 'macAddr', 'vendor', 'sort'])
@@ -399,6 +404,7 @@ class BrightMainWindow(ShineMainWindow):
         """
 
         self.scanDock.setEnabled(True)
+        self.menuProtect()
         if scanTarget:
             if '-' in scanTarget:
                 scanMethod = 'range scan'
@@ -412,6 +418,15 @@ class BrightMainWindow(ShineMainWindow):
             self.nodeListWidget.clear()
 
         self.buttonProtect(finish)
+
+    def menuProtect(self):
+        """ Menu action protect """
+
+        self.analysisButton.setText('analysis')
+        self.analysisButton.setEnabled(False)
+        self.action_Start.setEnabled(False)
+        self.action_Stop.setEnabled(False)
+        self.action_Restart.setEnabled(False)
 
     def buttonProtect(self, done):
         """ During the scaning process protect button """
@@ -492,3 +507,13 @@ class BrightMainWindow(ShineMainWindow):
         """ Display the json text in textEdit """
 
         self.sipTextEdit.setText(jsonStr)
+
+    def changAnalBtn(self):
+        """ When nodeListWidget click change analysis button text """
+
+        index = self.nodeListWidget.currentRow()
+        itemAddr = self.nodeItems[index].ipAddr
+        analBtnText = 'Analysis ({})'.format(itemAddr)
+        self.analysisButton.setText(analBtnText)
+        self.analysisButton.setEnabled(True)
+        self.action_Start.setEnabled(True)
