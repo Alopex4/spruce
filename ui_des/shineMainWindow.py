@@ -11,7 +11,6 @@ from PyQt5 import QtGui
 from PyQt5 import QtCore
 
 from mainWindow import Ui_MainWindow
-from queryThread import QueryThread
 from shineDialog import Ui_RankDialog
 from shineDialog import Ui_AuthorDialog
 from shineDialog import ui_FilterDialog
@@ -419,7 +418,6 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         self.sipTextEdit.setPlaceholderText(demoText)
         self.sipTextEdit.setReadOnly(True)
-        self.sipButton.clicked.connect(self.searchIPInfo)
 
     def _netLineEditRO(self, state=False):
         """ Control panel dock line edit widget state setting """
@@ -433,40 +431,6 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.gwIpLineEdit.setReadOnly(state)
         self.gwMacLineEdit.setReadOnly(state)
         self.gwVendorLineEdit.setReadOnly(state)
-
-    def searchIPInfo(self):
-        """ Searh ip information(JSON format) and display it in the textEdit """
-
-        self.sipTextEdit.clear()
-        ip = self.sipLineEdit.text()
-
-        self.queryWorker = QueryThread(ip)
-        self.queryWorker.infoSignal.connect(self.queryInfo)
-        self.queryWorker.finishSignal.connect(self.queryButton)
-        self.queryWorker.jsonSignal.connect(self.queryDisplay)
-        self.queryWorker.start()
-
-        # Destroyed while thread is still running
-        # Solution https://blog.csdn.net/suli_fly/article/details/21627535
-        self.queryWorker.wait()
-
-    def queryInfo(self, title, tips):
-        """ When info raise show the message info """
-
-        QtWidgets.QMessageBox.information(self, title, tips)
-
-    def queryButton(self, done):
-        """
-            done --> False --> lock button
-            done --> true --> unlock button
-        """
-
-        self.sipButton.setEnabled(done)
-
-    def queryDisplay(self, jsonStr):
-        """ Display the json text in textEdit """
-
-        self.sipTextEdit.setText(jsonStr)
 
     def RemainWidgetInit(self):
         """ Scan Dock, conciseTable, verboseTab, decodeTab initial """

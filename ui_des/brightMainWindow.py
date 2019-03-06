@@ -10,8 +10,9 @@ import netifaces
 from PyQt5 import QtWidgets
 from PyQt5 import QtGui
 
-from shineMainWindow import ShineMainWindow
+from queryThread import QueryThread
 from scanThread import ScanThread
+from shineMainWindow import ShineMainWindow
 
 
 class BrightMainWindow(ShineMainWindow):
@@ -26,37 +27,61 @@ class BrightMainWindow(ShineMainWindow):
             Widget communicate with each other relationship mapping
         """
 
-        self.refreshButton.clicked.connect(self.refreshBtnClick)
+        # Menu trigger action mapping
         self.actionNetCSV.triggered.connect(self.netCsvExport)
         self.actionNetJSON.triggered.connect(self.netJsonExport)
         self.actionNetPlain.triggered.connect(self.netPlainExport)
 
+        # Config/Scan panel button mapping
+        self.refreshButton.clicked.connect(self.refreshBtnClick)
         self.rangeButton.clicked.connect(
             lambda: self.scanLanNet(self.rangeLineEdit.text()))
         self.maskButton.clicked.connect(
             lambda: self.scanLanNet(self.maskLineEdit.text()))
+        self.sipButton.clicked.connect(self.queryIPInfo)
 
     def refreshBtnClick(self):
         """
             Clicked the `refresh` button
             1. Acquire local netork work information
-                * Network Interface name
-                * Network IP
-                * Network MAC
-                * Network Vendor --> via MAC and OUI.csv
-                * Network Mask
             2. Acquire gateway network information
-                * Gateway IP
-                * Gateway MAC
-                * Gateway Vendor --> via MAC and OUI.csv
             3. Display the information to the lineEdit
             4. Scan tab fill the lineEdit
             5. Export Menu active
         """
 
-        # Task 1
         # Acquire local info
+        self._networkInfoAcq()
+
+        # Accquire gateway info
+        self._gatewayInfoAcq()
+
+        # Display the info
+        self._displayNetInfo()
+
+        # Wire info to Scan tab
+        self._fillScanTab()
+
+        # Export menu active
+        self.menu_export.setEnabled(True)
+        self.menuNetwork_info.setEnabled(True)
+
+    def _networkInfoAcq(self):
+        """ 
+            Acquire network information
+                * Network Interface name
+                * Network IP
+                * Network MAC
+                * Network Vendor --> via MAC and OUI.csv
+                * Network Mask
+        """
+
         self.inetName = netifaces.gateways()['default'][netifaces.AF_INET][1]
+        if 'ppp' in self.inetName:
+            self.nicType = 'ppp'
+        else:
+            self.nicType = 'original'
+
         self.ipAddr = netifaces.ifaddresses(
             self.inetName)[netifaces.AF_INET][0]['addr']
         self.macAddr = netifaces.ifaddresses(
@@ -65,60 +90,21 @@ class BrightMainWindow(ShineMainWindow):
             self.inetName)[netifaces.AF_INET][0]['netmask']
         self.vendor = self._macQueryVendor(self.macAddr)
 
-        # Task 2
-        # Accquire gateway info
-        self.gwIpAddr = netifaces.gateways()['default'][netifaces.AF_INET][0]
-
-        cmd = "cat /proc/net/arp | grep '0x2' | xargs  | cut -d ' ' -f4"
-        r = subprocess.check_output(cmd, shell=True)
-        self.gwMacAddr = r.decode('utf-8').replace('\n', '')
-        self.gwVendor = self._macQueryVendor(self.gwMacAddr)
-
-        # Task 3
-        # Display the info
-        self.nameLineEdit.setText(self.inetName)
-        self.ipLineEdit.setText(self.ipAddr)
-        self.macLineEdit.setText(self.macAddr)
-        self.netmaskLineEdit.setText(self.netMask)
-        self.vendorLineEdit.setText(self.vendor)
-
-        self.gwIpLineEdit.setText(self.gwIpAddr)
-        self.gwMacLineEdit.setText(self.gwMacAddr)
-        self.gwVendorLineEdit.setText(self.gwVendor)
-
-        # Task 4
-        # Wire info to Scan tab
-        ipScanMask, ipScanRange = self._scanParameter(self.ipAddr,
-                                                      self.netMask)
-        self.maskLineEdit.setText(ipScanMask)
-        self.rangeLineEdit.setText(ipScanRange)
-
-        # self.maskLineEdit.setStyleSheet(
-        #     "background-color: rgb(159, 232, 170); color: black;")
-        # self.rangeLineEdit.setStyleSheet(
-        #     "background-color: rgb(159, 232, 170); color: black")
-
-        # Task 5
-        # Export menu active
-        self.menu_export.setEnabled(True)
-        self.menuNetwork_info.setEnabled(True)
-
-    def _scanParameter(self, ipAddr, netMask):
+    def _gatewayInfoAcq(self):
         """ 
-            Generate the scan parameter 
-            ipMask --> eg: 192.168.1.1/24
-            ipRange --> eg: 192.168.1.0-10
+            Acquire gateway information
+                * Gateway IP
+                * Gateway MAC
+                * Gateway Vendor --> via MAC and OUI.csv
         """
 
-        intIpList = [int(x) for x in self.ipAddr.split('.')]
-        intMaskList = [int(x) for x in self.netMask.split('.')]
-
-        ipSegment = '.'.join(
-            [str(i & m) for i, m in zip(intIpList, intMaskList)])
-        maskBits = sum([bin(m).count('1') for m in intMaskList])
-        ipMask = '{}/{}'.format(ipSegment, maskBits)
-        ipRange = '{}-10'.format(ipSegment)
-        return ipMask, ipRange
+        if self.nicType == 'original':
+            self.gwIpAddr = netifaces.gateways()['default'][netifaces.AF_INET][
+                0]
+            cmd = "cat /proc/net/arp | grep '0x2' | xargs  | cut -d ' ' -f4"
+            r = subprocess.check_output(cmd, shell=True)
+            self.gwMacAddr = r.decode('utf-8').replace('\n', '')
+            self.gwVendor = self._macQueryVendor(self.gwMacAddr)
 
     def _macQueryVendor(self, macAddr):
         """ 
@@ -134,6 +120,43 @@ class BrightMainWindow(ShineMainWindow):
                 if macOui in row:
                     return row[2]
             return 'None'
+
+    def _displayNetInfo(self):
+        """ Display the network info to network tab lineEdit """
+
+        self.nameLineEdit.setText(self.inetName)
+        self.ipLineEdit.setText(self.ipAddr)
+        self.macLineEdit.setText(self.macAddr)
+        self.netmaskLineEdit.setText(self.netMask)
+        self.vendorLineEdit.setText(self.vendor)
+
+        self.gwIpLineEdit.setText(self.gwIpAddr)
+        self.gwMacLineEdit.setText(self.gwMacAddr)
+        self.gwVendorLineEdit.setText(self.gwVendor)
+
+    def _fillScanTab(self):
+        """ Fill out the scan tab """
+
+        ipScanMask, ipScanRange = self._calScanParm(self.ipAddr, self.netMask)
+        self.maskLineEdit.setText(ipScanMask)
+        self.rangeLineEdit.setText(ipScanRange)
+
+    def _calScanParm(self, ipAddr, netMask):
+        """ 
+            Generate the scan parameter 
+            ipMask --> eg: 192.168.1.1/24
+            ipRange --> eg: 192.168.1.0-10
+        """
+
+        intIpList = [int(x) for x in self.ipAddr.split('.')]
+        intMaskList = [int(x) for x in self.netMask.split('.')]
+
+        ipSegment = '.'.join(
+            [str(i & m) for i, m in zip(intIpList, intMaskList)])
+        maskBits = sum([bin(m).count('1') for m in intMaskList])
+        ipMask = '{}/{}'.format(ipSegment, maskBits)
+        ipRange = '{}-10'.format(ipSegment)
+        return ipMask, ipRange
 
     def netCsvExport(self):
         """ 
@@ -154,7 +177,7 @@ class BrightMainWindow(ShineMainWindow):
         networkData.append(fieldDatas)
 
         self._fileExportTpl('save network csv file', 'csv files(*.csv)',
-                            '.csv', 'csv', networkData)
+                            '.csv', networkData)
 
     def netJsonExport(self):
         """ 
@@ -176,7 +199,7 @@ class BrightMainWindow(ShineMainWindow):
             }
         }
         self._fileExportTpl('save network JSON file', 'csv files(*.json)',
-                            '.json', 'json', networkInfo)
+                            '.json', networkInfo)
 
     def netPlainExport(self):
         """ 
@@ -196,13 +219,12 @@ class BrightMainWindow(ShineMainWindow):
         networkData.append(fieldNames)
         networkData.append(fieldDatas)
         self._fileExportTpl('save network txt file', 'plain text files(*.txt)',
-                            '.txt', 'plain', networkData)
+                            '.txt', networkData)
 
     def _fileExportTpl(self,
                        dialogName,
                        fileFilter,
                        suffix,
-                       fmt,
                        data,
                        dirctory='.'):
         """
@@ -212,7 +234,7 @@ class BrightMainWindow(ShineMainWindow):
 
         saveFileName = self._exportFmtTpl(dialogName, fileFilter, suffix)
 
-        if fmt == 'csv':
+        if 'csv' in suffix:
             # data = [[fieldNames_list], [fieldDatas_list]]
             fieldNames, fieldDatas = data
             saveRow = dict(zip(fieldNames, fieldDatas))
@@ -221,12 +243,12 @@ class BrightMainWindow(ShineMainWindow):
                 writer.writeheader()
                 writer.writerow(saveRow)
 
-        elif fmt == 'json':
+        elif 'json' in suffix:
             # data = JSON foramt
             with open(saveFileName, 'w') as jsonFile:
                 json.dump(data, jsonFile, indent=4)
 
-        elif fmt == 'plain':
+        elif 'txt' in suffix:
             # data = [[fieldNames_list], [fieldDatas_list]]
             fieldNames, fieldDatas = data
             saveData = tuple(zip(fieldNames, fieldDatas))
@@ -270,7 +292,7 @@ class BrightMainWindow(ShineMainWindow):
         self.scanWorker.finishSignal[bool, str].connect(self.notifyRelatePanel)
         self.scanWorker.finishSignal[bool].connect(self.notifyRelatePanel)
         self.scanWorker.warnSignal.connect(self.scanWarnMessage)
-        self.scanWorker.updateSignal.connect(self.scanNodeInsert)
+        self.scanWorker.updateSignal.connect(self.scanNodesInsert)
         self.scanWorker.start()
 
     def scanWarnMessage(self, title, warningTips):
@@ -286,15 +308,14 @@ class BrightMainWindow(ShineMainWindow):
             status --> False --> begin
             status --> True --> finish
                 begin:
+                    menu export LAN disable
                     clear the nodeList 
-                    progressBar begin loop
-                    lock button/lineEdit
-
+                    protec tbutton
                 finish:
-                    progressBar finish loop
-                    unlock button/lineEdit
+                    protec tbutton
         """
 
+        self.scanDock.setEnabled(True)
         if scanTarget:
             if '-' in scanTarget:
                 scanMethod = 'range scan'
@@ -303,30 +324,27 @@ class BrightMainWindow(ShineMainWindow):
             self.scanDock.setWindowTitle('{}: {}'.format(
                 'Scan Panel', scanMethod))
 
-        self.scanDock.setEnabled(True)
         if not finish:
-            self.scanProgressBar.setMaximum(0)
-            self.scanProgressBar.setMaximum(0)
-            self.scanProgressBar.setValue(0)
-
-            self.rangeButton.setEnabled(False)
-            self.rangeLineEdit.setEnabled(False)
-            self.maskButton.setEnabled(False)
-            self.maskLineEdit.setEnabled(False)
             self.menuLAN_info.setEnabled(False)
             self.nodeListWidget.clear()
 
-        else:
-            self.scanProgressBar.setMaximum(100)
-            self.scanProgressBar.setMinimum(100)
-            self.scanProgressBar.setValue(100)
+        self.buttonProtect(finish)
 
-            self.rangeButton.setEnabled(True)
-            self.rangeLineEdit.setEnabled(True)
-            self.maskButton.setEnabled(True)
-            self.maskLineEdit.setEnabled(True)
+    def buttonProtect(self, done):
+        """ During the scaning process protect button """
 
-    def scanNodeInsert(self, nodesList):
+        value = 100 if done else 0
+
+        self.scanProgressBar.setMaximum(value)
+        self.scanProgressBar.setMinimum(value)
+        self.scanProgressBar.setValue(value)
+
+        self.rangeButton.setEnabled(done)
+        self.rangeLineEdit.setEnabled(done)
+        self.maskButton.setEnabled(done)
+        self.maskLineEdit.setEnabled(done)
+
+    def scanNodesInsert(self, nodesList):
         """ 
             Insert the scanning nodes to table 
             1. Assign nodelist to nodeItems
@@ -337,12 +355,12 @@ class BrightMainWindow(ShineMainWindow):
         self.nodeItems = nodesList
 
         for node in nodesList:
-            Item = QtWidgets.QListWidgetItem()
-            Item.setText('{} ({})'.format(node.vendor[:10], node.ipAddr))
+            item = QtWidgets.QListWidgetItem()
+            item.setText('{} ({})'.format(node.vendor[:10], node.ipAddr))
             nodeIcon = self._selectIco(node.sort)
             icoFile = '{}/{}'.format('..', nodeIcon)
-            Item.setIcon(QtGui.QIcon(icoFile))
-            self.nodeListWidget.addItem(Item)
+            item.setIcon(QtGui.QIcon(icoFile))
+            self.nodeListWidget.addItem(item)
 
         self.menuLAN_info.setEnabled(True)
         print(self.nodeItems)
@@ -357,3 +375,37 @@ class BrightMainWindow(ShineMainWindow):
         else:
             icoFileName = 'remote.ico'
         return icoFileName
+
+    def queryIPInfo(self):
+        """ Searh ip information(JSON format) and display it in the textEdit """
+
+        self.sipTextEdit.clear()
+        ip = self.sipLineEdit.text()
+
+        self.queryWorker = QueryThread(ip)
+        self.queryWorker.infoSignal.connect(self.queryInfo)
+        self.queryWorker.finishSignal.connect(self.queryButton)
+        self.queryWorker.jsonSignal.connect(self.queryDisplay)
+        self.queryWorker.start()
+
+        # Destroyed while thread is still running
+        # Solution https://blog.csdn.net/suli_fly/article/details/21627535
+        self.queryWorker.wait()
+
+    def queryInfo(self, title, tips):
+        """ When info raise show the message info """
+
+        QtWidgets.QMessageBox.information(self, title, tips)
+
+    def queryButton(self, done):
+        """
+            done --> False --> lock button
+            done --> true --> unlock button
+        """
+
+        self.sipButton.setEnabled(done)
+
+    def queryDisplay(self, jsonStr):
+        """ Display the json text in textEdit """
+
+        self.sipTextEdit.setText(jsonStr)
