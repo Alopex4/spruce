@@ -486,10 +486,6 @@ class BrightMainWindow(ShineMainWindow):
         self.queryWorker.jsonSignal.connect(self.queryDisplay)
         self.queryWorker.start()
 
-        # Destroyed while thread is still running
-        # Solution https://blog.csdn.net/suli_fly/article/details/21627535
-        self.queryWorker.wait()
-
     def queryInfo(self, title, tips):
         """ When info raise show the message info """
 

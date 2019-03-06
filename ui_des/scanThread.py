@@ -25,6 +25,9 @@ class ScanThread(QtCore.QThread):
         self.node = node
         self.nodeItems = nodeItem
 
+    def __del__(self):
+        self.wait()
+
     def warningEmit(self):
         """ Parameter invalid emit the warning Signal """
 

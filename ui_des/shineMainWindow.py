@@ -312,7 +312,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ctlPanelContInit()
 
         # scanDock, conciseTable, verboseTabs, decoceTabs
-        self.RemainWidgetInit()
+        self.remainWidgetInit()
 
         # clean all text
         self.clearAllText()
@@ -432,12 +432,11 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.gwMacLineEdit.setReadOnly(state)
         self.gwVendorLineEdit.setReadOnly(state)
 
-    def RemainWidgetInit(self):
+    def remainWidgetInit(self):
         """ Scan Dock, conciseTable, verboseTab, decodeTab initial """
 
         # Scan dock
-        self.analysisButton.setText('analysis')
-        self.analysisButton.setEnabled(False)
+        self.scanDock.setWindowTitle('Scan panel: ')
         self.stopButton.setEnabled(False)
 
         # conciseTable
@@ -463,6 +462,9 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # NodeList
         self.nodeListWidget.clear()
+        self.analysisButton.setText('analysis')
+        self.analysisButton.setEnabled(False)
+        self.action_Start.setEnabled(False)
 
         # Concise Table
         self.conciseInfoTable.clearContents()

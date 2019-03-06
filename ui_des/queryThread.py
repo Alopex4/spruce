@@ -16,6 +16,11 @@ class QueryThread(QtCore.QThread):
         self.token = token
         self.queryIP = ip
 
+    def __del__(self):
+        # Destroyed while thread is still running
+        # Solution https://blog.csdn.net/suli_fly/article/details/21627535
+        self.wait()
+
     def run(self):
         self.finishSignal.emit(False)
         url = 'http://ipinfo.io/{searchIP}?token={token}'.format(
