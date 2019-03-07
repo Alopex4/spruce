@@ -113,9 +113,40 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.statusBar = QtWidgets.QStatusBar(self)
         self.statusBar.setFixedHeight(35)
-        self.speedLabel = QtWidgets.QLabel('')
-        self.speedLabel.setText('↑upload  || ↓download')
-        self.statusBar.addPermanentWidget(self.speedLabel)
+        parentDir = '..'
+        uploadFile = '{}/{}'.format(parentDir, 'upload.ico')
+        uploadIco = QtGui.QPixmap(uploadFile)
+        downloadFile = '{}/{}'.format(parentDir, 'download.ico')
+        downloadIco = QtGui.QPixmap(downloadFile)
+        packageSentFile = '{}/{}'.format(parentDir, 'packageSent.ico')
+        packageSentIco = QtGui.QPixmap(packageSentFile)
+        packageRecvFile = '{}/{}'.format(parentDir, 'packageRecv.ico')
+        packageRecvIco = QtGui.QPixmap(packageRecvFile)
+
+        self.uploadLabel = QtWidgets.QLabel('upload:  KB |')
+        self.uploadIcoLabel = QtWidgets.QLabel('')
+        self.uploadIcoLabel.setPixmap(uploadIco)
+
+        self.downloadLabel = QtWidgets.QLabel('download:  KB |')
+        self.downloadIcoLabel = QtWidgets.QLabel('')
+        self.downloadIcoLabel.setPixmap(downloadIco)
+
+        self.packageSentLabel = QtWidgets.QLabel('sent: packages |')
+        self.packageSentIcoLabel = QtWidgets.QLabel('')
+        self.packageSentIcoLabel.setPixmap(packageSentIco)
+
+        self.packageRecveLabel = QtWidgets.QLabel('receive: packages')
+        self.packageRecveIcoLabel = QtWidgets.QLabel('receive: packages')
+        self.packageRecveIcoLabel.setPixmap(packageRecvIco)
+
+        self.statusBar.addPermanentWidget(self.uploadIcoLabel)
+        self.statusBar.addPermanentWidget(self.uploadLabel)
+        self.statusBar.addPermanentWidget(self.downloadIcoLabel)
+        self.statusBar.addPermanentWidget(self.downloadLabel)
+        self.statusBar.addPermanentWidget(self.packageSentIcoLabel)
+        self.statusBar.addPermanentWidget(self.packageSentLabel)
+        self.statusBar.addPermanentWidget(self.packageRecveIcoLabel)
+        self.statusBar.addPermanentWidget(self.packageRecveLabel)
         self.setStatusBar(self.statusBar)
 
     def shineInitUI(self):
@@ -301,6 +332,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 * concise table
                 * verbose tab
                 * decode tabs
+                * status bar
             clean all the text
         """
 
@@ -316,6 +348,9 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # clean all text
         self.clearAllText()
+
+        # status bar
+        self.clearStatusBarText()
 
         # Obsolete object
         self.unlockButton.setVisible(False)
@@ -503,6 +538,13 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Query tab
         self.sipLineEdit.clear()
         self.sipTextEdit.clear()
+
+    def clearStatusBarText(self):
+        """ Status bar text initial """
+        self.uploadLabel.setText('upload:  KB |')
+        self.downloadLabel.setText('download:  KB |')
+        self.packageSentLabel.setText('sent: packages |')
+        self.packageRecveLabel.setText('receive: packages')
 
 
 if __name__ == '__main__':

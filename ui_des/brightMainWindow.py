@@ -3,6 +3,8 @@
 
 import csv
 import json
+import time
+import psutil
 import subprocess
 from functools import namedtuple
 
@@ -13,6 +15,7 @@ from PyQt5 import QtWidgets
 
 from queryThread import QueryThread
 from scanThread import ScanThread
+from trafficThread import TrafficThread
 from shineMainWindow import ShineMainWindow
 
 
@@ -519,6 +522,9 @@ class BrightMainWindow(ShineMainWindow):
         self.analysisButton.setEnabled(True)
         self.action_Start.setEnabled(True)
 
+    # ---------------
+    # analysis button
+    # ---------------
     def analysisManage(self):
         """ 
             Manage the analysis process
@@ -535,8 +541,9 @@ class BrightMainWindow(ShineMainWindow):
                 * capture packets and timestamps
             * Display info to conciseTable
         """
+
         self.analClkWidgetChange()
-        # self.analClkNetworkTraffic()
+        self.analClkNetworkTraffic()
         # self.analClkFilterMarco()
         # self.analClkCapture()
         # self.analClkDisplayInfo()
@@ -608,10 +615,37 @@ class BrightMainWindow(ShineMainWindow):
         self.hexTab.setEnabled(True)
         self.decodeInfoTab.setEnabled(True)
 
-    def stopManage(self):
-        """ Manage stop caputre process """
+    def analClkNetworkTraffic(self):
+        """ Network traffic display """
 
+        self.trafficWorker = TrafficThread(self.inetName)
+        self.trafficWorker.speedSignal.connect(self.trafficProcess)
+        self.trafficWorker.start()
+
+    def trafficProcess(self, upDown, sentRecv):
+        """ Handle the traffic data display and record  """
+
+        self.uploadLabel.setText('upload: {:02f} KB |'.format(upDown[0]))
+        self.downloadLabel.setText('download: {:02f} KB |'.format(upDown[1]))
+        self.packageSentLabel.setText('sent: {:} packages |'.format(
+            sentRecv[0]))
+        self.packageRecveLabel.setText('receive: {:} packages'.format(
+            sentRecv[1]))
+
+    # -----------
+    # stop button
+    # -----------
+    def stopManage(self):
+        """ 
+            Manage stop caputre process
+            * widget control manage
+            * Network Traffic stop
+        """
+
+        # Widget control manage
         self.stopClkWidgetChange()
+        # Network traffic stop
+        self.trafficWorker.goOn = False
 
     def stopClkWidgetChange(self):
         """
@@ -654,3 +688,6 @@ class BrightMainWindow(ShineMainWindow):
 
         # conciseTable, verboseTabs, decodeTabs manage
         pass
+
+        # Status bar
+        self.clearStatusBarText()
