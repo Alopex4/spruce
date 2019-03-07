@@ -6,9 +6,9 @@ import sys
 import subprocess
 
 import requests
-from PyQt5 import QtWidgets
 from PyQt5 import QtGui
 from PyQt5 import QtCore
+from PyQt5 import QtWidgets
 
 from mainWindow import Ui_MainWindow
 from shineDialog import Ui_RankDialog
@@ -462,6 +462,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # NodeList
         self.nodeListWidget.clear()
+        # fix bug --> analysis button text init1ial
         self.analysisButton.setText('analysis')
         self.analysisButton.setEnabled(False)
         self.action_Start.setEnabled(False)

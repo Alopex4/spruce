@@ -7,8 +7,9 @@ import subprocess
 from functools import namedtuple
 
 import netifaces
-from PyQt5 import QtWidgets
 from PyQt5 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtWidgets
 
 from queryThread import QueryThread
 from scanThread import ScanThread
@@ -34,6 +35,8 @@ class BrightMainWindow(ShineMainWindow):
         self.actionLANCSV.triggered.connect(self.lanCsvExport)
         self.actionLANJSON.triggered.connect(self.lanJsonExport)
         self.actionLANPlain.triggered.connect(self.lanPlainExport)
+        self.action_Start.triggered.connect(self.analysisButton.click)
+        self.action_Stop.triggered.connect(self.stopButton.click)
 
         # Config panel button mapping
         self.refreshButton.clicked.connect(self.refreshBtnClick)
@@ -45,6 +48,8 @@ class BrightMainWindow(ShineMainWindow):
 
         # Scan panel button mapping
         self.nodeListWidget.itemSelectionChanged.connect(self.changAnalBtn)
+        self.analysisButton.clicked.connect(self.analysisManage)
+        self.stopButton.clicked.connect(self.stopManage)
 
     def refreshBtnClick(self):
         """
@@ -454,7 +459,7 @@ class BrightMainWindow(ShineMainWindow):
 
         for node in nodesList:
             item = QtWidgets.QListWidgetItem()
-            item.setText('{} ({})'.format(node.vendor[:10], node.ipAddr))
+            item.setText('{} ({})'.format(node.vendor[:14], node.ipAddr))
             nodeIcon = self._selectIco(node.sort)
             icoFile = '{}/{}'.format('..', nodeIcon)
             item.setIcon(QtGui.QIcon(icoFile))
@@ -513,3 +518,139 @@ class BrightMainWindow(ShineMainWindow):
         self.analysisButton.setText(analBtnText)
         self.analysisButton.setEnabled(True)
         self.action_Start.setEnabled(True)
+
+    def analysisManage(self):
+        """ 
+            Manage the analysis process
+            * widget control manage
+            * Network Traffic manage
+                * upload speed
+                * download speed
+            * Filter manage
+                * filter protocol select
+                * generate filter marco
+            * Packet filter start 
+                * startup socket
+                * apply filter marco to socket
+                * capture packets and timestamps
+            * Display info to conciseTable
+        """
+        self.analClkWidgetChange()
+        # self.analClkNetworkTraffic()
+        # self.analClkFilterMarco()
+        # self.analClkCapture()
+        # self.analClkDisplayInfo()
+
+    def analClkWidgetChange(self):
+        """
+            Analysis button click widget change
+                * menu status manage
+                * control panel manage
+                * scan panel manage
+                * conciseTable, verboseTabs, decodeTabs manage
+        """
+
+        # Menu
+        self.action_Save.setEnabled(True)
+        self.action_Open.setEnabled(False)
+        self.action_Start.setEnabled(False)
+        self.action_Stop.setEnabled(True)
+        self.action_Restart.setEnabled(True)
+        self.menuPackets_info.setEnabled(False)
+        self.menu_Statistic.setEnabled(False)
+        self.action_Filter.setEnabled(False)
+        self.action_RefreshRank.setEnabled(False)
+
+        # Control Panel
+        self.rangeLineEdit.setEnabled(False)
+        self.refreshButton.setEnabled(False)
+        self.rangeButton.setEnabled(False)
+        self.maskLineEdit.setEnabled(False)
+        self.maskButton.setEnabled(False)
+        self.searchLineEdit.setEnabled(True)
+        self.searchButton.setEnabled(True)
+
+        # Scan Paenl
+        self.nodeListWidget.setEnabled(False)
+        value = 0
+        self.scanProgressBar.setMaximum(value)
+        self.scanProgressBar.setMinimum(value)
+        self.scanProgressBar.setValue(value)
+        self.stopButton.setEnabled(True)
+        self.analysisButton.setEnabled(False)
+
+        # ConciseTable, verboseTabs, decodeTabs
+        self.conciseInfoTable.clearContents()
+        self.conciseInfoTable.setEnabled(True)
+        self.linkTextEdit.clear()
+        self.linkTextEdit.setReadOnly(True)
+        self.linkTab.setEnabled(True)
+
+        self.interTextEdit.clear()
+        self.interTextEdit.setReadOnly(True)
+        self.interTab.setEnabled(True)
+
+        self.TransTextEdit.clear()
+        self.TransTextEdit.setReadOnly(True)
+        self.transTab.setEnabled(True)
+
+        self.appTextEdit.clear()
+        self.appTextEdit.setReadOnly(True)
+        self.appTab.setEnabled(True)
+        self.verboseInfoTab.setEnabled(True)
+
+        self.rawTextEdit.clear()
+        self.rawTextEdit.setReadOnly(True)
+        self.rawTab.setEnabled(True)
+
+        self.hexTextEdit.clear()
+        self.hexTextEdit.setReadOnly(True)
+        self.hexTab.setEnabled(True)
+        self.decodeInfoTab.setEnabled(True)
+
+    def stopManage(self):
+        """ Manage stop caputre process """
+
+        self.stopClkWidgetChange()
+
+    def stopClkWidgetChange(self):
+        """
+            Stop button click widget change
+                * menu status manage
+                * control panel manage
+                * scan panel manage
+                * conciseTable, verboseTabs, decodeTabs manage
+        """
+
+        # Menu
+        self.action_Save.setEnabled(True)
+        self.action_Open.setEnabled(True)
+        self.menuPackets_info.setEnabled(True)
+        self.action_Start.setEnabled(True)
+        self.action_Stop.setEnabled(False)
+        self.action_Restart.setEnabled(False)
+        self.menu_Statistic.setEnabled(True)
+        self.menu_protocol.setEnabled(True)
+        self.menu_time.setEnabled(True)
+        self.menu_length.setEnabled(True)
+        self.action_Filter.setEnabled(True)
+        self.action_RefreshRank.setEnabled(True)
+
+        # Control Panel
+        self.refreshButton.setEnabled(True)
+        self.rangeLineEdit.setEnabled(True)
+        self.rangeButton.setEnabled(True)
+        self.maskLineEdit.setEnabled(True)
+        self.maskButton.setEnabled(True)
+
+        # Scan Panel
+        self.nodeListWidget.setEnabled(True)
+        value = 100
+        self.scanProgressBar.setMaximum(value)
+        self.scanProgressBar.setMinimum(value)
+        self.scanProgressBar.setValue(value)
+        self.analysisButton.setEnabled(True)
+        self.stopButton.setEnabled(False)
+
+        # conciseTable, verboseTabs, decodeTabs manage
+        pass
