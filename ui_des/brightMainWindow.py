@@ -4,7 +4,6 @@
 import csv
 import json
 import time
-import psutil
 import subprocess
 from functools import namedtuple
 
@@ -619,18 +618,17 @@ class BrightMainWindow(ShineMainWindow):
         """ Network traffic display """
 
         self.trafficWorker = TrafficThread(self.inetName)
-        self.trafficWorker.speedSignal.connect(self.trafficProcess)
+        self.trafficWorker.trafficSignal.connect(self.trafficProcess, )
         self.trafficWorker.start()
 
-    def trafficProcess(self, upDown, sentRecv):
+    def trafficProcess(self, upload, download, sent, recv):
         """ Handle the traffic data display and record  """
 
-        self.uploadLabel.setText('upload: {:02f} KB |'.format(upDown[0]))
-        self.downloadLabel.setText('download: {:02f} KB |'.format(upDown[1]))
-        self.packageSentLabel.setText('sent: {:} packages |'.format(
-            sentRecv[0]))
-        self.packageRecveLabel.setText('receive: {:} packages'.format(
-            sentRecv[1]))
+        self.uploadLabel.setText('upload: {:02} KB |'.format(round(upload, 2)))
+        self.downloadLabel.setText('download: {:02} KB |'.format(
+            round(download, 2)))
+        self.packageSentLabel.setText('sent: {} packages |'.format(sent))
+        self.packageRecveLabel.setText('receive: {} packages'.format(recv))
 
     # -----------
     # stop button
@@ -638,14 +636,14 @@ class BrightMainWindow(ShineMainWindow):
     def stopManage(self):
         """ 
             Manage stop caputre process
-            * widget control manage
             * Network Traffic stop
+            * widget control manage
         """
 
-        # Widget control manage
-        self.stopClkWidgetChange()
         # Network traffic stop
         self.trafficWorker.goOn = False
+        # Widget control manage
+        self.stopClkWidgetChange()
 
     def stopClkWidgetChange(self):
         """
