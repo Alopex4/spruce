@@ -29,6 +29,9 @@ class BrightMainWindow(ShineMainWindow):
     def variableInit(self):
         """ Initial the variable this window need to use """
 
+        # Store network interface type
+        self.nicType = 'original'
+
         # Store scan node
         self.nodeItems = []
 
@@ -57,7 +60,7 @@ class BrightMainWindow(ShineMainWindow):
         self.actionLANPlain.triggered.connect(self.lanPlainExport)
         self.action_Start.triggered.connect(self.analysisButton.click)
         self.action_Stop.triggered.connect(self.stopButton.click)
-        self.action_Filter.triggered.connect(self.showFilterDialog)
+        self.action_Filter.triggered.connect(self.settingFilterDict)
 
         # Config panel button mapping
         self.refreshButton.clicked.connect(self.refreshBtnClick)
@@ -111,8 +114,6 @@ class BrightMainWindow(ShineMainWindow):
         self.inetName = netifaces.gateways()['default'][netifaces.AF_INET][1]
         if 'ppp' in self.inetName:
             self.nicType = 'ppp'
-        else:
-            self.nicType = 'original'
 
         self.ipAddr = netifaces.ifaddresses(
             self.inetName)[netifaces.AF_INET][0]['addr']
@@ -728,11 +729,29 @@ class BrightMainWindow(ShineMainWindow):
         # Status bar
         self.clearStatusBarText()
 
-    def showFilterDialog(self):
+    def settingFilterDict(self):
         """
             Menubar --> Option --> &filter
             show filter dialog information
         """
 
         self.filterDialog = ui_FilterDialog(self.filterDict, parent=self)
+        self.filterDialog.filterSignal.connect(self.filterMarcoGenerate)
         self.filterDialog.exec_()
+
+    def filterMarcoGenerate(self, filters):
+        """" Use filter string generate filter marco """
+
+        filterText = 'filter'
+        filterStrDecode = self.filterDict['filter'].replace('||',
+                                                            ' or ').replace(
+                                                                '&&', ' and ')
+        if self.filterDict['filter']:
+            if len(filterStrDecode) > 30:
+                filterParameter = filterStrDecode[:30] + '...'
+            else:
+                filterParameter = filterStrDecode
+            self.filterLabel.setText('{}: {}'.format(filterText,
+                                                     filterParameter))
+        else:
+            self.filterLabel.setText('{}: {}'.format(filterText, 'disable'))

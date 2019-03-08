@@ -113,6 +113,8 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.statusBar = QtWidgets.QStatusBar(self)
         self.statusBar.setFixedHeight(35)
         parentDir = '..'
+        filterFile = '{}/{}'.format(parentDir, 'filter.ico')
+        filterIco = QtGui.QPixmap(filterFile)
         uploadFile = '{}/{}'.format(parentDir, 'upload.ico')
         uploadIco = QtGui.QPixmap(uploadFile)
         downloadFile = '{}/{}'.format(parentDir, 'download.ico')
@@ -121,6 +123,10 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         packageSentIco = QtGui.QPixmap(packageSentFile)
         packageRecvFile = '{}/{}'.format(parentDir, 'packageRecv.ico')
         packageRecvIco = QtGui.QPixmap(packageRecvFile)
+
+        self.filterLabel = QtWidgets.QLabel('Filter: disable')
+        self.filterIcoLabel = QtWidgets.QLabel('')
+        self.filterIcoLabel.setPixmap(filterIco)
 
         self.uploadLabel = QtWidgets.QLabel('upload:  KB |')
         self.uploadIcoLabel = QtWidgets.QLabel('')
@@ -138,6 +144,8 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.packageRecveIcoLabel = QtWidgets.QLabel('receive: packages')
         self.packageRecveIcoLabel.setPixmap(packageRecvIco)
 
+        self.statusBar.addWidget(self.filterIcoLabel)
+        self.statusBar.addWidget(self.filterLabel)
         self.statusBar.addPermanentWidget(self.uploadIcoLabel)
         self.statusBar.addPermanentWidget(self.uploadLabel)
         self.statusBar.addPermanentWidget(self.downloadIcoLabel)
@@ -303,7 +311,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #         self.filterDialog = ui_FilterDialog(self)
     #         self.filterDialog.exec_()
     #     else:
-    #         tips = '''Check `about --> rank` more details. 
+    #         tips = '''Check `about --> rank` more details.
     #             \nTips: Make sure you already install tcpdump!'''
 
     #         QtWidgets.QMessageBox.warning(self, 'filter warning', tips)
@@ -539,6 +547,8 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def clearStatusBarText(self):
         """ Status bar text initial """
+
+        self.filterLabel.setText('filter: disable')
         self.uploadLabel.setText('upload:  KB |')
         self.downloadLabel.setText('download:  KB |')
         self.packageSentLabel.setText('sent: packages |')

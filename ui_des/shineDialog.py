@@ -82,26 +82,29 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
         self.initUi()
         self.signalSlotMap()
         self.filterInit()
-        self.disableRadio.click()
 
     def initUi(self):
         """ Initial the filter dialog UI"""
+
         self.setWindowIcon(QtGui.QIcon('../spruce.ico'))
         self.setWindowTitle('packets filter')
         self.setFixedSize(260, 420)
 
     def signalSlotMap(self):
+        """ Mapping the signal and slot """
+
         self.disableRadio.clicked.connect(
             lambda: self.widgetManage(False, False, False, reset=True))
         self.enableRaido.clicked.connect(
             lambda: self.widgetManage(True, True, False, reset=True))
 
         self.customCheckBox.clicked.connect(self.customStatus)
-
-        self.buttonBox.clicked.connect(self.filterStruct)
-        self.buttonBox.rejected.connect(self.setFilter)
+        self.buttonBox.accepted.connect(self.structFilter)
+        self.buttonBox.rejected.connect(self.formerFilter)
 
     def customStatus(self):
+        """ Maping to the custome checkbox click """
+
         status = self.customCheckBox.checkState()
         if status == QtCore.Qt.Unchecked:
             self.widgetManage(True, True, False)
@@ -150,8 +153,55 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
         if (self.filterDict['type'] == 'noncustom') and (
                 self.filterDict['filter'] == ''):
             self.disableRadio.click()
+        elif self.filterDict['type'] == 'custom':
+            self._setCustomLine()
 
-    def filterStruct(self):
+        elif self.filterDict['type'] == 'noncustom':
+            self._setFilterCheck()
+
+    def _setCustomLine(self):
+        """ Custom line edit setting """
+
+        self.enableRaido.setChecked(True)
+        self.customCheckBox.setCheckState(QtCore.Qt.Checked)
+        self.customLineEdit.setEnabled(True)
+        self.customLineEdit.setText(self.filterDict['filter'])
+        self._protUnlock(False)
+
+    def _setFilterCheck(self):
+        """ Protocol checkbox setting """
+
+        self.enableRaido.setChecked(True)
+        self.customCheckBox.setCheckState(QtCore.Qt.Unchecked)
+        filterString = self.filterDict['filter']
+        filterTuple = tuple(
+            filter(None,
+                   filterString.replace('dst port ', '').split('||')))
+
+        if 'ip ' in filterTuple:
+            self.ipCheckBox.setChecked(True)
+        if 'icmp ' in filterTuple:
+            self.icmpCheckBox.setChecked(True)
+        if 'igmp ' in filterTuple:
+            self.igmpCheckBox.setChecked(True)
+
+        if 'udp ' in filterTuple:
+            self.udpCheckBox.setChecked(True)
+        if 'tcp ' in filterTuple:
+            self.tcpCheckBox.setChecked(True)
+
+        if '20 ' in filterTuple:
+            self.ftpCheckBox.setChecked(True)
+        if '22 ' in filterTuple:
+            self.telnetCheckBox.setChecked(True)
+        if '23 ' in filterTuple:
+            self.sshCheckBox.setChecked(True)
+        if '53 ' in filterTuple:
+            self.dnsCheckBox.setChecked(True)
+        if '80 ' in filterTuple:
+            self.httpsCheckBox.setChecked(True)
+
+    def structFilter(self):
         """
             Struct the filter string
             type: 
@@ -170,9 +220,12 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
         elif self.enableRaido.isEnabled():
             self.filterDict['type'] = 'noncustom'
             self.filterDict['filter'] = self._nonCustomFilter()
+        elif self.disableRadio.isEnabled():
+            self.filterDict['type'] = 'noncustom'
+            self.filterDict['filter'] = ''
 
         self.filterSignal.emit(self.filterDict)
-        print(self.filterDict)
+        # print(self.filterDict)
 
     def _nonCustomFilter(self):
         """ Scan all the checkbox to struct filter string """
@@ -211,8 +264,10 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
         filterString = '||'.join(filterList).replace('-', ' ')
         return filterString
 
-    def setFilter(self, text):
-        print(text)
+    def formerFilter(self):
+        """ Return the former filter string """
+
+        self.filterSignal.emit(self.filterDict)
 
 
 if __name__ == '__main__':
