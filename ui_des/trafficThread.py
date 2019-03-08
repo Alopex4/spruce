@@ -8,7 +8,7 @@ from PyQt5 import QtCore
 
 
 class TrafficThread(QtCore.QThread):
-    trafficSignal = QtCore.pyqtSignal(float, float, int, int)
+    trafficSignal = QtCore.pyqtSignal(float, float, float, int, int)
 
     def __init__(self, inetName):
         super().__init__()
@@ -29,7 +29,7 @@ class TrafficThread(QtCore.QThread):
         sent = 0
         recv = 0
 
-        self.trafficSignal.emit(upload, download, sent, recv)
+        self.trafficSignal.emit(time.time(), upload, download, sent, recv)
         while True:
             t0 = time.time()
             prevUpDownDatas, _ = self.getTrafficInfo(self.nicName)
@@ -45,7 +45,7 @@ class TrafficThread(QtCore.QThread):
             recv = currSentRev[1] - self.prevRecv
 
             if self.goOn:
-                self.trafficSignal.emit(upload, download, sent, recv)
+                self.trafficSignal.emit(t1, upload, download, sent, recv)
             else:
                 break
 

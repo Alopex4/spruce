@@ -78,14 +78,47 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
         self.setWindowIcon(QtGui.QIcon('../spruce.ico'))
         self.setWindowTitle('packets filter')
         self.setFixedSize(260, 420)
-        self.disableRadio.clicked.connect(lambda: self._containsUnlock(False))
-        self.enableRaido.clicked.connect(lambda: self._containsUnlock(True))
+        self.disableRadio.clicked.connect(
+            lambda: self.widgetManage(False, False, False, reset=True))
+        self.enableRaido.clicked.connect(
+            lambda: self.widgetManage(True, True, False, reset=True))
+
+        self.customCheckBox.clicked.connect(self.customStatus)
+
         self.buttonBox.clicked.connect(lambda: self.setFilter('clicked hit'))
         self.buttonBox.rejected.connect(lambda: self.setFilter('rejectd hit'))
         self.disableRadio.click()
 
     def setFilter(self, text):
         print(text)
+
+    def customStatus(self):
+        status = self.customCheckBox.checkState()
+        if status == QtCore.Qt.Unchecked:
+            self.widgetManage(True, True, False)
+        elif status == QtCore.Qt.Checked:
+            self.widgetManage(False, True, True)
+
+    def widgetManage(self, status, checkbox, lineedit, reset=False):
+        self._containsUnlock(status)
+        self.customCheckBox.setEnabled(checkbox)
+        self.customLineEdit.setEnabled(lineedit)
+        if reset:
+            self._resetWidget()
+
+    def _resetWidget(self):
+        self.customCheckBox.setCheckState(QtCore.Qt.Unchecked)
+        self.customLineEdit.clear()
+        self.ipCheckBox.setCheckState(QtCore.Qt.Unchecked)
+        self.icmpCheckBox.setCheckState(QtCore.Qt.Unchecked)
+        self.igmpCheckBox.setCheckState(QtCore.Qt.Unchecked)
+        self.udpCheckBox.setCheckState(QtCore.Qt.Unchecked)
+        self.tcpCheckBox.setCheckState(QtCore.Qt.Unchecked)
+        self.ftpCheckBox.setCheckState(QtCore.Qt.Unchecked)
+        self.telnetCheckBox.setCheckState(QtCore.Qt.Unchecked)
+        self.sshCheckBox.setCheckState(QtCore.Qt.Unchecked)
+        self.dnsCheckBox.setCheckState(QtCore.Qt.Unchecked)
+        self.httpsCheckBox.setCheckState(QtCore.Qt.Unchecked)
 
     def _containsUnlock(self, status):
         self.intGroupBox.setEnabled(status)

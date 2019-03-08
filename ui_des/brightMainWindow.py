@@ -449,6 +449,8 @@ class BrightMainWindow(ShineMainWindow):
         self.maskButton.setEnabled(done)
         self.maskLineEdit.setEnabled(done)
 
+        self.action_Filter.setEnabled(done)
+
     def scanNodesInsert(self, nodesList):
         """ 
             Insert the scanning nodes to table 
@@ -617,18 +619,31 @@ class BrightMainWindow(ShineMainWindow):
     def analClkNetworkTraffic(self):
         """ Network traffic display """
 
+        self.timestamps = []
+        self.uploads = []
+        self.downloads = []
+        self.sents = []
+        self.recvs = []
+
         self.trafficWorker = TrafficThread(self.inetName)
         self.trafficWorker.trafficSignal.connect(self.trafficProcess, )
         self.trafficWorker.start()
 
-    def trafficProcess(self, upload, download, sent, recv):
+    def trafficProcess(self, timestamp, upload, download, sent, recv):
         """ Handle the traffic data display and record  """
 
-        self.uploadLabel.setText('upload: {:02} KB |'.format(round(upload, 2)))
-        self.downloadLabel.setText('download: {:02} KB |'.format(
-            round(download, 2)))
+        upload = round(upload, 3)
+        download = round(download, 3)
+        self.uploadLabel.setText('upload: {:02} KB |'.format(upload))
+        self.downloadLabel.setText('download: {:02} KB |'.format(download))
         self.packageSentLabel.setText('sent: {} packages |'.format(sent))
         self.packageRecveLabel.setText('receive: {} packages'.format(recv))
+
+        self.timestamps.append(timestamp)
+        self.uploads.append(upload)
+        self.downloads.append(download)
+        self.sents.append(sent)
+        self.recvs.append(recv)
 
     # -----------
     # stop button
