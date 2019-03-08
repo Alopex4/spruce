@@ -13,7 +13,6 @@ from PyQt5 import QtWidgets
 from mainWindow import Ui_MainWindow
 from shineDialog import Ui_RankDialog
 from shineDialog import Ui_AuthorDialog
-from shineDialog import ui_FilterDialog
 
 ROOT = 1
 NETWORK = 2
@@ -227,7 +226,6 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.action_Save.triggered.connect(self.showSaveFile)
         self.action_Open.triggered.connect(self.showOpenFile)
         self.action_Author.triggered.connect(self.showAuthorDialog)
-        self.action_Filter.triggered.connect(self.showFilterDialog)
         self.action_RefreshRank.triggered.connect(self.refreshRank)
 
     def showRankDialog(self):
@@ -293,22 +291,22 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         auhtorDialog = Ui_AuthorDialog(self)
         auhtorDialog.exec_()
 
-    def showFilterDialog(self):
-        """
-            Menubar --> Option --> &filter
-            show filter dialog information
-            ROOT, NETWORK, tcpdump --> network tab, scan tab
-        """
+    # def showFilterDialog(self):
+    #     """
+    #         Menubar --> Option --> &filter
+    #         show filter dialog information
+    #         ROOT, NETWORK, tcpdump --> network tab, scan tab
+    #     """
 
-        if ((ROOT | NETWORK | TCPDUMP) & self.rank) == (ROOT | NETWORK
-                                                        | TCPDUMP):
-            self.filterDialog = ui_FilterDialog(self)
-            self.filterDialog.exec_()
-        else:
-            tips = '''Check `about --> rank` more details. 
-                \nTips: Make sure you already install tcpdump!'''
+    #     if ((ROOT | NETWORK | TCPDUMP) & self.rank) == (ROOT | NETWORK
+    #                                                     | TCPDUMP):
+    #         self.filterDialog = ui_FilterDialog(self)
+    #         self.filterDialog.exec_()
+    #     else:
+    #         tips = '''Check `about --> rank` more details. 
+    #             \nTips: Make sure you already install tcpdump!'''
 
-            QtWidgets.QMessageBox.warning(self, 'filter warning', tips)
+    #         QtWidgets.QMessageBox.warning(self, 'filter warning', tips)
 
     def refreshRank(self):
         """

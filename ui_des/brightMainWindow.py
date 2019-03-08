@@ -16,13 +16,31 @@ from queryThread import QueryThread
 from scanThread import ScanThread
 from trafficThread import TrafficThread
 from shineMainWindow import ShineMainWindow
+from shineDialog import ui_FilterDialog
 
 
 class BrightMainWindow(ShineMainWindow):
     def __init__(self):
         super().__init__()
+        self.variableInit()
         self.signalSlotMap()
         self.refreshButton.click()
+
+    def variableInit(self):
+        """ Initial the variable this window need to use """
+
+        # Store scan node
+        self.nodeItems = []
+
+        # Store network traffic info
+        self.timestamps = []
+        self.uploads = []
+        self.downloads = []
+        self.sents = []
+        self.recvs = []
+
+        # Store filter string
+        self.filterDict = {'type': 'noncustom', 'filter': ''}
 
     def signalSlotMap(self):
         """
@@ -39,6 +57,7 @@ class BrightMainWindow(ShineMainWindow):
         self.actionLANPlain.triggered.connect(self.lanPlainExport)
         self.action_Start.triggered.connect(self.analysisButton.click)
         self.action_Stop.triggered.connect(self.stopButton.click)
+        self.action_Filter.triggered.connect(self.showFilterDialog)
 
         # Config panel button mapping
         self.refreshButton.clicked.connect(self.refreshBtnClick)
@@ -375,7 +394,7 @@ class BrightMainWindow(ShineMainWindow):
         """
 
         self.nodeListWidget.setCurrentRow(-1)
-        self.nodeItems = []
+        self.nodeItems.clear()
         self.node = namedtuple('ItemNode',
                                ['ipAddr', 'macAddr', 'vendor', 'sort'])
         localNode = self.node(self.ipAddr, self.macAddr, self.vendor, 'local')
@@ -449,7 +468,11 @@ class BrightMainWindow(ShineMainWindow):
         self.maskButton.setEnabled(done)
         self.maskLineEdit.setEnabled(done)
 
-        self.action_Filter.setEnabled(done)
+        if not done:
+            self.action_Filter.setEnabled(False)
+        else:
+            if self.tcpdumpCheck:
+                self.action_Filter.setEnabled(done)
 
     def scanNodesInsert(self, nodesList):
         """ 
@@ -619,11 +642,11 @@ class BrightMainWindow(ShineMainWindow):
     def analClkNetworkTraffic(self):
         """ Network traffic display """
 
-        self.timestamps = []
-        self.uploads = []
-        self.downloads = []
-        self.sents = []
-        self.recvs = []
+        self.timestamps.clear()
+        self.uploads.clear()
+        self.downloads.clear()
+        self.sents.clear()
+        self.recvs.clear()
 
         self.trafficWorker = TrafficThread(self.inetName)
         self.trafficWorker.trafficSignal.connect(self.trafficProcess, )
@@ -704,3 +727,12 @@ class BrightMainWindow(ShineMainWindow):
 
         # Status bar
         self.clearStatusBarText()
+
+    def showFilterDialog(self):
+        """
+            Menubar --> Option --> &filter
+            show filter dialog information
+        """
+
+        self.filterDialog = ui_FilterDialog(self.filterDict, parent=self)
+        self.filterDialog.exec_()
