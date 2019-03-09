@@ -571,15 +571,14 @@ class BrightMainWindow(ShineMainWindow):
         filterMacro = self.analClkFilterMcrco()
         if filterMacro:
             self.analClkNetworkTraffic()
-            pass
             # self.analClkCapture(filterMacro)
             # self.analClkDisplayInfo()
         else:
             self.stopClkWidgetChange()
             title = 'analysis warning!'
-            tips = '''Tips:
-* Make sure your filter string qualify BPF rule\n
-    BPF rule: http://biot.com/capstats/bpf.html\n
+            tips = '''Tips:\n
+* Make sure your filter string qualify BPF syntax.\n
+    BPF syntax: http://biot.com/capstats/bpf.html \n
 * Make sure your scan target is a host not a gateway.
 '''
             QtWidgets.QMessageBox.warning(self, title, tips)
@@ -662,57 +661,63 @@ class BrightMainWindow(ShineMainWindow):
         """
 
         remoteFltrStr = ''
+        originalFltStr = ''
+        withAnd = ''
         nodeIndex = self.nodeListWidget.currentRow()
         nodeInfo = self.nodeItems[nodeIndex]
 
+        isRemote = True if nodeInfo.sort == 'remote' else False
+        isNotEmpty = True if len(self.filterDict['filter']) > 0 else False
+
         # Refuse gateway
         if nodeInfo.sort != 'gateway':
-            ''' uncomplete '''
+            # Remote host append filter sring
+            if isRemote:
+                remoteFltrStr = '(not arp) and (src host {} and dst host {}) '.format(
+                    nodeInfo.ipAddr, nodeInfo.ipAddr)
 
-            # # Remote host append filter sring
-            # if nodeInfo.sort == 'remote':
-            #     remoteFltrStr = 'not arp and (src host {} and dst host {}) and '.format(
-            #         nodeInfo.ipAddr, nodeInfo.ipAddr)
+            # Original filter string add bracket or just keep empty
+            if isNotEmpty:
+                originalFltStr = '(' + self.filterDict['filter'] + ')'
 
-            # # Original filter string add bracket or just keep empty
-            # if len(self.filterDict['filter'].strip()) > 0:
-            #     originalFltStr = '(' + self.filterDict['filter'] + ')'
-            # else:
-            #     originalFltStr = self.filterDict['filter']
+            # addd `and` between remote and original
+            if isRemote and isNotEmpty:
+                withAnd = ' and '
 
-            # # combine filterSting
-            # if originalFltStr:
-            #     filterString = ''.format(remoteFltrStr, originalFltStr)
+            # combine filterSting
+            filterString = "'{} {} {}'".format(remoteFltrStr, withAnd,
+                                               originalFltStr)
 
-            # cmd = "tcpdump -i {interface} -dd {filters}".format(
-            #     interface=self.inetName, filters=filterString)
-            # print(cmd)
-            # try:
-            #     filterFragment = subprocess.check_output(cmd, shell=True)
-            # except subprocess.CalledProcessError:
-            #     pass
-            # else:
-            #     macro = self._generateMacro(filterFragment)
-            #     return macro
+            cmd = "sudo tcpdump -i {interface} -dd {filters}".format(
+                interface=self.inetName, filters=filterString)
+            try:
+                tcpdumpBinary = subprocess.check_output(cmd, shell=True)
+            except subprocess.CalledProcessError:
+                pass
+            else:
+                macro = BrightMainWindow._generateMacro(tcpdumpBinary)
+                print(macro)
+                return macro
         return None
 
-    def _generateMacro(filterFragment):
-        """ Generate the macro """
+    @staticmethod
+    def _generateMacro(tcpdumpBinary):
+        """ 
+            Generate the macro
+            tcpdumpBinary --> 
+                b'{ 0x28, 0, 0, 0x0000000c },\n{ 0x15, 0, 3, 0x000008...
+                * decode the string to utf-8
+                * replace '\n'
+                * adding variable name `macroString`
+                * replace {} to [] (because set just keep different element)
+                * execute the macroString
+        """
 
-        cookedMacro = []
-        temp = []
-
-        rowMacro = filterFragment.decode('utf-8').replace('{', '').replace(
-            '}', '')[:-2].split(',\n')
-
-        for row in rowMacro:
-            items = row.split(',')
-            temp.clear()
-            for item in items:
-                temp.append(int(item, base=16))
-            cookedMacro.append(temp)
-
-        return cookedMacro
+        macroString = 'macroString = ( ' + tcpdumpBinary.decode(
+            'utf-8').replace('\n', '').replace('{', '[').replace('}',
+                                                                 ']') + ')'
+        exec(macroString)
+        return macroString
 
     def analClkNetworkTraffic(self):
         """ Network traffic display """
