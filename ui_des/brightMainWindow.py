@@ -554,12 +554,12 @@ class BrightMainWindow(ShineMainWindow):
         """ 
             Manage the analysis process
             * widget control manage
-            * Network Traffic manage
-                * upload speed
-                * download speed
             * Filter manage
                 * filter protocol select
                 * generate filter marco
+            * Network Traffic manage
+                * upload speed
+                * download speed
             * Packet filter start 
                 * startup socket
                 * apply filter marco to socket
@@ -568,10 +568,21 @@ class BrightMainWindow(ShineMainWindow):
         """
 
         self.analClkWidgetChange()
-        self.analClkNetworkTraffic()
-        self.analClkFilterMarco()
-        # self.analClkCapture()
-        # self.analClkDisplayInfo()
+        filterMarco = self.analClkFilterMarco()
+        if filterMarco:
+            self.analClkNetworkTraffic()
+            pass
+            # self.analClkCapture(filterMarco)
+            # self.analClkDisplayInfo()
+        else:
+            self.stopClkWidgetChange()
+            title = 'analysis warning!'
+            tips = '''Tips:
+* Make sure your filter string qualify BPF rule\n
+    BPF rule: http://biot.com/capstats/bpf.html\n
+* Make sure your scan target is a host not a gateway.
+'''
+            QtWidgets.QMessageBox.warning(self, title, tips)
 
     def analClkWidgetChange(self):
         """
@@ -584,6 +595,7 @@ class BrightMainWindow(ShineMainWindow):
 
         # Menu
         self.action_Save.setEnabled(True)
+
         self.action_Open.setEnabled(False)
         self.action_Start.setEnabled(False)
         self.action_Stop.setEnabled(True)
@@ -640,6 +652,24 @@ class BrightMainWindow(ShineMainWindow):
         self.hexTab.setEnabled(True)
         self.decodeInfoTab.setEnabled(True)
 
+    def analClkFilterMarco(self):
+        """ 
+            According to filterDict and node type 
+            generate filter marco
+                * 
+        """
+
+        nodeIndex = self.nodeListWidget.currentRow()
+        nodeInfo = self.nodeItems[nodeIndex]
+
+        if nodeInfo.sort != 'gateway':
+            filterString = self.filterDict['filter']
+            cmd = "tcpdump -i {interface} -dd {filters}".format(
+                interface=self.inetName, filters=filterString)
+            r = subprocess.check_output(cmd, shell=True)
+            print(r)
+            return True
+
     def analClkNetworkTraffic(self):
         """ Network traffic display """
 
@@ -666,11 +696,9 @@ class BrightMainWindow(ShineMainWindow):
         self.timestamps.append(timestamp)
         self.uploads.append(upload)
         self.downloads.append(download)
+        
         self.sents.append(sent)
         self.recvs.append(recv)
-
-    def analClkFilterMarco(self):
-        print(self.filterDict)
 
     # -----------
     # stop button
@@ -683,7 +711,11 @@ class BrightMainWindow(ShineMainWindow):
         """
 
         # Network traffic stop
-        self.trafficWorker.goOn = False
+        try:
+            self.trafficWorker.goOn = False
+        except AttributeError:
+            pass
+
         # Widget control manage
         self.stopClkWidgetChange()
 
