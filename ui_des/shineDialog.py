@@ -152,8 +152,7 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
         """ Initial fiter according to filterDict """
 
         # {'type': 'noncustom', 'filter': ''}
-        if (self.recvFilterDict['type'] == 'noncustom') and (
-                self.recvFilterDict['filter'] == ''):
+        if self.recvFilterDict['filter'] == '':
             self.disableRadio.click()
         elif self.recvFilterDict['type'] == 'custom':
             self._setCustomLine()
@@ -218,7 +217,7 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
 
         if self.customCheckBox.checkState() == QtCore.Qt.Checked:
             self.recvFilterDict['type'] = 'custom'
-            self.recvFilterDict['filter'] = self.customLineEdit.text()
+            self.recvFilterDict['filter'] = self.customLineEdit.text().strip()
         else:
             self.recvFilterDict['type'] = 'noncustom'
             if self.enableRaido.isEnabled():

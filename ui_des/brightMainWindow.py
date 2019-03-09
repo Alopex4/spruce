@@ -33,6 +33,8 @@ class BrightMainWindow(ShineMainWindow):
         self.nicType = 'original'
 
         # Store scan node
+        self.node = namedtuple('ItemNode',
+                               ['ipAddr', 'macAddr', 'vendor', 'sort'])
         self.nodeItems = []
 
         # Store network traffic info
@@ -396,8 +398,6 @@ class BrightMainWindow(ShineMainWindow):
 
         self.nodeListWidget.setCurrentRow(-1)
         self.nodeItems.clear()
-        self.node = namedtuple('ItemNode',
-                               ['ipAddr', 'macAddr', 'vendor', 'sort'])
         localNode = self.node(self.ipAddr, self.macAddr, self.vendor, 'local')
         self.nodeItems.append(localNode)
 
@@ -556,23 +556,23 @@ class BrightMainWindow(ShineMainWindow):
             * widget control manage
             * Filter manage
                 * filter protocol select
-                * generate filter marco
+                * generate filter macro
             * Network Traffic manage
                 * upload speed
                 * download speed
             * Packet filter start 
                 * startup socket
-                * apply filter marco to socket
+                * apply filter macro to socket
                 * capture packets and timestamps
             * Display info to conciseTable
         """
 
         self.analClkWidgetChange()
-        filterMarco = self.analClkFilterMarco()
-        if filterMarco:
+        filterMacro = self.analClkFilterMcrco()
+        if filterMacro:
             self.analClkNetworkTraffic()
             pass
-            # self.analClkCapture(filterMarco)
+            # self.analClkCapture(filterMacro)
             # self.analClkDisplayInfo()
         else:
             self.stopClkWidgetChange()
@@ -652,23 +652,67 @@ class BrightMainWindow(ShineMainWindow):
         self.hexTab.setEnabled(True)
         self.decodeInfoTab.setEnabled(True)
 
-    def analClkFilterMarco(self):
+    def analClkFilterMcrco(self):
         """ 
             According to filterDict and node type 
-            generate filter marco
-                * 
+            generate filter macro
+                * gateway --> None
+                * remote --> append remote filter string
+                * host -->  if filter string not empty add `(` `)` in filter
         """
 
+        remoteFltrStr = ''
         nodeIndex = self.nodeListWidget.currentRow()
         nodeInfo = self.nodeItems[nodeIndex]
 
+        # Refuse gateway
         if nodeInfo.sort != 'gateway':
-            filterString = self.filterDict['filter']
-            cmd = "tcpdump -i {interface} -dd {filters}".format(
-                interface=self.inetName, filters=filterString)
-            r = subprocess.check_output(cmd, shell=True)
-            print(r)
-            return True
+            ''' uncomplete '''
+
+            # # Remote host append filter sring
+            # if nodeInfo.sort == 'remote':
+            #     remoteFltrStr = 'not arp and (src host {} and dst host {}) and '.format(
+            #         nodeInfo.ipAddr, nodeInfo.ipAddr)
+
+            # # Original filter string add bracket or just keep empty
+            # if len(self.filterDict['filter'].strip()) > 0:
+            #     originalFltStr = '(' + self.filterDict['filter'] + ')'
+            # else:
+            #     originalFltStr = self.filterDict['filter']
+
+            # # combine filterSting
+            # if originalFltStr:
+            #     filterString = ''.format(remoteFltrStr, originalFltStr)
+
+            # cmd = "tcpdump -i {interface} -dd {filters}".format(
+            #     interface=self.inetName, filters=filterString)
+            # print(cmd)
+            # try:
+            #     filterFragment = subprocess.check_output(cmd, shell=True)
+            # except subprocess.CalledProcessError:
+            #     pass
+            # else:
+            #     macro = self._generateMacro(filterFragment)
+            #     return macro
+        return None
+
+    def _generateMacro(filterFragment):
+        """ Generate the macro """
+
+        cookedMacro = []
+        temp = []
+
+        rowMacro = filterFragment.decode('utf-8').replace('{', '').replace(
+            '}', '')[:-2].split(',\n')
+
+        for row in rowMacro:
+            items = row.split(',')
+            temp.clear()
+            for item in items:
+                temp.append(int(item, base=16))
+            cookedMacro.append(temp)
+
+        return cookedMacro
 
     def analClkNetworkTraffic(self):
         """ Network traffic display """
@@ -696,7 +740,7 @@ class BrightMainWindow(ShineMainWindow):
         self.timestamps.append(timestamp)
         self.uploads.append(upload)
         self.downloads.append(download)
-        
+
         self.sents.append(sent)
         self.recvs.append(recv)
 

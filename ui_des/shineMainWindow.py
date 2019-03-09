@@ -124,7 +124,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         packageRecvFile = '{}/{}'.format(parentDir, 'packageRecv.ico')
         packageRecvIco = QtGui.QPixmap(packageRecvFile)
 
-        self.filterLabel = QtWidgets.QLabel('Filter: disable')
+        self.filterLabel = QtWidgets.QLabel('filter: disable')
         self.filterIcoLabel = QtWidgets.QLabel('')
         self.filterIcoLabel.setPixmap(filterIco)
 
