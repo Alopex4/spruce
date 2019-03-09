@@ -67,16 +67,17 @@ class Ui_AuthorDialog(QtWidgets.QDialog, shineAuthorDialog):
 
 
 class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
-    filterSignal = QtCore.pyqtSignal(dict)
     """
         Filter dialog widget.
         Pass info to tcpdump generate an filter codes.
     """
 
+    filterSignal = QtCore.pyqtSignal(dict)
+
     def __init__(self, filterDict, parent=None):
         super(QtWidgets.QDialog, self).__init__(parent)
         # {'type': 'noncustom', 'filter': ''}
-        self.filterDict = filterDict
+        self.recvFilterDict = filterDict
 
         self.setupUi(self)
         self.initUi()
@@ -84,7 +85,7 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
         self.filterInit()
 
     def initUi(self):
-        """ Initial the filter dialog UI"""
+        """ Initial the filter dialog UI """
 
         self.setWindowIcon(QtGui.QIcon('../spruce.ico'))
         self.setWindowTitle('packets filter')
@@ -98,7 +99,8 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
         self.enableRaido.clicked.connect(
             lambda: self.widgetManage(True, True, False, reset=True))
 
-        self.customCheckBox.clicked.connect(self.customStatus)
+        # self.customCheckBox.clicked.connect(self.customStatus)
+        self.customCheckBox.toggled.connect(self.customStatus)
         self.buttonBox.accepted.connect(self.structFilter)
         self.buttonBox.rejected.connect(self.formerFilter)
 
@@ -150,30 +152,30 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
         """ Initial fiter according to filterDict """
 
         # {'type': 'noncustom', 'filter': ''}
-        if (self.filterDict['type'] == 'noncustom') and (
-                self.filterDict['filter'] == ''):
+        if (self.recvFilterDict['type'] == 'noncustom') and (
+                self.recvFilterDict['filter'] == ''):
             self.disableRadio.click()
-        elif self.filterDict['type'] == 'custom':
+        elif self.recvFilterDict['type'] == 'custom':
             self._setCustomLine()
 
-        elif self.filterDict['type'] == 'noncustom':
+        elif self.recvFilterDict['type'] == 'noncustom':
             self._setFilterCheck()
 
     def _setCustomLine(self):
         """ Custom line edit setting """
 
         self.enableRaido.setChecked(True)
-        self.customCheckBox.setCheckState(QtCore.Qt.Checked)
-        self.customLineEdit.setEnabled(True)
-        self.customLineEdit.setText(self.filterDict['filter'])
-        self._protUnlock(False)
+        self.customCheckBox.click()
+        self.customLineEdit.setText(self.recvFilterDict['filter'])
+        # self.customLineEdit.setEnabled(True)
+        # self._protUnlock(False)
 
     def _setFilterCheck(self):
         """ Protocol checkbox setting """
 
         self.enableRaido.setChecked(True)
         self.customCheckBox.setCheckState(QtCore.Qt.Unchecked)
-        filterString = self.filterDict['filter']
+        filterString = self.recvFilterDict['filter']
         filterTuple = tuple(
             filter(None,
                    filterString.replace('dst port ', '').split('||')))
@@ -215,16 +217,16 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
         """
 
         if self.customCheckBox.checkState() == QtCore.Qt.Checked:
-            self.filterDict['type'] = 'custom'
-            self.filterDict['filter'] = self.customLineEdit.text()
-        elif self.enableRaido.isEnabled():
-            self.filterDict['type'] = 'noncustom'
-            self.filterDict['filter'] = self._nonCustomFilter()
-        elif self.disableRadio.isEnabled():
-            self.filterDict['type'] = 'noncustom'
-            self.filterDict['filter'] = ''
+            self.recvFilterDict['type'] = 'custom'
+            self.recvFilterDict['filter'] = self.customLineEdit.text()
+        else:
+            self.recvFilterDict['type'] = 'noncustom'
+            if self.enableRaido.isEnabled():
+                self.recvFilterDict['filter'] = self._nonCustomFilter()
+            elif self.disableRadio.isEnabled():
+                self.recvFilterDict['filter'] = ''
 
-        self.filterSignal.emit(self.filterDict)
+        self.filterSignal.emit(self.recvFilterDict)
         # print(self.filterDict)
 
     def _nonCustomFilter(self):
@@ -267,7 +269,7 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
     def formerFilter(self):
         """ Return the former filter string """
 
-        self.filterSignal.emit(self.filterDict)
+        self.filterSignal.emit(self.recvFilterDict)
 
 
 if __name__ == '__main__':

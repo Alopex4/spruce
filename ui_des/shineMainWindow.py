@@ -548,7 +548,6 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def clearStatusBarText(self):
         """ Status bar text initial """
 
-        self.filterLabel.setText('filter: disable')
         self.uploadLabel.setText('upload:  KB |')
         self.downloadLabel.setText('download:  KB |')
         self.packageSentLabel.setText('sent: packages |')

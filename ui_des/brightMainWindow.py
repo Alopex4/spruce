@@ -569,7 +569,7 @@ class BrightMainWindow(ShineMainWindow):
 
         self.analClkWidgetChange()
         self.analClkNetworkTraffic()
-        # self.analClkFilterMarco()
+        self.analClkFilterMarco()
         # self.analClkCapture()
         # self.analClkDisplayInfo()
 
@@ -669,6 +669,9 @@ class BrightMainWindow(ShineMainWindow):
         self.sents.append(sent)
         self.recvs.append(recv)
 
+    def analClkFilterMarco(self):
+        print(self.filterDict)
+
     # -----------
     # stop button
     # -----------
@@ -729,29 +732,31 @@ class BrightMainWindow(ShineMainWindow):
         # Status bar
         self.clearStatusBarText()
 
+    # -------------
+    # filter dialog
+    # -------------
     def settingFilterDict(self):
         """
             Menubar --> Option --> &filter
             show filter dialog information
         """
 
-        self.filterDialog = ui_FilterDialog(self.filterDict, parent=self)
-        self.filterDialog.filterSignal.connect(self.filterMarcoGenerate)
+        self.filterDialog = ui_FilterDialog(self.filterDict)
+        self.filterDialog.filterSignal.connect(self.filterStatusBar)
         self.filterDialog.exec_()
 
-    def filterMarcoGenerate(self, filters):
-        """" Use filter string generate filter marco """
+    def filterStatusBar(self, reciveDict):
+        """" Assign the filterDict, notify status bar """
 
+        self.filterDict = reciveDict
         filterText = 'filter'
-        filterStrDecode = self.filterDict['filter'].replace('||',
-                                                            ' or ').replace(
-                                                                '&&', ' and ')
-        if self.filterDict['filter']:
+        filterStrDecode = self.filterDict['filter'].replace('||', ' or ')
+        filterStrDecode = filterStrDecode.replace('&&', ' and ')
+
+        if filterStrDecode:
             if len(filterStrDecode) > 30:
-                filterParameter = filterStrDecode[:30] + '...'
-            else:
-                filterParameter = filterStrDecode
+                filterStrDecode = filterStrDecode[:30] + '...'
             self.filterLabel.setText('{}: {}'.format(filterText,
-                                                     filterParameter))
+                                                     filterStrDecode))
         else:
             self.filterLabel.setText('{}: {}'.format(filterText, 'disable'))
