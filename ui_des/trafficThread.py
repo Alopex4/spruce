@@ -12,14 +12,16 @@ class TrafficThread(QtCore.QThread):
 
     def __init__(self, inetName):
         super().__init__()
-        self.goOn = True
         self.nicName = inetName
         _, packets = self.getTrafficInfo(self.nicName)
         self.prevSent = packets[0]
         self.prevRecv = packets[1]
+        self.startFlag = True
+
+    def stop(self):
+        self.startFlag = False
 
     def __del__(self):
-        self.goOn = False
         self.quit()
         self.wait()
 
@@ -44,7 +46,7 @@ class TrafficThread(QtCore.QThread):
             sent = currSentRev[0] - self.prevSent
             recv = currSentRev[1] - self.prevRecv
 
-            if self.goOn:
+            if self.startFlag:
                 self.trafficSignal.emit(t1, upload, download, sent, recv)
             else:
                 break

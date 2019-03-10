@@ -4,9 +4,6 @@
 import csv
 import json
 import subprocess
-import socket
-import struct
-import ctypes
 from functools import namedtuple
 
 import netifaces
@@ -17,6 +14,8 @@ from PyQt5 import QtWidgets
 from queryThread import QueryThread
 from scanThread import ScanThread
 from trafficThread import TrafficThread
+from poisonThread import PoisonThread
+from captureThread import CaptureThread
 from shineMainWindow import ShineMainWindow
 from shineDialog import ui_FilterDialog
 
@@ -738,23 +737,37 @@ class BrightMainWindow(ShineMainWindow):
     def analClkCapture(self, nodeInfo, filterMacros):
         """
             Analysis button click capute the package
+                * Remote node star arp poison
                 * set the filterMarco to sockets
         """
 
         if nodeInfo.sort == 'remote':
             if self.ipRoutingCheck():
-                print('has ip rounting')
-                self._arpPoisonTarget(nodeInfo.ipAddr, nodeInfo.macAddr)
+                self._arpPoisonTarget(nodeInfo.macAddr, nodeInfo.ipAddr)
             else:
-                print('has not rounting')
                 return False
 
+        self._captureStart(self.inetName, filterMacros)
         return True
 
-    def _arpPoisonTarget(self, targetIp, targetMac):
+    def _arpPoisonTarget(self, targetMac, targetIp):
         """ Posion the target via arp flow """
 
-        pass
+        # PoiosnThread(localMac, deceiveIp, sendToMac, sendToIp)
+        targetPoison = PoisonThread(self.macAddr, self.gwIpAddr, targetMac,
+                                    targetIp)
+        gatewayPoison = PoisonThread(self.macAddr, targetIp, self.gwMacAddr,
+                                     self.gwIpAddr)
+        self.poisonWorkers = [targetPoison, gatewayPoison]
+
+        for worker in self.poisonWorkers:
+            worker.start()
+
+    def _captureStart(self, inetName, macros):
+        """ Start the capture thread """
+
+        self.captureWorker = CaptureThread(inetName, macros)
+        self.captureWorker.start()
 
     def analClkNetworkTraffic(self):
         """ Network traffic display """
@@ -766,7 +779,7 @@ class BrightMainWindow(ShineMainWindow):
         self.recvs.clear()
 
         self.trafficWorker = TrafficThread(self.inetName)
-        self.trafficWorker.trafficSignal.connect(self.trafficProcess, )
+        self.trafficWorker.trafficSignal.connect(self.trafficProcess)
         self.trafficWorker.start()
 
     def trafficProcess(self, timestamp, upload, download, sent, recv):
@@ -796,9 +809,20 @@ class BrightMainWindow(ShineMainWindow):
             * widget control manage
         """
 
-        # Network traffic stop
+        # Stop poison workers
         try:
-            self.trafficWorker.goOn = False
+            for worker in self.poisonWorkers:
+                worker.stop()
+        except AttributeError:
+            pass
+        # Stop capture worker
+        try:
+            self.captureWorker.stop()
+        except AttributeError:
+            pass
+        # Stop traffic worker
+        try:
+            self.trafficWorker.stop()
         except AttributeError:
             pass
 
