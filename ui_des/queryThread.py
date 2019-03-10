@@ -26,7 +26,7 @@ class QueryThread(QtCore.QThread):
         url = 'http://ipinfo.io/{searchIP}?token={token}'.format(
             searchIP=self.queryIP, token=self.token)
         try:
-            ipJSON = requests.get(url, timeout=0.5).text
+            ipJSON = requests.get(url, timeout=1.0).text
         except (requests.ConnectionError, requests.exceptions.ReadTimeout):
             self.infoSignal.emit('Search Info',
                                  'Make sure your network is stable')

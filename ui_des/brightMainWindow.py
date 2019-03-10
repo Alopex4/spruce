@@ -568,10 +568,10 @@ class BrightMainWindow(ShineMainWindow):
         """
 
         self.analClkWidgetChange()
-        filterMacro = self.analClkFilterMcrco()
-        if filterMacro:
+        filterMacros = self.analClkFilterMcrco()
+        if filterMacros:
+            self.analClkCapture(filterMacros)
             self.analClkNetworkTraffic()
-            # self.analClkCapture(filterMacro)
             # self.analClkDisplayInfo()
         else:
             self.stopClkWidgetChange()
@@ -660,7 +660,7 @@ class BrightMainWindow(ShineMainWindow):
                 * host -->  if filter string not empty add `(` `)` in filter
         """
 
-        remoteFltrStr = ''
+        decorateFltrStr = ''
         originalFltStr = ''
         withAnd = ''
         nodeIndex = self.nodeListWidget.currentRow()
@@ -671,23 +671,24 @@ class BrightMainWindow(ShineMainWindow):
 
         # Refuse gateway
         if nodeInfo.sort != 'gateway':
-            # Remote host append filter sring
-            if isRemote:
-                remoteFltrStr = '(not arp) and (src host {} and dst host {}) '.format(
-                    nodeInfo.ipAddr, nodeInfo.ipAddr)
+            # All host append decorate filter sring
+            decorateFltrStr = '(ether host {} or ether dst host {}) '.format(
+                nodeInfo.macAddr, nodeInfo.macAddr)
 
-            # Original filter string add bracket or just keep empty
+            # Remote host need to append `not arp`
+            if isRemote:
+                decorateFltrStr = ' (not arp) and ' + decorateFltrStr
+
+            # Original filter string `add bracket`  `assign withAnd`
             if isNotEmpty:
                 originalFltStr = '(' + self.filterDict['filter'] + ')'
-
-            # addd `and` between remote and original
-            if isRemote and isNotEmpty:
                 withAnd = ' and '
 
             # combine filterSting
-            filterString = "'{} {} {}'".format(remoteFltrStr, withAnd,
+            filterString = "'{} {} {}'".format(decorateFltrStr, withAnd,
                                                originalFltStr)
 
+            print(filterString)
             cmd = "sudo tcpdump -i {interface} -dd {filters}".format(
                 interface=self.inetName, filters=filterString)
             try:
@@ -695,9 +696,9 @@ class BrightMainWindow(ShineMainWindow):
             except subprocess.CalledProcessError:
                 pass
             else:
-                macro = BrightMainWindow._generateMacro(tcpdumpBinary)
-                print(macro)
-                return macro
+                macros = BrightMainWindow._generateMacro(tcpdumpBinary)
+                print(macros)
+                return macros
         return None
 
     @staticmethod
@@ -713,11 +714,18 @@ class BrightMainWindow(ShineMainWindow):
                 * execute the macroString
         """
 
-        macroString = 'macroString = ( ' + tcpdumpBinary.decode(
-            'utf-8').replace('\n', '').replace('{', '[').replace('}',
-                                                                 ']') + ')'
-        exec(macroString)
+        macroString = '( ' + tcpdumpBinary.decode('utf-8').replace(
+            '\n', '').replace('{', '[').replace('}', ']') + ')'
+        macroString = eval(macroString)
         return macroString
+
+    def analClkCapture(self, filterMacros):
+        """
+            Analysis button click capute the package
+                * set the filterMarco to sockets
+        """
+
+        pass
 
     def analClkNetworkTraffic(self):
         """ Network traffic display """
