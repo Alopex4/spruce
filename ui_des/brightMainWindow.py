@@ -3,8 +3,10 @@
 
 import csv
 import json
-import time
 import subprocess
+import socket
+import struct
+import ctypes
 from functools import namedtuple
 
 import netifaces
@@ -567,21 +569,33 @@ class BrightMainWindow(ShineMainWindow):
             * Display info to conciseTable
         """
 
+        nodeIndex = self.nodeListWidget.currentRow()
+        nodeInfo = self.nodeItems[nodeIndex]
+
         self.analClkWidgetChange()
-        filterMacros = self.analClkFilterMcrco()
+        filterMacros = self.analClkFilterMacro(nodeInfo)
         if filterMacros:
-            self.analClkCapture(filterMacros)
-            self.analClkNetworkTraffic()
-            # self.analClkDisplayInfo()
-        else:
-            self.stopClkWidgetChange()
-            title = 'analysis warning!'
-            tips = '''Tips:\n
-* Make sure your filter string qualify BPF syntax.\n
-    BPF syntax: http://biot.com/capstats/bpf.html \n
-* Make sure your scan target is a host not a gateway.
+            Done = self.analClkCapture(nodeInfo, filterMacros)
+            if Done:
+                self.analClkNetworkTraffic()
+            else:
+                routingTips = '''Tips:\n
+* Make sure you already open ip-routing.\n
+    open ip routing: https://bit.ly/2ERZw9P
 '''
-            QtWidgets.QMessageBox.warning(self, title, tips)
+                self._analysisWarn(routingTips)
+
+        else:
+            filterTips = '''Tips:\n
+* Make sure your scan target is a host not a gateway.
+* Make sure your filter string qualify BPF syntax.\n
+    BPF syntax: https://bit.ly/2dgiQha \n
+'''
+            self._analysisWarn(filterTips)
+
+    def _analysisWarn(self, tips, title='Analysis warn!'):
+        self.stopClkWidgetChange()
+        QtWidgets.QMessageBox.warning(self, title, tips)
 
     def analClkWidgetChange(self):
         """
@@ -651,20 +665,20 @@ class BrightMainWindow(ShineMainWindow):
         self.hexTab.setEnabled(True)
         self.decodeInfoTab.setEnabled(True)
 
-    def analClkFilterMcrco(self):
+    def analClkFilterMacro(self, nodeInfo):
         """ 
             According to filterDict and node type 
             generate filter macro
                 * gateway --> None
-                * remote --> append remote filter string
+                * remote/host
+                    * append mac address filter string
+                * remote --> append `not arp` filter string
                 * host -->  if filter string not empty add `(` `)` in filter
         """
 
         decorateFltrStr = ''
         originalFltStr = ''
         withAnd = ''
-        nodeIndex = self.nodeListWidget.currentRow()
-        nodeInfo = self.nodeItems[nodeIndex]
 
         isRemote = True if nodeInfo.sort == 'remote' else False
         isNotEmpty = True if len(self.filterDict['filter']) > 0 else False
@@ -716,14 +730,29 @@ class BrightMainWindow(ShineMainWindow):
 
         macroString = '( ' + tcpdumpBinary.decode('utf-8').replace(
             '\n', '').replace('{', '[').replace('}', ']') + ')'
+
+        # https://stackoverflow.com/questions/2220699/whats-the-difference-between-eval-exec-and-compile
         macroString = eval(macroString)
         return macroString
 
-    def analClkCapture(self, filterMacros):
+    def analClkCapture(self, nodeInfo, filterMacros):
         """
             Analysis button click capute the package
                 * set the filterMarco to sockets
         """
+
+        if nodeInfo.sort == 'remote':
+            if self.ipRoutingCheck():
+                print('has ip rounting')
+                self._arpPoisonTarget(nodeInfo.ipAddr, nodeInfo.macAddr)
+            else:
+                print('has not rounting')
+                return False
+
+        return True
+
+    def _arpPoisonTarget(self, targetIp, targetMac):
+        """ Posion the target via arp flow """
 
         pass
 
