@@ -8,6 +8,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from rankDialog import Ui_Form as shineRankDialoge
 from authorDialog import Ui_Dialog as shineAuthorDialog
 from filterDialog import Ui_Dialog as shineFilterDialog
+from nodeDialog import Ui_Dialog as shineNodeDialog
 
 
 class Ui_RankDialog(QtWidgets.QDialog, shineRankDialoge):
@@ -271,8 +272,62 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
         self.filterSignal.emit(self.recvFilterDict)
 
 
+class Ui_NodeDialog(QtWidgets.QDialog, shineNodeDialog):
+    """
+        Node dialog widget.
+        Display the node informaiton
+    """
+
+    def __init__(self, parent=None):
+        super(QtWidgets.QDialog, self).__init__(parent)
+        self.setupUi(self)
+        self.setWindowIcon(QtGui.QIcon('../spruce.ico'))
+        self.setWindowTitle('node information')
+        self.setFixedSize(247, 400)
+        self._setIcons()
+        self._decorateLineEdit()
+        self.nodeOkButton.clicked.connect(self.close)
+
+    def _setIcons(self):
+        """ set node icons """
+
+        parentDir = '..'
+        ipFile = '{}/{}'.format(parentDir, 'ip.ico')
+        ipIco = QtGui.QPixmap(ipFile)
+        macFile = '{}/{}'.format(parentDir, 'mac.ico')
+        macIco = QtGui.QPixmap(macFile)
+        vendorFile = '{}/{}'.format(parentDir, 'vendor.ico')
+        vendorIco = QtGui.QPixmap(vendorFile)
+        typeFile = '{}/{}'.format(parentDir, 'type.ico')
+        typeIco = QtGui.QPixmap(typeFile)
+
+        self.nodeIpIconLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.nodeIpIconLabel.setPixmap(ipIco)
+        self.nodeMacIconLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.nodeMacIconLabel.setPixmap(macIco)
+        self.nodeVendorIconLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.nodeVendorIconLabel.setPixmap(vendorIco)
+        self.nodeTypeIconLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.nodeTypeIconLabel.setPixmap(typeIco)
+
+    def _decorateLineEdit(self):
+        """ 
+            set node text read only 
+            set node aligenment
+        """
+
+        self.nodeIpLineEdit.setReadOnly(True)
+        self.nodeIpLineEdit.setAlignment(QtCore.Qt.AlignCenter)
+        self.nodeMacLineEdit.setReadOnly(True)
+        self.nodeMacLineEdit.setAlignment(QtCore.Qt.AlignCenter)
+        self.nodeVendorLineEdit.setReadOnly(True)
+        self.nodeVendorLineEdit.setAlignment(QtCore.Qt.AlignHCenter)
+        self.nodeTypeLineEdit.setReadOnly(True)
+        self.nodeTypeLineEdit.setAlignment(QtCore.Qt.AlignCenter)
+
+
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-    author = ui_FilterDialog()
+    author = Ui_NodeDialog()
     author.show()
     sys.exit(app.exec_())

@@ -18,6 +18,7 @@ from poisonThread import PoisonThread
 from captureThread import CaptureThread
 from shineMainWindow import ShineMainWindow
 from shineDialog import ui_FilterDialog
+from shineDialog import Ui_NodeDialog
 
 
 class BrightMainWindow(ShineMainWindow):
@@ -76,6 +77,7 @@ class BrightMainWindow(ShineMainWindow):
 
         # Scan panel button mapping
         self.nodeListWidget.itemSelectionChanged.connect(self.changAnalBtn)
+        self.nodeListWidget.itemDoubleClicked.connect(self.showNodeDialog)
         self.analysisButton.clicked.connect(self.analysisManage)
         self.stopButton.clicked.connect(self.stopManage)
 
@@ -346,47 +348,48 @@ class BrightMainWindow(ShineMainWindow):
 
         saveFileName = self._exportFmtTpl(dialogName, fileFilter, suffix)
 
-        if 'csv' in suffix:
-            # data = [[fieldNames_list], [fieldDatas_list]]
-            fieldNames, fieldDatas = data
+        if saveFileName:
+            if 'csv' in suffix:
+                # data = [[fieldNames_list], [fieldDatas_list]]
+                fieldNames, fieldDatas = data
 
-            with open(saveFileName, 'w') as csvFile:
-                writer = csv.DictWriter(csvFile, fieldnames=fieldNames)
-                writer.writeheader()
-                if csvRows:
-                    saveRows = [
-                        dict(zip(fieldNames, fieldDatas[i]))
-                        for i in range(len(fieldDatas))
-                    ]
-                    writer.writerows(saveRows)
-                else:
-                    saveRow = dict(zip(fieldNames, fieldDatas))
-                    writer.writerow(saveRow)
+                with open(saveFileName, 'w') as csvFile:
+                    writer = csv.DictWriter(csvFile, fieldnames=fieldNames)
+                    writer.writeheader()
+                    if csvRows:
+                        saveRows = [
+                            dict(zip(fieldNames, fieldDatas[i]))
+                            for i in range(len(fieldDatas))
+                        ]
+                        writer.writerows(saveRows)
+                    else:
+                        saveRow = dict(zip(fieldNames, fieldDatas))
+                        writer.writerow(saveRow)
 
-        elif 'json' in suffix:
-            # data = JSON foramt
-            with open(saveFileName, 'w') as jsonFile:
-                json.dump(data, jsonFile, indent=4)
+            elif 'json' in suffix:
+                # data = JSON foramt
+                with open(saveFileName, 'w') as jsonFile:
+                    json.dump(data, jsonFile, indent=4)
 
-        elif 'txt' in suffix:
-            # data = [[fieldNames_list], [fieldDatas_list]]
-            fieldNames, fieldDatas = data
-            with open(saveFileName, 'w') as plainFile:
-                if txtRows:
-                    saveData = [
-                        tuple(zip(fieldNames, fieldDatas[i]))
-                        for i in range(len(fieldDatas))
-                    ]
-                    for items in saveData:
-                        for k, v in items:
+            elif 'txt' in suffix:
+                # data = [[fieldNames_list], [fieldDatas_list]]
+                fieldNames, fieldDatas = data
+                with open(saveFileName, 'w') as plainFile:
+                    if txtRows:
+                        saveData = [
+                            tuple(zip(fieldNames, fieldDatas[i]))
+                            for i in range(len(fieldDatas))
+                        ]
+                        for items in saveData:
+                            for k, v in items:
+                                plainFile.writelines('{key}: {value}\n'.format(
+                                    key=k, value=v))
+                            plainFile.writelines('\n')
+                    else:
+                        saveData = tuple(zip(fieldNames, fieldDatas))
+                        for itmes in saveData:
                             plainFile.writelines('{key}: {value}\n'.format(
-                                key=k, value=v))
-                        plainFile.writelines('\n')
-                else:
-                    saveData = tuple(zip(fieldNames, fieldDatas))
-                    for itmes in saveData:
-                        plainFile.writelines('{key}: {value}\n'.format(
-                            key=itmes[0], value=itmes[1]))
+                                key=itmes[0], value=itmes[1]))
 
     def _exportFmtTpl(self, dialogName, fileFilter, suffix, dirctory='.'):
         """ 
@@ -564,6 +567,18 @@ class BrightMainWindow(ShineMainWindow):
         self.analysisButton.setText(analBtnText)
         self.analysisButton.setEnabled(True)
         self.action_Start.setEnabled(True)
+
+    def showNodeDialog(self):
+        """ Display the node content information """
+
+        index = self.nodeListWidget.currentRow()
+        node = self.nodeItems[index]
+        self.nodeDialog = Ui_NodeDialog()
+        self.nodeDialog.nodeIpLineEdit.setText(node.ipAddr)
+        self.nodeDialog.nodeMacLineEdit.setText(node.macAddr)
+        self.nodeDialog.nodeVendorLineEdit.setText(node.vendor)
+        self.nodeDialog.nodeTypeLineEdit.setText(node.sort)
+        self.nodeDialog.exec_()
 
     # ---------------
     # analysis button
