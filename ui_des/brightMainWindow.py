@@ -32,6 +32,7 @@ class BrightMainWindow(ShineMainWindow):
 
         # Store network interface type
         self.nicType = 'original'
+        self.inetNameAlias = ''
 
         # Store scan node
         self.node = namedtuple('ItemNode',
@@ -117,14 +118,25 @@ class BrightMainWindow(ShineMainWindow):
         self.inetName = netifaces.gateways()['default'][netifaces.AF_INET][1]
         if 'ppp' in self.inetName:
             self.nicType = 'ppp'
+            self.inetNameAlias = self._getWiredNetName()
+            self.macAddr = netifaces.ifaddresses(
+                self.inetNameAlias)[netifaces.AF_LINK][0]['addr']
+        else:
+            self.macAddr = netifaces.ifaddresses(
+                self.inetName)[netifaces.AF_LINK][0]['addr']
 
         self.ipAddr = netifaces.ifaddresses(
             self.inetName)[netifaces.AF_INET][0]['addr']
-        self.macAddr = netifaces.ifaddresses(
-            self.inetName)[netifaces.AF_LINK][0]['addr']
         self.netMask = netifaces.ifaddresses(
             self.inetName)[netifaces.AF_INET][0]['netmask']
         self.vendor = self._macQueryVendor(self.macAddr)
+
+    def _getWiredNetName(self):
+        """ Get wired network interface name (include 'en') """
+
+        for netName in netifaces.interfaces():
+            if 'en' in netName:
+                return netName
 
     def _gatewayInfoAcq(self):
         """ 
@@ -134,13 +146,16 @@ class BrightMainWindow(ShineMainWindow):
                 * Gateway Vendor --> via MAC and OUI.csv
         """
 
+        self.gwIpAddr = netifaces.gateways()['default'][netifaces.AF_INET][0]
         if self.nicType == 'original':
-            self.gwIpAddr = netifaces.gateways()['default'][netifaces.AF_INET][
-                0]
-            cmd = "cat /proc/net/arp | grep '0x2' | xargs  | cut -d ' ' -f4"
+            cmd = "cat /proc/net/arp | grep '{}'| grep '{}' | xargs  | cut -d ' ' -f4".format(
+                '0x2', self.gwIpAddr)
             r = subprocess.check_output(cmd, shell=True)
             self.gwMacAddr = r.decode('utf-8').replace('\n', '')
             self.gwVendor = self._macQueryVendor(self.gwMacAddr)
+        elif self.nicType == 'ppp':
+            self.gwMacAddr = '`pppoe` link no gateway mac'
+            self.gwVendor = '`pppoe` link no gateway vendor'
 
     def _macQueryVendor(self, macAddr):
         """ 
@@ -399,11 +414,13 @@ class BrightMainWindow(ShineMainWindow):
 
         self.nodeListWidget.setCurrentRow(-1)
         self.nodeItems.clear()
+        self.nodeListWidget.clear()
         localNode = self.node(self.ipAddr, self.macAddr, self.vendor, 'local')
         self.nodeItems.append(localNode)
 
         self.scanWorker = ScanThread(self.inetName, scanTarget, self.macAddr,
-                                     self.gwIpAddr, self.node, self.nodeItems)
+                                     self.gwIpAddr, self.node, self.nodeItems,
+                                     self.nicType)
 
         self.scanWorker.finishSignal[bool, str].connect(self.notifyRelatePanel)
         self.scanWorker.finishSignal[bool].connect(self.notifyRelatePanel)
@@ -426,9 +443,9 @@ class BrightMainWindow(ShineMainWindow):
                 begin:
                     menu export LAN disable
                     clear the nodeList 
-                    protec tbutton
+                    protect button
                 finish:
-                    protec tbutton
+                    protect button
         """
 
         self.scanDock.setEnabled(True)
@@ -702,8 +719,12 @@ class BrightMainWindow(ShineMainWindow):
                                                originalFltStr)
 
             print(filterString)
+            if self.inetNameAlias:
+                deviceName = self.inetNameAlias
+            else:
+                deviceName = self.inetName
             cmd = "sudo tcpdump -i {interface} -dd {filters}".format(
-                interface=self.inetName, filters=filterString)
+                interface=deviceName, filters=filterString)
             try:
                 tcpdumpBinary = subprocess.check_output(cmd, shell=True)
             except subprocess.CalledProcessError:
@@ -741,6 +762,7 @@ class BrightMainWindow(ShineMainWindow):
                 * set the filterMarco to sockets
         """
 
+        print(nodeInfo)
         if nodeInfo.sort == 'remote':
             if self.ipRoutingCheck():
                 self._arpPoisonTarget(nodeInfo.macAddr, nodeInfo.ipAddr)

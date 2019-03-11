@@ -15,8 +15,8 @@ class ScanThread(QtCore.QThread):
     warnSignal = QtCore.pyqtSignal(str, str)
     updateSignal = QtCore.pyqtSignal(list)
 
-    def __init__(self, inetName, scanTarget, macAddr, gwIpAddr, node,
-                 nodeItem):
+    def __init__(self, inetName, scanTarget, macAddr, gwIpAddr, node, nodeItem,
+                 nicType):
         super().__init__()
         self.name = inetName
         self.target = scanTarget
@@ -24,6 +24,7 @@ class ScanThread(QtCore.QThread):
         self.gwIpAddr = gwIpAddr
         self.node = node
         self.nodeItems = nodeItem
+        self.nicType = nicType
 
     def __del__(self):
         self.wait()
@@ -77,7 +78,7 @@ class ScanThread(QtCore.QThread):
                         macSet.add(mac)
 
         # print(self.nodeItem)
-        if not scanFail and len(self.nodeItems) > 1:
+        if (not scanFail and len(self.nodeItems) > 1) or self.nicType == 'ppp':
             self.updateSignal.emit(self.nodeItems)
         self.finishSignal[bool].emit(True)
 
