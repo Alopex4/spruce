@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import sys
+
 from binascii import hexlify
 from ctypes import create_string_buffer, addressof
 from socket import socket, AF_PACKET, SOCK_RAW, SOL_SOCKET, ntohs
@@ -9,56 +11,32 @@ from struct import pack
 # A subset of Berkeley Packet Filter constants and macros, as defined in
 # linux/filter.h.
 
-# Instruction classes
-BPF_LD = 0x00
-BPF_JMP = 0x05
-BPF_RET = 0x06
-
-# ld/ldx fields
-BPF_H = 0x08
-BPF_B = 0x10
-BPF_ABS = 0x20
-
-# alu/jmp fields
-BPF_JEQ = 0x10
-BPF_K = 0x00
-
 
 def bpf_jump(code, jt, jf, k):
+    print(pack('HBBI', code, jt, jf, k))
     return pack('HBBI', code, jt, jf, k)
 
 
-# def bpf_stmt(code, k):
-#     return bpf_jump(code, k, 0, 0)
+cc = [[40, 0, 0, 12], [21, 0, 3, 2048], [48, 0, 0, 23], [21, 0, 1, 1],
+      [6, 0, 0, 262144], [6, 0, 0, 0]]
 
-
-# Ordering of the filters is backwards of what would be intuitive for
-# performance reasons: the check that is most likely to fail is first.
 filters_list = [
-    # # Must have dst port 67. Load (BPF_LD) a half word value (BPF_H) in
-    # # ethernet frame at absolute byte offset 36 (BPF_ABS). If value is equal to
-    # # 67 then do not jump, else jump 5 statements.
-    # bpf_stmt(BPF_LD | BPF_H | BPF_ABS, 36),
-    # bpf_jump(BPF_JMP | BPF_JEQ | BPF_K, 67, 0, 5),
+    pack('HBBI', *c) for c in cc
+    # bpf_jump(*c) for c in cc
 
-    # # Must be UDP (check protocol field at byte offset 23)
-    # bpf_stmt(BPF_LD | BPF_B | BPF_ABS, 23),
-    # bpf_jump(BPF_JMP | BPF_JEQ | BPF_K, 0x11, 0, 3),
+    # bpf_jump(40, 0, 0, 12),
+    # bpf_jump(21, 0, 3, 2048),
+    # bpf_jump(48, 0, 0, 23),
+    # bpf_jump(21, 0, 1, 1),
+    # bpf_jump(6, 0, 0, 262144),
+    # bpf_jump(6, 0, 0, 0)
 
-    # # Must be IPv4 (check ethertype field at byte offset 12)
-    # bpf_stmt(BPF_LD | BPF_H | BPF_ABS, 12),
-    # bpf_jump(BPF_JMP | BPF_JEQ | BPF_K, 0x0800, 0, 1),
-
-    # # Pass(gt 0) or reject(eq 0) the packet
-    # bpf_stmt(BPF_RET | BPF_K, 0x0fffffff),  # pass
-    # bpf_stmt(BPF_RET | BPF_K, 0),  # reject
-    # # bpf_stmt(BPF_RET | BPF_K, 262144),  # pass
-    bpf_jump(0x28, 0, 0, 0x0000000c),
-    bpf_jump(0x15, 0, 3, 0x00000800),
-    bpf_jump(0x30, 0, 0, 0x00000017),
-    bpf_jump(0x15, 0, 1, 0x00000001),
-    bpf_jump(0x6, 0, 0, 0x00040000),
-    bpf_jump(0x6, 0, 0, 0x00000000),
+    # bpf_jump(0x28, 0, 0, 0x0000000c),
+    # bpf_jump(0x15, 0, 3, 0x00000800),
+    # bpf_jump(0x30, 0, 0, 0x00000017),
+    # bpf_jump(0x15, 0, 1, 0x00000001),
+    # bpf_jump(0x6, 0, 0, 0x00040000),
+    # bpf_jump(0x6, 0, 0, 0x00000000),
 ]
 
 # Create filters struct and fprog struct to be used by SO_ATTACH_FILTER, as
@@ -80,5 +58,8 @@ s.setsockopt(SOL_SOCKET, SO_ATTACH_FILTER, fprog)
 s.bind(('wlp5s0', 0x0800))
 
 while True:
-    data, addr = s.recvfrom(65565)
-    print('got data from', addr, ':', hexlify(data))
+    try:
+        data, addr = s.recvfrom(65565)
+        print('got data from', addr, ':', hexlify(data))
+    except KeyboardInterrupt:
+        sys.exit()

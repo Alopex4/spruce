@@ -53,7 +53,6 @@ class BrightMainWindow(ShineMainWindow):
         self.filterDict = {'type': 'noncustom', 'filter': ''}
 
         # Store all the process packet
-        self.pktIndex = 0
         self.processPackets = []
 
     def signalSlotMap(self):
@@ -516,7 +515,8 @@ class BrightMainWindow(ShineMainWindow):
             item = QtWidgets.QListWidgetItem()
             item.setText('{} ({})'.format(node.vendor[:14], node.ipAddr))
             nodeIcon = self._selectIco(node.sort)
-            icoFile = '{}/{}'.format('..', nodeIcon)
+            parentDir = '../icon/'
+            icoFile = '{}/{}'.format(parentDir, nodeIcon)
             item.setIcon(QtGui.QIcon(icoFile))
             self.nodeListWidget.addItem(item)
 
@@ -723,8 +723,9 @@ class BrightMainWindow(ShineMainWindow):
         # Refuse gateway
         if nodeInfo.sort != 'gateway':
             # All host append decorate filter sring
-            decorateFltrStr = '(ether host {} or ether dst host {}) '.format(
-                nodeInfo.macAddr, nodeInfo.macAddr)
+            broadcast = 'ff:ff:ff:ff:ff:ff'
+            decorateFltrStr = '(ether host {} or ether dst host {} or ether dst host {}) '.format(
+                nodeInfo.macAddr, nodeInfo.macAddr, broadcast)
 
             # Remote host need to append `not arp`
             if isRemote:
@@ -809,16 +810,14 @@ class BrightMainWindow(ShineMainWindow):
     def _captureStart(self, inetName, macros):
         """ Start the capture thread """
 
-        self.pktIndex = 0
         self.captureWorker = CaptureThread(inetName, macros)
         self.captureWorker.packetSignal.connect(self.unpackPacket)
         self.captureWorker.start()
 
-    def unpackPacket(self, packet):
+    def unpackPacket(self, packet, index):
         """ Unpack the packet to generate a packet instance """
 
-        self.pktIndex += 1
-        print(self.pktIndex)
+        self.cooker = CookedPacket(index, packet)
         # packet = CookedPacket(threading.Lock())
         # self.processPackets.append(packet)
 
@@ -871,6 +870,7 @@ class BrightMainWindow(ShineMainWindow):
         # Stop capture worker
         try:
             self.captureWorker.stop()
+            self.captureWorker.packetSignal.disconnect(self.unpackPacket)
         except AttributeError:
             pass
         # Stop traffic worker

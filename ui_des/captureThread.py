@@ -10,7 +10,7 @@ from PyQt5 import QtCore
 
 
 class CaptureThread(QtCore.QThread):
-    packetSignal = QtCore.pyqtSignal(bytes)
+    packetSignal = QtCore.pyqtSignal(bytes, int)
 
     def __init__(self, inetName, marcos):
         super().__init__()
@@ -18,6 +18,7 @@ class CaptureThread(QtCore.QThread):
         self.device = inetName
         self.marcos = marcos
         self.startFlag = True
+        self.index = 0
 
     def __del__(self):
         self.quit()
@@ -45,5 +46,7 @@ class CaptureThread(QtCore.QThread):
 
         while self.startFlag:
             packet, addr = s.recvfrom(655351)
-            self.packetSignal.emit(packet)
-            print('got data from', addr, ':', hexlify(packet))
+            self.index += 1
+            self.packetSignal.emit(packet, self.index)
+            # print('number ', self.index, 'got data from', addr, ':',
+            #       hexlify(packet))

@@ -89,5 +89,3 @@ if __name__ == '__main__':
 
     t1 = threading.Thread(target=save_package, args=(10, ))
     t1.start()
-
-    print('end')

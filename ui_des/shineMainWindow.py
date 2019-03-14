@@ -112,7 +112,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.statusBar = QtWidgets.QStatusBar(self)
         self.statusBar.setFixedHeight(35)
-        parentDir = '..'
+        parentDir = '../icon/'
         filterFile = '{}/{}'.format(parentDir, 'filter.ico')
         filterIco = QtGui.QPixmap(filterFile)
         uploadFile = '{}/{}'.format(parentDir, 'upload.ico')
@@ -244,12 +244,16 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.rank = self.getRank()
         rankDialog = Ui_RankDialog(self)
-        true_ico = QtGui.QPixmap('../true.ico')
-        false_ico = QtGui.QPixmap('../false.ico')
+
+        parentDir = '../icon/'
+        trueFile = '{}/{}'.format(parentDir, 'true.ico')
+        trueIco = QtGui.QPixmap(trueFile)
+        falseFile = '{}/{}'.format(parentDir, 'false.ico')
+        falseIco = QtGui.QPixmap(falseFile)
 
         # Use `and` operator to get current active level
         stateIconList = [
-            true_ico if self.rank & i == i else false_ico
+            trueIco if self.rank & i == i else falseIco
             for i in [ROOT, NETWORK, ROUTING, TCPDUMP]
         ]
         # Store all the rankDialog label widget
