@@ -195,9 +195,9 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
         if '20 ' in filterTuple:
             self.ftpCheckBox.setChecked(True)
         if '22 ' in filterTuple:
-            self.telnetCheckBox.setChecked(True)
-        if '23 ' in filterTuple:
             self.sshCheckBox.setChecked(True)
+        if '23 ' in filterTuple:
+            self.telnetCheckBox.setChecked(True)
         if '53 ' in filterTuple:
             self.dnsCheckBox.setChecked(True)
         if '80 ' in filterTuple:
@@ -253,9 +253,9 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
         if not self.ftpCheckBox.isChecked():
             filterList.remove('dst-port-20 ')
             filterList.remove('dst-port-21 ')
-        if not self.telnetCheckBox.isChecked():
-            filterList.remove('dst-port-22 ')
         if not self.sshCheckBox.isChecked():
+            filterList.remove('dst-port-22 ')
+        if not self.telnetCheckBox.isChecked():
             filterList.remove('dst-port-23 ')
         if not self.dnsCheckBox.isChecked():
             filterList.remove('dst-port-53 ')

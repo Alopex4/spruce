@@ -10,6 +10,8 @@ from PyQt5 import QtCore
 
 
 class CaptureThread(QtCore.QThread):
+    packetSignal = QtCore.pyqtSignal(bytes)
+
     def __init__(self, inetName, marcos):
         super().__init__()
 
@@ -25,7 +27,7 @@ class CaptureThread(QtCore.QThread):
         self.startFlag = False
 
     def run(self):
-        # Create listening socket with filters
+        # Create raw socket to sniffer packets
         s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW,
                           socket.ntohs(0x0003))
 
@@ -39,9 +41,9 @@ class CaptureThread(QtCore.QThread):
         SO_ATTACH_FILTER = 26
 
         s.setsockopt(socket.SOL_SOCKET, SO_ATTACH_FILTER, fprog)
-
-        s.bind((self.device, 0x0800))
+        # s.bind((self.device, 0x0800))
 
         while self.startFlag:
-            data, addr = s.recvfrom(65565)
-            print('got data from', addr, ':', hexlify(data))
+            packet, addr = s.recvfrom(655351)
+            self.packetSignal.emit(packet)
+            print('got data from', addr, ':', hexlify(packet))

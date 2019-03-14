@@ -4,6 +4,7 @@
 import csv
 import json
 import subprocess
+import threading
 from functools import namedtuple
 
 import netifaces
@@ -11,14 +12,15 @@ from PyQt5 import QtGui
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 
+from cookedPacket import CookedPacket
 from queryThread import QueryThread
 from scanThread import ScanThread
 from trafficThread import TrafficThread
 from poisonThread import PoisonThread
 from captureThread import CaptureThread
-from shineMainWindow import ShineMainWindow
 from shineDialog import ui_FilterDialog
 from shineDialog import Ui_NodeDialog
+from shineMainWindow import ShineMainWindow
 
 
 class BrightMainWindow(ShineMainWindow):
@@ -49,6 +51,10 @@ class BrightMainWindow(ShineMainWindow):
 
         # Store filter string
         self.filterDict = {'type': 'noncustom', 'filter': ''}
+
+        # Store all the process packet
+        self.pktIndex = 0
+        self.processPackets = []
 
     def signalSlotMap(self):
         """
@@ -733,12 +739,12 @@ class BrightMainWindow(ShineMainWindow):
             filterString = "'{} {} {}'".format(decorateFltrStr, withAnd,
                                                originalFltStr)
 
-            print(filterString)
+            # print(filterString)
             if self.inetNameAlias:
                 deviceName = self.inetNameAlias
             else:
                 deviceName = self.inetName
-            cmd = "sudo tcpdump -i {interface} -dd {filters}".format(
+            cmd = "sudo tcpdump -s 0 -i {interface} -dd {filters}".format(
                 interface=deviceName, filters=filterString)
             try:
                 tcpdumpBinary = subprocess.check_output(cmd, shell=True)
@@ -791,11 +797,11 @@ class BrightMainWindow(ShineMainWindow):
         """ Posion the target via arp flow """
 
         # PoiosnThread(localMac, deceiveIp, sendToMac, sendToIp)
-        targetPoison = PoisonThread(self.macAddr, self.gwIpAddr, targetMac,
-                                    targetIp)
-        gatewayPoison = PoisonThread(self.macAddr, targetIp, self.gwMacAddr,
-                                     self.gwIpAddr)
-        self.poisonWorkers = [targetPoison, gatewayPoison]
+        self.targetPoison = PoisonThread(self.macAddr, self.gwIpAddr,
+                                         targetMac, targetIp)
+        self.gatewayPoison = PoisonThread(self.macAddr, targetIp,
+                                          self.gwMacAddr, self.gwIpAddr)
+        self.poisonWorkers = [self.targetPoison, self.gatewayPoison]
 
         for worker in self.poisonWorkers:
             worker.start()
@@ -803,8 +809,18 @@ class BrightMainWindow(ShineMainWindow):
     def _captureStart(self, inetName, macros):
         """ Start the capture thread """
 
+        self.pktIndex = 0
         self.captureWorker = CaptureThread(inetName, macros)
+        self.captureWorker.packetSignal.connect(self.unpackPacket)
         self.captureWorker.start()
+
+    def unpackPacket(self, packet):
+        """ Unpack the packet to generate a packet instance """
+
+        self.pktIndex += 1
+        print(self.pktIndex)
+        # packet = CookedPacket(threading.Lock())
+        # self.processPackets.append(packet)
 
     def analClkNetworkTraffic(self):
         """ Network traffic display """
