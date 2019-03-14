@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import time
 import socket
 import struct
 from binascii import hexlify
@@ -10,7 +11,8 @@ from PyQt5 import QtCore
 
 
 class CaptureThread(QtCore.QThread):
-    packetSignal = QtCore.pyqtSignal(bytes, int)
+    # tsSec, tsUsec, index, binaryPacket
+    packetSignal = QtCore.pyqtSignal(int, int, int, bytes)
 
     def __init__(self, inetName, marcos):
         super().__init__()
@@ -45,8 +47,10 @@ class CaptureThread(QtCore.QThread):
         # s.bind((self.device, 0x0800))
 
         while self.startFlag:
-            packet, addr = s.recvfrom(655351)
+            packet, _ = s.recvfrom(655351)
             self.index += 1
-            self.packetSignal.emit(packet, self.index)
+            tsSec, tsUsec = (int(ts.ljust(6, '0')) if len(ts) < 6 else int(ts)
+                             for ts in str(round(time.time(), 6)).split('.'))
+            self.packetSignal.emit(tsSec, tsUsec, self.index, packet)
             # print('number ', self.index, 'got data from', addr, ':',
             #       hexlify(packet))

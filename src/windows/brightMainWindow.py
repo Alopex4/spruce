@@ -10,8 +10,7 @@ import netifaces
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
-# from cookedPacket import CookedPacket
-from capturePkt.cookedPacket import CookedPacket
+from capturePkt.roughPacket import RoughPacket
 from threads.queryThread import QueryThread
 from threads.scanThread import ScanThread
 from threads.trafficThread import TrafficThread
@@ -52,7 +51,7 @@ class BrightMainWindow(ShineMainWindow):
         self.filterDict = {'type': 'noncustom', 'filter': ''}
 
         # Store all the process packet
-        self.processPackets = []
+        self.briefPkts = []
 
     def signalSlotMap(self):
         """
@@ -814,10 +813,13 @@ class BrightMainWindow(ShineMainWindow):
         self.captureWorker.packetSignal.connect(self.unpackPacket)
         self.captureWorker.start()
 
-    def unpackPacket(self, packet, index):
-        """ Unpack the packet to generate a packet instance """
+    def unpackPacket(self, tsSec, tsUsec, index, packet):
+        """ Unpack the packet to generate a brief packet inform """
 
-        self.cooker = CookedPacket(index, packet)
+        briefPkt = RoughPacket(tsSec, tsUsec, index, packet)
+        print(briefPkt)
+        self.briefPkts.append(briefPkt)
+
         # packet = CookedPacket(threading.Lock())
         # self.processPackets.append(packet)
 
@@ -855,7 +857,7 @@ class BrightMainWindow(ShineMainWindow):
     # stop button
     # -----------
     def stopManage(self):
-        """ 
+        """
             Manage stop caputre process
             * Network Traffic stop
             * widget control manage

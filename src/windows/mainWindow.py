@@ -23,7 +23,7 @@ class Ui_MainWindow(object):
         self.conciseInfoTable = QtWidgets.QTableWidget(self.splitter)
         self.conciseInfoTable.setShowGrid(False)
         self.conciseInfoTable.setObjectName("conciseInfoTable")
-        self.conciseInfoTable.setColumnCount(7)
+        self.conciseInfoTable.setColumnCount(6)
         self.conciseInfoTable.setRowCount(0)
         item = QtWidgets.QTableWidgetItem()
         self.conciseInfoTable.setHorizontalHeaderItem(0, item)
@@ -37,8 +37,6 @@ class Ui_MainWindow(object):
         self.conciseInfoTable.setHorizontalHeaderItem(4, item)
         item = QtWidgets.QTableWidgetItem()
         self.conciseInfoTable.setHorizontalHeaderItem(5, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.conciseInfoTable.setHorizontalHeaderItem(6, item)
         self.verboseInfoTab = QtWidgets.QTabWidget(self.splitter)
         self.verboseInfoTab.setObjectName("verboseInfoTab")
         self.linkTab = QtWidgets.QWidget()
@@ -443,8 +441,6 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "Protocol"))
         item = self.conciseInfoTable.horizontalHeaderItem(5)
         item.setText(_translate("MainWindow", "Length"))
-        item = self.conciseInfoTable.horizontalHeaderItem(6)
-        item.setText(_translate("MainWindow", "Info"))
         self.verboseInfoTab.setTabText(
             self.verboseInfoTab.indexOf(self.linkTab),
             _translate("MainWindow", "link"))
@@ -454,15 +450,12 @@ class Ui_MainWindow(object):
         self.verboseInfoTab.setTabText(
             self.verboseInfoTab.indexOf(self.transTab),
             _translate("MainWindow", "transport"))
-        self.verboseInfoTab.setTabText(
-            self.verboseInfoTab.indexOf(self.appTab),
-            _translate("MainWindow", "application"))
-        self.decodeInfoTab.setTabText(
-            self.decodeInfoTab.indexOf(self.rawTab),
-            _translate("MainWindow", "raw binary"))
-        self.decodeInfoTab.setTabText(
-            self.decodeInfoTab.indexOf(self.hexTab),
-            _translate("MainWindow", "hex decode"))
+        self.verboseInfoTab.setTabText(self.verboseInfoTab.indexOf(self.appTab),
+                                       _translate("MainWindow", "application"))
+        self.decodeInfoTab.setTabText(self.decodeInfoTab.indexOf(self.rawTab),
+                                      _translate("MainWindow", "raw binary"))
+        self.decodeInfoTab.setTabText(self.decodeInfoTab.indexOf(self.hexTab),
+                                      _translate("MainWindow", "hex decode"))
         self.menu_File.setTitle(_translate("MainWindow", "&File"))
         self.menu_export.setTitle(_translate("MainWindow", "&export"))
         self.menuNetwork_info.setTitle(

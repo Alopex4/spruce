@@ -52,12 +52,16 @@ class Ui_AuthorDialog(QtWidgets.QDialog, shineAuthorDialog):
     def __init__(self, parent=None):
         super(QtWidgets.QDialog, self).__init__(parent)
         self.setupUi(self)
-        self.setWindowIcon(QtGui.QIcon('../spruce.ico'))
+
+        parentDir = '../icon'
+        spruceFile = '{}/{}'.format(parentDir, 'spruce.ico')
+        spruceIco = QtGui.QPixmap(spruceFile)
+
+        self.setWindowIcon(QtGui.QIcon(spruceIco))
         self.setWindowTitle('about author')
         self.setFixedSize(272, 440)
         self.iconLabel.clear()
-        author_icon = QtGui.QPixmap('../spruce.ico')
-        self.iconLabel.setPixmap(author_icon)
+        self.iconLabel.setPixmap(spruceIco)
 
         self.authorLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.contacLabel.setAlignment(QtCore.Qt.AlignCenter)
@@ -291,7 +295,7 @@ class Ui_NodeDialog(QtWidgets.QDialog, shineNodeDialog):
     def _setIcons(self):
         """ set node icons """
 
-        parentDir = '..'
+        parentDir = '../icon'
         ipFile = '{}/{}'.format(parentDir, 'ip.ico')
         ipIco = QtGui.QPixmap(ipFile)
         macFile = '{}/{}'.format(parentDir, 'mac.ico')
