@@ -22,24 +22,24 @@ class RoughPacket:
                        25: 'SMTP', 53: 'Domain', 69: 'TFTP', 80: 'HTTP',
                        110: 'POP3', 123: 'NTP', 137: 'NBNS', 443: 'HTTPS', }
     ProtColorMap = {'ARP': QtGui.QColor(239, 83, 80, 255),
-                    'IPv6': QtGui.QColor(171, 71, 188, 255),
-                    'PPoE': QtGui.QColor(236, 64, 122, 255),
-                    'ICMP': QtGui.QColor(255, 238, 88, 255),
-                    'IGMP': QtGui.QColor(255, 167, 38, 255),
-                    'TCP': QtGui.QColor(66, 165, 245, 255),
-                    'UDP': QtGui.QColor(102, 187, 106, 255),
-                    'FTP-data': QtGui.QColor(85, 139, 47, 255),
-                    'FTP': QtGui.QColor(158, 157, 36, 255),
-                    'SSH': QtGui.QColor(96, 125, 139, 255),
-                    'Telnet': QtGui.QColor(121, 85, 72, 255),
-                    'SMTP': QtGui.QColor(255, 235, 59, 255),
-                    'Domain': QtGui.QColor(46, 125, 50, 255),
-                    'TFTP': QtGui.QColor(21, 101, 192, 255),
-                    'HTTP': QtGui.QColor(69, 39, 160, 255),
-                    'POP3': QtGui.QColor(173, 20, 87, 255),
-                    'NTP': QtGui.QColor(255, 196, 0, 255),
-                    'NBNS': QtGui.QColor(62, 39, 35, 255),
-                    'HTTPS': QtGui.QColor(69, 39, 160, 255)
+                    'IPv6': QtGui.QColor(171, 71, 188, 100),
+                    'PPoE': QtGui.QColor(236, 64, 122, 100),
+                    'ICMP': QtGui.QColor(255, 238, 88, 100),
+                    'IGMP': QtGui.QColor(255, 167, 38, 100),
+                    'TCP': QtGui.QColor(66, 165, 245, 100),
+                    'UDP': QtGui.QColor(102, 187, 106, 100),
+                    'FTP-data': QtGui.QColor(85, 139, 47, 100),
+                    'FTP': QtGui.QColor(158, 157, 36, 100),
+                    'SSH': QtGui.QColor(96, 125, 139, 100),
+                    'Telnet': QtGui.QColor(121, 85, 72, 100),
+                    'SMTP': QtGui.QColor(255, 235, 59, 100),
+                    'Domain': QtGui.QColor(46, 125, 50, 100),
+                    'TFTP': QtGui.QColor(21, 101, 192, 100),
+                    'HTTP': QtGui.QColor(69, 39, 160, 100),
+                    'POP3': QtGui.QColor(173, 20, 87, 100),
+                    'NTP': QtGui.QColor(255, 196, 0, 100),
+                    'NBNS': QtGui.QColor(62, 39, 35, 100),
+                    'HTTPS': QtGui.QColor(69, 39, 160, 100)
                     }
 
     def __init__(self, sec, usec, index, pkt):
@@ -124,9 +124,23 @@ class RoughPacket:
                                                      QtGui.QColor(224, 224, 224,
                                                                   255))
 
+    def getBriefPacket(self):
+        """ Get the brief packet information """
+
+        # briefPacket = NamedTuple('Brief Packet',
+        #                          ['no', 'time', 'source', 'destination',
+        #                           'protocol', 'length'])
+        return (self.pktIndex, self.pktTime, self.pktSrc,
+                self.pktDst, self.pktProt, self.pktLen)
+
+    def getColor(self):
+        """ Get that packet color"""
+
+        return self.pktColor
+
     def __str__(self):
+        """ For print function """
+
         fmt = 'pktIndex: {}\npktTime: {}\npktLen: {}\npktProt: {}\npktSrc:{}\npktDst:{}\n'
         return fmt.format(self.pktIndex, self.pktTime, self.pktLen,
                           self.pktProt, self.pktSrc, self.pktDst)
-        # fmt = 'headerLen: {}, ipProt: {}'
-        # return fmt.format(self.ipHeaderLen, self.ipProt)

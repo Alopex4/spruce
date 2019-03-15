@@ -8,6 +8,7 @@ from functools import namedtuple
 
 import netifaces
 from PyQt5 import QtGui
+from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 
 from capturePkt.roughPacket import RoughPacket
@@ -644,7 +645,6 @@ class BrightMainWindow(ShineMainWindow):
 
         # Menu
         self.action_Save.setEnabled(True)
-
         self.action_Open.setEnabled(False)
         self.action_Start.setEnabled(False)
         self.action_Stop.setEnabled(True)
@@ -673,6 +673,7 @@ class BrightMainWindow(ShineMainWindow):
         self.analysisButton.setEnabled(False)
 
         # ConciseTable, verboseTabs, decodeTabs
+        self.conciseInfoTable.setRowCount(0)
         self.conciseInfoTable.clearContents()
         self.conciseInfoTable.setEnabled(True)
         self.linkTextEdit.clear()
@@ -783,7 +784,6 @@ class BrightMainWindow(ShineMainWindow):
                 * set the filterMarco to sockets
         """
 
-        print(nodeInfo)
         if nodeInfo.sort == 'remote':
             if self.ipRoutingCheck():
                 self._arpPoisonTarget(nodeInfo.macAddr, nodeInfo.ipAddr)
@@ -819,9 +819,28 @@ class BrightMainWindow(ShineMainWindow):
         briefPkt = RoughPacket(tsSec, tsUsec, index, packet)
         print(briefPkt)
         self.briefPkts.append(briefPkt)
+        self.insertBriefPkt(briefPkt)
 
         # packet = CookedPacket(threading.Lock())
         # self.processPackets.append(packet)
+
+    def insertBriefPkt(self, briefPkt):
+        """ In sert brief packet info to the concise table """
+
+        # Insert info prepare
+        pktDatas = briefPkt.getBriefPacket()
+        pktColor = briefPkt.getColor()
+        # Append a  blank row
+        self.conciseInfoTable.insertRow(self.conciseInfoTable.rowCount())
+        pktRow = self.conciseInfoTable.rowCount() - 1
+
+        # Insert data to the row
+        for pktCol, data in enumerate(pktDatas):
+            pktItem = QtWidgets.QTableWidgetItem(str(data))
+            pktItem.setBackground(pktColor)
+            pktItem.setTextAlignment(QtCore.Qt.AlignCenter)
+            self.conciseInfoTable.setItem(pktRow, pktCol, pktItem)
+        self.conciseInfoTable.scrollToBottom()
 
     def analClkNetworkTraffic(self):
         """ Network traffic display """
