@@ -182,7 +182,7 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
         filterString = self.recvFilterDict['filter']
         filterTuple = tuple(
             filter(None,
-                   filterString.replace('dst port ', '').split('||')))
+                   filterString.replace('port ', '').split('||')))
 
         if 'ip ' in filterTuple:
             self.ipCheckBox.setChecked(True)
@@ -237,9 +237,9 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
         """ Scan all the checkbox to struct filter string """
 
         filterList = [
-            'ip ', 'icmp ', 'igmp ', 'udp ', 'tcp ', 'dst-port-20 ',
-            'dst-port-21 ', 'dst-port-22 ', 'dst-port-23 ', 'dst-port-53 ',
-            'dst-port-80 ', 'dst-port-443 '
+            'ip ', 'icmp ', 'igmp ', 'udp ', 'tcp ', 'port-20 ',
+            'port-21 ', 'port-22 ', 'port-23 ', 'port-53 ',
+            'port-80 ', 'port-443 '
         ]
 
         if not self.ipCheckBox.isChecked():
@@ -255,17 +255,17 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
             filterList.remove('tcp ')
 
         if not self.ftpCheckBox.isChecked():
-            filterList.remove('dst-port-20 ')
-            filterList.remove('dst-port-21 ')
+            filterList.remove('port-20 ')
+            filterList.remove('port-21 ')
         if not self.sshCheckBox.isChecked():
-            filterList.remove('dst-port-22 ')
+            filterList.remove('port-22 ')
         if not self.telnetCheckBox.isChecked():
-            filterList.remove('dst-port-23 ')
+            filterList.remove('port-23 ')
         if not self.dnsCheckBox.isChecked():
-            filterList.remove('dst-port-53 ')
+            filterList.remove('port-53 ')
         if not self.httpsCheckBox.isChecked():
-            filterList.remove('dst-port-80 ')
-            filterList.remove('dst-port-443 ')
+            filterList.remove('port-80 ')
+            filterList.remove('port-443 ')
 
         filterString = '||'.join(filterList).replace('-', ' ')
         return filterString
