@@ -46,7 +46,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.shineBegin()
         self.shineDock()
-        self.shineProgressBar()
+        self.shineScanPanel()
         self.shineTable()
         self.shineStatusBar()
         self.shineInitUI()
@@ -81,9 +81,11 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.scanDock.setFeatures(QtWidgets.QDockWidget.DockWidgetMovable
                                   | QtWidgets.QDockWidget.DockWidgetFloatable)
 
-    def shineProgressBar(self):
+    def shineScanPanel(self):
         """ Set process bar look much better """
 
+        # Remove the dotted border
+        self.nodeListWidget.setFocusPolicy(QtCore.Qt.NoFocus)
         self.scanProgressBar.setMinimum(100)
         self.scanProgressBar.setMaximum(100)
         self.scanProgressBar.setValue(0)
@@ -102,6 +104,17 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.conciseInfoTable.setSelectionBehavior(
             QtWidgets.QAbstractItemView.SelectRows)
         self.conciseInfoTable.horizontalHeader().setStretchLastSection(True)
+        # Text don't wrap
+        self.conciseInfoTable.setWordWrap(False)
+        # Remove the dotted border
+        self.conciseInfoTable.setFocusPolicy(QtCore.Qt.NoFocus)
+        # Remove focuse in title
+        self.conciseInfoTable.horizontalHeader().setHighlightSections(False)
+
+        # auto seperate field
+        # self.conciseInfoTable.horizontalHeader().setSectionResizeMode(
+        #     QtWidgets.QHeaderView.Stretch)
+        # self.conciseInfoTable.setColumnWidth()
 
         # Testing code
         # self.conciseInfoTable.setRowCount(4)
@@ -175,8 +188,8 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # define the rank
     # ---------------
     def getRank(self):
-        """ 
-            Manage the rank info 
+        """
+            Manage the rank info
                 * root privilege  --> without affect --> application error      --> value 0000 0001
                 * network startup --> without affect --> without ipinfo search  --> value 0000 0010
                 * ip routing      --> without affect --> without remote sniffer --> value 0000 0100
@@ -238,8 +251,8 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.action_RefreshRank.triggered.connect(self.refreshRank)
 
     def showRankDialog(self):
-        """ 
-            Menubar --> About --> &rank 
+        """
+            Menubar --> About --> &rank
             show root, network, routing, tcpdump all right or not
         """
 
@@ -335,7 +348,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # widget initial
     # --------------
     def allWidgetInit(self):
-        """ 
+        """
             Manage all the widget initial
                 * menu action
                 * control panel
@@ -404,13 +417,13 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.scanTab.setEnabled(False)
 
     def ctlPanelContInit(self):
-        """ 
+        """
             Control panel all contain widget need a initial status
             NetworkTab --> lock all lineEdit
-            ScanTab --> paceholder and match pattern(range: 192.168.1.1-100, 
+            ScanTab --> paceholder and match pattern(range: 192.168.1.1-100,
                 mask: 192.168.1.0/24)
             SearchTab --> paceholder and tips
-            ipinfo --> paceholder and tips 
+            ipinfo --> paceholder and tips
         """
 
         # Network Tab

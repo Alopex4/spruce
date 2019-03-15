@@ -35,11 +35,11 @@ class RoughPacket:
                     'SMTP': QtGui.QColor(255, 235, 59, 100),
                     'Domain': QtGui.QColor(46, 125, 50, 100),
                     'TFTP': QtGui.QColor(21, 101, 192, 100),
-                    'HTTP': QtGui.QColor(69, 39, 160, 100),
+                    'HTTP': QtGui.QColor(128, 222, 234, 200),
                     'POP3': QtGui.QColor(173, 20, 87, 100),
                     'NTP': QtGui.QColor(255, 196, 0, 100),
                     'NBNS': QtGui.QColor(62, 39, 35, 100),
-                    'HTTPS': QtGui.QColor(69, 39, 160, 100)
+                    'HTTPS': QtGui.QColor(128, 222, 234, 200),
                     }
 
     def __init__(self, sec, usec, index, pkt):

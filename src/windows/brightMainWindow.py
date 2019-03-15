@@ -606,6 +606,16 @@ class BrightMainWindow(ShineMainWindow):
             * Display info to conciseTable
         """
 
+        routingTips = '''Tips:\n
+* Make sure you already open ip-routing.\n
+    open ip routing: https://bit.ly/2ERZw9P
+'''
+
+        filterTips = '''Tips:\n
+* Make sure your scan target is a host not a gateway.
+* Make sure your filter string qualify BPF syntax.\n
+    BPF syntax: https://bit.ly/2dgiQha \n
+'''
         nodeIndex = self.nodeListWidget.currentRow()
         nodeInfo = self.nodeItems[nodeIndex]
 
@@ -616,18 +626,8 @@ class BrightMainWindow(ShineMainWindow):
             if Done:
                 self.analClkNetworkTraffic()
             else:
-                routingTips = '''Tips:\n
-* Make sure you already open ip-routing.\n
-    open ip routing: https://bit.ly/2ERZw9P
-'''
                 self._analysisWarn(routingTips)
-
         else:
-            filterTips = '''Tips:\n
-* Make sure your scan target is a host not a gateway.
-* Make sure your filter string qualify BPF syntax.\n
-    BPF syntax: https://bit.ly/2dgiQha \n
-'''
             self._analysisWarn(filterTips)
 
     def _analysisWarn(self, tips, title='Analysis warn!'):
@@ -641,6 +641,7 @@ class BrightMainWindow(ShineMainWindow):
                 * control panel manage
                 * scan panel manage
                 * conciseTable, verboseTabs, decodeTabs manage
+                * concise table menu
         """
 
         # Menu
@@ -701,6 +702,52 @@ class BrightMainWindow(ShineMainWindow):
         self.hexTextEdit.setReadOnly(True)
         self.hexTab.setEnabled(True)
         self.decodeInfoTab.setEnabled(True)
+
+        # table menu
+        self.conciseInfoTable.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.conciseInfoTable.customContextMenuRequested.connect(
+            self.queryMenuShow)
+
+        self.queryMenu = QtWidgets.QMenu()
+        querySrc = self.queryMenu.addAction('Query source')
+        queryDst = self.queryMenu.addAction('Query destination')
+        queryProt = self.queryMenu.addAction('Query protocol')
+
+        querySrc.triggered.connect(lambda: self._menuQueryAddr(2))
+        queryDst.triggered.connect(lambda: self._menuQueryAddr(3))
+
+    def queryMenuShow(self, pos):
+        """ Display the query menu """
+
+        self.queryMenu.move(self.pos() + pos)
+        self.queryMenu.show()
+
+        # queryAction = menu.exec_(self.conciseInfoTable.mapToGlobal(pos))
+        # # queryAction = self.conciseInfoTable.mapToGlobal(pos)
+
+        # if queryAction == querySrc:
+        #     self._menuQueryAddr(pos, 2)
+        # elif queryAction == queryDst:
+        #     self._menuQueryAddr(pos, 3)
+        # elif queryAction == queryProt:
+        #     pass
+
+    def _menuQueryAddr(self, addrPos):
+        """ Concise table right click query address """
+
+        sipTabIndex = 3
+        addr = self.conciseInfoTable.item(
+            self.conciseInfoTable.currentRow(),
+            addrPos).text()
+
+        #  Make sure it is IP address
+        if '.' in addr:
+            self.controlTabManage.setCurrentIndex(sipTabIndex)
+            self.sipLineEdit.setText(addr)
+            self.sipButton.click()
+        else:
+            QtWidgets.QMessageBox.warning(self, 'Query Error',
+                                          'Make sure your query object is IP(eg: 8.8.8.8) address')
 
     def analClkFilterMacro(self, nodeInfo):
         """ 
