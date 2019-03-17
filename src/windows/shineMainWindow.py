@@ -399,7 +399,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
             Control panel tab widget active/deactive, according to the rank level
             NETWORK --> search tab, ipinfo tab
-            ROOT, NETWORK --> network tab, scan tab
+            ROOT, NETWORK --> network tab, scan tab, term tab
         """
 
         if self.rank & NETWORK == NETWORK:
@@ -412,9 +412,11 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if ((ROOT | NETWORK) & self.rank) == (ROOT | NETWORK):
             self.networkTab.setEnabled(True)
             self.scanTab.setEnabled(True)
+            self.termTab.setEnabled(True)
         else:
             self.networkTab.setEnabled(False)
             self.scanTab.setEnabled(False)
+            self.termTab.setEnabled(False)
 
     def ctlPanelContInit(self):
         """
@@ -477,6 +479,27 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         self.sipTextEdit.setPlaceholderText(demoText)
         self.sipTextEdit.setReadOnly(True)
+
+        # Term Tab
+        self.termLineEdit.setPlaceholderText('eg: linux')
+        self.termLineEdit.setStatusTip('Query computer terms you want to know')
+        demoTermText = """
+        <p>Linux (pronounced "lih-nux", not "lie-nux") is a Unix-like 
+        <a href="/definition/operating_system">operating system</a> (OS) 
+        created by Linus Torvalds. He developed Linux because he wasn't 
+        happy with the currently available options in
+         <a href="/definition/unix">Unix</a> and felt he could improve it. 
+         So he did what anybody else would do, and created his own operating system.</p>
+        <p>When Linus finished building a working version of Linux, he freely 
+        distributed the OS, which helped it gain popularity.  Today, Linux is 
+        used by millions of people around the world.  Many computer hobbyists 
+        (a.k.a. nerds) like the operating system because it is highly 
+        customizable.  Programmers can even modify the 
+        <a href="/definition/sourcecode">source code</a> and create their own 
+        unique version of the Linux operating system.</p>
+        """
+        self.termTextEdit.setText(demoTermText)
+        self.termTextEdit.setReadOnly(True)
 
     def _netLineEditRO(self, state=False):
         """ Control panel dock line edit widget state setting """

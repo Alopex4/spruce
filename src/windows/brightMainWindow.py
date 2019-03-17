@@ -13,6 +13,7 @@ from PyQt5 import QtWidgets
 
 from capturePkt.roughPacket import RoughPacket
 from threads.queryThread import QueryThread
+from threads.termsThread import TermsThread
 from threads.scanThread import ScanThread
 from threads.trafficThread import TrafficThread
 from threads.poisonThread import PoisonThread
@@ -78,6 +79,7 @@ class BrightMainWindow(ShineMainWindow):
         self.maskButton.clicked.connect(
             lambda: self.scanLanNet(self.maskLineEdit.text()))
         self.sipButton.clicked.connect(self.queryIPInfo)
+        self.termButton.clicked.connect(self.queryTerms)
 
         # Scan panel button mapping
         self.nodeListWidget.itemSelectionChanged.connect(self.changAnalBtn)
@@ -411,6 +413,9 @@ class BrightMainWindow(ShineMainWindow):
                 saveFileName = saveFileName + suffix
         return saveFileName
 
+    # ----------
+    # scan metho
+    # ----------
     def scanLanNet(self, scanTarget):
         """ 
             Reset the nodeListWidget current row avoid index out or range
@@ -534,6 +539,9 @@ class BrightMainWindow(ShineMainWindow):
             icoFileName = 'remote.ico'
         return icoFileName
 
+    # ---------
+    # query tab
+    # ---------
     def queryIPInfo(self):
         """ Searh ip information(JSON format) and display it in the textEdit """
 
@@ -564,6 +572,39 @@ class BrightMainWindow(ShineMainWindow):
 
         self.sipTextEdit.setText(jsonStr)
 
+    # -----------
+    # Terms query
+    # -----------
+    def queryTerms(self):
+        """ Query the terms get the result display to the textEdit """
+
+        term = self.termLineEdit.text().strip()
+        if term:
+            self.termTextEdit.clear()
+            self.termWorker = TermsThread(term)
+            self.termWorker.infoSignal.connect(self.queryInfo)
+            self.termWorker.finishSignal.connect(self.changeTermBtn)
+            self.termWorker.htmlSignal.connect(self.termDisplay)
+            self.termWorker.start()
+        else:
+            self.queryInfo('Query Info', 'Please input your terms first')
+
+    def changeTermBtn(self, done):
+        """
+            done --> False --> lock button
+            done --> true --> unlock button
+        """
+
+        self.termButton.setEnabled(done)
+
+    def termDisplay(self, htmlStr):
+        """ Display the html text in textEdit """
+
+        self.termTextEdit.setText(htmlStr)
+
+    # ----------------------
+    # analysis button change
+    # ----------------------
     def changAnalBtn(self):
         """ When nodeListWidget click change analysis button text """
 
@@ -715,6 +756,7 @@ class BrightMainWindow(ShineMainWindow):
 
         querySrc.triggered.connect(lambda: self._menuQueryAddr(2))
         queryDst.triggered.connect(lambda: self._menuQueryAddr(3))
+        queryProt.triggered.connect(self._menuQueryProt)
 
     def queryMenuShow(self, pos):
         """ Display the query menu """
@@ -748,6 +790,19 @@ class BrightMainWindow(ShineMainWindow):
         else:
             QtWidgets.QMessageBox.warning(self, 'Query Error',
                                           'Make sure your query object is IP(eg: 8.8.8.8) address')
+
+    def _menuQueryProt(self):
+        """ Concise table right crlick query terms """
+
+        termIndex = 4
+        protField = 4
+        term = self.conciseInfoTable.item(
+            self.conciseInfoTable.currentRow(),
+            protField).text()
+
+        self.controlTabManage.setCurrentIndex(termIndex)
+        self.termLineEdit.setText(term)
+        self.termButton.click()
 
     def analClkFilterMacro(self, nodeInfo):
         """ 

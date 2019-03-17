@@ -6,15 +6,14 @@ from PyQt5 import QtCore
 
 
 # class QueryThread(QtCore.QObject):
-class QueryThread(QtCore.QThread):
+class TermsThread(QtCore.QThread):
     finishSignal = QtCore.pyqtSignal(bool)
-    jsonSignal = QtCore.pyqtSignal(str)
+    htmlSignal = QtCore.pyqtSignal(str)
     infoSignal = QtCore.pyqtSignal(str, str)
 
-    def __init__(self, ip, token='80977e50c0ef36'):
+    def __init__(self, term):
         super().__init__()
-        self.token = token
-        self.queryIP = ip
+        self.term = term
 
     def __del__(self):
         # Destroyed while thread is still running
@@ -23,14 +22,13 @@ class QueryThread(QtCore.QThread):
 
     def run(self):
         self.finishSignal.emit(False)
-        url = 'http://ipinfo.io/{searchIP}?token={token}'.format(
-            searchIP=self.queryIP, token=self.token)
+        url = 'https://techterms.com/definition/{}'.format(self.term)
         try:
-            ipJSON = requests.get(url, timeout=1.0).text
+            termDefine = requests.get(url, timeout=1.0).text
         except (requests.ConnectionError, requests.exceptions.ReadTimeout):
-            self.infoSignal.emit('Search Info',
+            self.infoSignal.emit('Term Info',
                                  'Make sure your network is stable')
         else:
-            self.jsonSignal.emit(ipJSON)
+            self.htmlSignal.emit(termDefine)
         finally:
             self.finishSignal.emit(True)

@@ -494,15 +494,15 @@
          <item row="0" column="1">
           <widget class="QLineEdit" name="termLineEdit"/>
          </item>
+         <item row="1" column="0" colspan="2">
+          <widget class="QTextBrowser" name="termTextBrowser"/>
+         </item>
          <item row="2" column="0" colspan="2">
           <widget class="QPushButton" name="termButton">
            <property name="text">
             <string>query</string>
            </property>
           </widget>
-         </item>
-         <item row="1" column="0" colspan="2">
-          <widget class="QTextEdit" name="termTextEdit"/>
          </item>
         </layout>
        </widget>
