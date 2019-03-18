@@ -11,13 +11,16 @@ from PyQt5 import QtGui
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 
+# Capture packet manager
 from capturePkt.roughPacket import RoughPacket
+# Thread workers
 from threads.queryThread import QueryThread
 from threads.termsThread import TermsThread
 from threads.scanThread import ScanThread
 from threads.trafficThread import TrafficThread
 from threads.poisonThread import PoisonThread
 from threads.captureThread import CaptureThread
+# Menu open dialogs
 from dialogs.shineDialog import ui_FilterDialog
 from dialogs.shineDialog import Ui_NodeDialog
 from windows.shineMainWindow import ShineMainWindow
@@ -53,7 +56,7 @@ class BrightMainWindow(ShineMainWindow):
         self.filterDict = {'type': 'noncustom', 'filter': ''}
 
         # Store all the process packet
-        self.briefPkts = []
+        self.rarePkts = []
 
     def signalSlotMap(self):
         """
@@ -415,20 +418,22 @@ class BrightMainWindow(ShineMainWindow):
                 saveFileName = saveFileName + suffix
         return saveFileName
 
-    def showSaveFile(self, fileName=None):
+    def showSaveFile(self):
         """
             Menubar --> File --> &save
             Save a file in disk, auto append --> .pcap
         """
 
-        if not fileName:
-            # _ --> file types
-            saveFileName, _ = QtWidgets.QFileDialog.getSaveFileName(
-                self, 'save file', '.', "pcaket files (*.pcap)")
-            if '.pcap' not in saveFileName:
-                saveFileName = saveFileName + '.pcap'
-        else:
-            saveFileName = fileName
+        saveFileName, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, 'save file', '.', "pcaket files (*.pcap)")
+        if '.pcap' not in saveFileName:
+            saveFileName = saveFileName + '.pcap'
+        self.writePcapFile()
+
+    def writePcapFile(self):
+        """ Save the pcap file to the disk """
+
+        pass
 
     def showOpenFile(self):
         """
@@ -713,7 +718,7 @@ class BrightMainWindow(ShineMainWindow):
         """
 
         # Menu
-        self.action_Save.setEnabled(True)
+        self.action_Save.setEnabled(False)
         self.action_Open.setEnabled(False)
         self.action_Start.setEnabled(False)
         self.action_Stop.setEnabled(True)
@@ -936,11 +941,9 @@ class BrightMainWindow(ShineMainWindow):
         """ Unpack the packet to generate a brief packet inform """
 
         briefPkt = RoughPacket(tsSec, tsUsec, index, packet)
-        print(briefPkt)
-        self.briefPkts.append(briefPkt)
+        # print(briefPkt)
+        self.rarePkts.append(briefPkt)
         self.insertBriefPkt(briefPkt)
-
-        # packet = CookedPacket(threading.Lock())
         # self.processPackets.append(packet)
 
     def insertBriefPkt(self, briefPkt):
@@ -1032,7 +1035,8 @@ class BrightMainWindow(ShineMainWindow):
         """
 
         # Menu
-        self.action_Save.setEnabled(True)
+        if self.rarePkts:
+            self.action_Save.setEnabled(True)
         self.action_Open.setEnabled(True)
         self.menuPackets_info.setEnabled(True)
         self.action_Start.setEnabled(True)

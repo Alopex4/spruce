@@ -18,6 +18,7 @@ class TermsThread(QtCore.QThread):
     def __del__(self):
         # Destroyed while thread is still running
         # Solution https://blog.csdn.net/suli_fly/article/details/21627535
+        self.quit()
         self.wait()
 
     def run(self):

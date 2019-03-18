@@ -27,6 +27,7 @@ class ScanThread(QtCore.QThread):
         self.nicType = nicType
 
     def __del__(self):
+        self.quit()
         self.wait()
 
     def warningEmit(self):
