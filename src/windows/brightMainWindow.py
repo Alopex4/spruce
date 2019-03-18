@@ -68,6 +68,8 @@ class BrightMainWindow(ShineMainWindow):
         self.actionLANCSV.triggered.connect(self.lanCsvExport)
         self.actionLANJSON.triggered.connect(self.lanJsonExport)
         self.actionLANPlain.triggered.connect(self.lanPlainExport)
+        self.action_Open.triggered.connect(self.showOpenFile)
+        self.action_Save.triggered.connect(self.showSaveFile)
         self.action_Start.triggered.connect(self.analysisButton.click)
         self.action_Stop.triggered.connect(self.stopButton.click)
         self.action_Filter.triggered.connect(self.settingFilterDict)
@@ -412,6 +414,31 @@ class BrightMainWindow(ShineMainWindow):
             if suffix not in saveFileName:
                 saveFileName = saveFileName + suffix
         return saveFileName
+
+    def showSaveFile(self, fileName=None):
+        """
+            Menubar --> File --> &save
+            Save a file in disk, auto append --> .pcap
+        """
+
+        if not fileName:
+            # _ --> file types
+            saveFileName, _ = QtWidgets.QFileDialog.getSaveFileName(
+                self, 'save file', '.', "pcaket files (*.pcap)")
+            if '.pcap' not in saveFileName:
+                saveFileName = saveFileName + '.pcap'
+        else:
+            saveFileName = fileName
+
+    def showOpenFile(self):
+        """
+            Menubar --> File --> &open
+            show open file dialog get open file name(.pcap)
+        """
+
+        # _ --> file types
+        openFileName, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self, 'open file', '.', "packet files (*.pcap)")
 
     # ----------
     # scan metho
@@ -763,16 +790,6 @@ class BrightMainWindow(ShineMainWindow):
 
         self.queryMenu.move(self.pos() + pos)
         self.queryMenu.show()
-
-        # queryAction = menu.exec_(self.conciseInfoTable.mapToGlobal(pos))
-        # # queryAction = self.conciseInfoTable.mapToGlobal(pos)
-
-        # if queryAction == querySrc:
-        #     self._menuQueryAddr(pos, 2)
-        # elif queryAction == queryDst:
-        #     self._menuQueryAddr(pos, 3)
-        # elif queryAction == queryProt:
-        #     pass
 
     def _menuQueryAddr(self, addrPos):
         """ Concise table right click query address """

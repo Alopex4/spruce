@@ -4,6 +4,7 @@
 import os
 import sys
 import subprocess
+from builtins import StopAsyncIteration
 
 import requests
 from PyQt5 import QtGui
@@ -45,6 +46,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """ Make the UI looks more beauty and initial the UI status """
 
         self.shineBegin()
+        self.shineMenu()
         self.shineDock()
         self.shineScanPanel()
         self.shineTable()
@@ -70,6 +72,71 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         size = self.geometry()
         self.move((screen.width() - size.width()) / 2,
                   (screen.height() - size.height()) / 2)
+
+    def shineMenu(self):
+        """
+            Set the menu icon
+            Set the menu hot key
+        """
+
+        # Set menu icon
+        parentDir = '../icon/'
+        saveFile = '{}/{}'.format(parentDir, 'save.ico')
+        saveIcon = QtGui.QIcon(saveFile)
+        self.action_Save.setIcon(saveIcon)
+
+        openFile = '{}/{}'.format(parentDir, 'open.ico')
+        openIcon = QtGui.QIcon(openFile)
+        self.action_Open.setIcon(openIcon)
+
+        exitFile = '{}/{}'.format(parentDir, 'exit.ico')
+        exitIcon = QtGui.QIcon(exitFile)
+        self.action_close.setIcon(exitIcon)
+
+        startFile = '{}/{}'.format(parentDir, 'start.ico')
+        startIcon = QtGui.QIcon(startFile)
+        self.action_Start.setIcon(startIcon)
+
+        stopFile = '{}/{}'.format(parentDir, 'stop.ico')
+        stopIcon = QtGui.QIcon(stopFile)
+        self.action_Stop.setIcon(stopIcon)
+
+        restartFile = '{}/{}'.format(parentDir, 'restart.ico')
+        restartIcon = QtGui.QIcon(restartFile)
+        self.action_Restart.setIcon(restartIcon)
+
+        filterFile = '{}/{}'.format(parentDir, 'filter.ico')
+        filterIcon = QtGui.QIcon(filterFile)
+        self.action_Filter.setIcon(filterIcon)
+
+        authorFile = '{}/{}'.format(parentDir, 'author.ico')
+        authorIcon = QtGui.QIcon(authorFile)
+        self.action_Author.setIcon(authorIcon)
+
+        refreshFile = '{}/{}'.format(parentDir, 'refresh.ico')
+        refreshIcon = QtGui.QIcon(refreshFile)
+        self.action_RefreshRank.setIcon(refreshIcon)
+
+        rankFile = '{}/{}'.format(parentDir, 'rank.ico')
+        rankIcon = QtGui.QIcon(rankFile)
+        self.action_Rank.setIcon(rankIcon)
+
+        helpFile = '{}/{}'.format(parentDir, 'help.ico')
+        helpIcon = QtGui.QIcon(helpFile)
+        self.action_Help.setIcon(helpIcon)
+
+        # set hot key
+        self.action_Open.setShortcut('Ctrl+O')
+        self.action_Save.setShortcut('Ctrl+S')
+        self.action_RefreshRank.setShortcut('Ctrl+R')
+        self.action_close.setShortcut('Ctrl+Q')
+        self.action_Filter.setShortcut('Ctrl+F')
+        self.action_Start.setShortcut('Ctrl+Shift+S')
+        self.action_Stop.setShortcut('Ctrl+Shift+P')
+        self.action_Restart.setShortcut('Ctrl+Shift+R')
+        self.action_Help.setShortcut('F1')
+        self.action_Author.setShortcut('F2')
+        self.action_Rank.setShortcut('F3')
 
     def shineDock(self):
         """ Set dock widget movable and floatable """
@@ -115,11 +182,6 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.conciseInfoTable.horizontalHeader().setSectionResizeMode(
         #     QtWidgets.QHeaderView.Stretch)
         # self.conciseInfoTable.setColumnWidth()
-
-        # Testing code
-        # self.conciseInfoTable.setRowCount(4)
-        # item = QtWidgets.QTableWidgetItem('hello google')
-        # self.conciseInfoTable.setItem(0, 0, item)
 
     def shineStatusBar(self):
         """ Set a label widget the monitor the download/upload status"""
@@ -245,8 +307,6 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.action_close.triggered.connect(self.close)
         self.action_Rank.triggered.connect(self.showRankDialog)
-        self.action_Save.triggered.connect(self.showSaveFile)
-        self.action_Open.triggered.connect(self.showOpenFile)
         self.action_Author.triggered.connect(self.showAuthorDialog)
         self.action_RefreshRank.triggered.connect(self.refreshRank)
 
@@ -283,31 +343,6 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         rankDialog.exec_()
 
-    def showSaveFile(self, fileName=None):
-        """
-            Menubar --> File --> &save
-            Save a file in disk, auto append --> .pcap
-        """
-
-        if not fileName:
-            # _ --> file types
-            saveFileName, _ = QtWidgets.QFileDialog.getSaveFileName(
-                self, 'save file', '.', "pcaket files (*.pcap)")
-            if '.pcap' not in saveFileName:
-                saveFileName = saveFileName + '.pcap'
-        else:
-            saveFileName = fileName
-
-    def showOpenFile(self):
-        """
-            Menubar --> File --> &open
-            show open file dialog get open file name(.pcap)
-        """
-
-        # _ --> file types
-        openFileName, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, 'open file', '.', "packet files (*.pcap)")
-
     def showAuthorDialog(self):
         """
             Menubar --> About --> &author
@@ -316,23 +351,6 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         auhtorDialog = Ui_AuthorDialog(self)
         auhtorDialog.exec_()
-
-    # def showFilterDialog(self):
-    #     """
-    #         Menubar --> Option --> &filter
-    #         show filter dialog information
-    #         ROOT, NETWORK, tcpdump --> network tab, scan tab
-    #     """
-
-    #     if ((ROOT | NETWORK | TCPDUMP) & self.rank) == (ROOT | NETWORK
-    #                                                     | TCPDUMP):
-    #         self.filterDialog = ui_FilterDialog(self)
-    #         self.filterDialog.exec_()
-    #     else:
-    #         tips = '''Check `about --> rank` more details.
-    #             \nTips: Make sure you already install tcpdump!'''
-
-    #         QtWidgets.QMessageBox.warning(self, 'filter warning', tips)
 
     def refreshRank(self):
         """
@@ -518,6 +536,15 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """ Scan Dock, conciseTable, verboseTab, decodeTab initial """
 
         # Scan dock
+        parentDir = '../icon'
+        startFile = '{}/{}'.format(parentDir, 'start.ico')
+        startIcon = QtGui.QIcon(startFile)
+        self.analysisButton.setIcon(startIcon)
+
+        stopFile = '{}/{}'.format(parentDir, 'stop.ico')
+        stopIcon = QtGui.QIcon(stopFile)
+        self.stopButton.setIcon(stopIcon)
+
         self.scanDock.setWindowTitle('Scan panel: ')
         self.stopButton.setEnabled(False)
 
