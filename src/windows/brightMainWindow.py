@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
 import csv
 import json
+import struct
 import subprocess
 from functools import namedtuple
 
@@ -75,6 +77,7 @@ class BrightMainWindow(ShineMainWindow):
         self.action_Save.triggered.connect(self.showSaveFile)
         self.action_Start.triggered.connect(self.analysisButton.click)
         self.action_Stop.triggered.connect(self.stopButton.click)
+        self.action_Restart.triggered.connect(self.stopStart)
         self.action_Filter.triggered.connect(self.settingFilterDict)
 
         # Config panel button mapping
@@ -422,34 +425,130 @@ class BrightMainWindow(ShineMainWindow):
         """
             Menubar --> File --> &save
             Save a file in disk, auto append --> .pcap
+            * Set file name
+            * Write to disk
+            * disable `save` menu
         """
 
         saveFileName, _ = QtWidgets.QFileDialog.getSaveFileName(
             self, 'save file', '.', "pcaket files (*.pcap)")
-        if '.pcap' not in saveFileName:
-            saveFileName = saveFileName + '.pcap'
-        self.writePcapFile()
 
-    def writePcapFile(self):
-        """ Save the pcap file to the disk """
+        if saveFileName:
+            if '.pcap' not in saveFileName:
+                saveFileName = saveFileName + '.pcap'
+            self.writePcapFile(saveFileName)
 
-        pass
+        self.action_Save.setEnabled(False)
+
+    def writePcapFile(self, filename):
+        """
+            Write the pcap data to the disk
+            * write the header info
+            * write the packet info
+        """
+
+        # https://wiki.wireshark.org/Development/LibpcapFileFormat
+        # Header structure
+        # typedef struct pcap_hdr_s {
+        #         guint32 magic_number;   /* magic number */
+        #         guint16 version_major;  /* major version number */
+        #         guint16 version_minor;  /* minor version number */
+        #         gint32  thiszone;       /* GMT to local correction */
+        #         guint32 sigfigs;        /* accuracy of timestamps */
+        #         guint32 snaplen;        /* max length of captured packets, in octets */
+        #         guint32 network;        /* data link type */
+        # } pcap_hdr_t;
+
+        # Package structure
+        # typedef struct pcaprec_hdr_s {
+        #         guint32 ts_sec;         /* timestamp seconds */
+        #         guint32 ts_usec;        /* timestamp microseconds */
+        #         guint32 incl_len;       /* number of octets of packet saved in file */
+        #         guint32 orig_len;       /* actual length of packet */
+        # } pcaprec_hdr_t;
+
+        with open(filename, 'wb') as pcapFile:
+            # Header information
+            pcapFile.write(
+                struct.pack('@ I H H i I I I', 0xa1b2c3d4, 2, 4, 0, 0, 65535,
+                            1))
+
+            # Package information
+            for pkt in self.rarePkts:
+                pcapFile.write(
+                    struct.pack('@ I I I I', pkt.sec, pkt.usec, pkt.pktLen,
+                                pkt.pktLen))
+                pcapFile.write(pkt.pktData)
 
     def showOpenFile(self):
         """
             Menubar --> File --> &open
             show open file dialog get open file name(.pcap)
+            * Get openFile name
+            * Read header info define the file type
+            * Clear the container
+            * active the analysis widget(conciseTable, verboseTabs,decodeTabs)
+            * Read file and cook the package
+            * Show concise table meun
         """
 
         # _ --> file types
         openFileName, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, 'open file', '.', "packet files (*.pcap)")
+        if openFileName:
+            verified = self.checkPcapFile(openFileName)
+            if verified:
+                self.rarePkts.clear()
+                self.conciseInfoTable.setRowCount(0)
+                self.conciseInfoTable.clearContents()
+                self.conciseInfoTable.setEnabled(True)
+                self.verboseInfoTab.setEnabled(True)
+                self.decodeInfoTab.setEnabled(True)
+                self.readPacpFile(openFileName)
+                self.showTableMenu()
+            else:
+                self.openWarning()
 
-    # ----------
-    # scan metho
-    # ----------
+    def checkPcapFile(self, fileName):
+        """ Check whether it's a pcap file """
+
+        with open(fileName, 'rb') as diskFile:
+            header = diskFile.read(24)
+            magic, majv, minv = struct.unpack('@I H H 16x', header)
+            if magic == 0xa1b2c3d4 and majv == 2 and minv == 4:
+                return True
+            return False
+
+    def readPacpFile(self, openFileName):
+        """
+            Read the pcap file generate the raraPkts
+        """
+
+        index = 0
+        fileSize = os.path.getsize(openFileName)
+        with open(openFileName, 'rb') as pcapFile:
+            # Remove the header info
+            _ = pcapFile.read(24)
+            while pcapFile.tell() != fileSize:
+                index += 1
+                ts_sec, ts_usec, incl_len, orig_len = struct.unpack('@I I I I',
+                                                                    pcapFile.read(
+                                                                        16))
+                packet = pcapFile.read(incl_len)
+                self.unpackPacket(ts_sec, ts_usec, index, packet)
+
+    def openWarning(self):
+        """ If the opening file isn't pcap file trigger the warning """
+
+        title = 'open waring'
+        tips = 'Make sure your open file is `pacp` file'
+        QtWidgets.QMessageBox.warning(self, title, tips)
+
+    # -----------
+    # scan method
+    # -----------
     def scanLanNet(self, scanTarget):
-        """ 
+        """
             Reset the nodeListWidget current row avoid index out or range
             Store a nodesList data
             Scan thread work to scan Lan network
@@ -480,14 +579,14 @@ class BrightMainWindow(ShineMainWindow):
 
     def notifyRelatePanel(self, finish, scanTarget=None):
         """
-            Notify the scan panel/scan tab that the scan process is begin or finish 
+            Notify the scan panel/scan tab that the scan process is begin or finish
             Clear the listNode, append scan method name
 
             status --> False --> begin
             status --> True --> finish
                 begin:
                     menu export LAN disable
-                    clear the nodeList 
+                    clear the nodeList
                     protect button
                 finish:
                     protect button
@@ -539,8 +638,8 @@ class BrightMainWindow(ShineMainWindow):
                 self.action_Filter.setEnabled(done)
 
     def scanNodesInsert(self, nodesList):
-        """ 
-            Insert the scanning nodes to table 
+        """
+            Insert the scanning nodes to table
             1. Assign nodelist to nodeItems
             2. Traverse  all the nodeItems
             3. Active menu bar export --> LAN info
@@ -663,7 +762,7 @@ class BrightMainWindow(ShineMainWindow):
     # analysis button
     # ---------------
     def analysisManage(self):
-        """ 
+        """
             Manage the analysis process
             * widget control manage
             * Filter manage
@@ -672,7 +771,7 @@ class BrightMainWindow(ShineMainWindow):
             * Network Traffic manage
                 * upload speed
                 * download speed
-            * Packet filter start 
+            * Packet filter start
                 * startup socket
                 * apply filter macro to socket
                 * capture packets and timestamps
@@ -777,6 +876,9 @@ class BrightMainWindow(ShineMainWindow):
         self.decodeInfoTab.setEnabled(True)
 
         # table menu
+        self.showTableMenu()
+
+    def showTableMenu(self):
         self.conciseInfoTable.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.conciseInfoTable.customContextMenuRequested.connect(
             self.queryMenuShow)
@@ -800,35 +902,41 @@ class BrightMainWindow(ShineMainWindow):
         """ Concise table right click query address """
 
         sipTabIndex = 3
-        addr = self.conciseInfoTable.item(
-            self.conciseInfoTable.currentRow(),
-            addrPos).text()
-
-        #  Make sure it is IP address
-        if '.' in addr:
-            self.controlTabManage.setCurrentIndex(sipTabIndex)
-            self.sipLineEdit.setText(addr)
-            self.sipButton.click()
+        try:
+            addr = self.conciseInfoTable.item(
+                self.conciseInfoTable.currentRow(),
+                addrPos).text()
+        except AttributeError:
+            pass
         else:
-            QtWidgets.QMessageBox.warning(self, 'Query Error',
-                                          'Make sure your query object is IP(eg: 8.8.8.8) address')
+            #  Make sure it is IP address
+            if '.' in addr:
+                self.controlTabManage.setCurrentIndex(sipTabIndex)
+                self.sipLineEdit.setText(addr)
+                self.sipButton.click()
+            else:
+                QtWidgets.QMessageBox.warning(self, 'Query Error',
+                                              'Make sure your query object is IP(eg: 8.8.8.8) address')
 
     def _menuQueryProt(self):
         """ Concise table right crlick query terms """
 
         termIndex = 4
         protField = 4
-        term = self.conciseInfoTable.item(
-            self.conciseInfoTable.currentRow(),
-            protField).text()
-
-        self.controlTabManage.setCurrentIndex(termIndex)
-        self.termLineEdit.setText(term)
-        self.termButton.click()
+        try:
+            term = self.conciseInfoTable.item(
+                self.conciseInfoTable.currentRow(),
+                protField).text()
+        except AttributeError:
+            pass
+        else:
+            self.controlTabManage.setCurrentIndex(termIndex)
+            self.termLineEdit.setText(term)
+            self.termButton.click()
 
     def analClkFilterMacro(self, nodeInfo):
-        """ 
-            According to filterDict and node type 
+        """
+            According to filterDict and node type
             generate filter macro
                 * gateway --> None
                 * remote/host
@@ -883,9 +991,9 @@ class BrightMainWindow(ShineMainWindow):
 
     @staticmethod
     def _generateMacro(tcpdumpBinary):
-        """ 
+        """
             Generate the macro
-            tcpdumpBinary --> 
+            tcpdumpBinary -->
                 b'{ 0x28, 0, 0, 0x0000000c },\n{ 0x15, 0, 3, 0x000008...
                 * decode the string to utf-8
                 * replace '\n'
@@ -938,7 +1046,7 @@ class BrightMainWindow(ShineMainWindow):
         self.captureWorker.start()
 
     def unpackPacket(self, tsSec, tsUsec, index, packet):
-        """ Unpack the packet to generate a brief packet inform """
+        """ Unpack the packet to generate a brief packet inform and insert it """
 
         briefPkt = RoughPacket(tsSec, tsUsec, index, packet)
         # print(briefPkt)
@@ -1099,3 +1207,10 @@ class BrightMainWindow(ShineMainWindow):
                                                      filterStrDecode))
         else:
             self.filterLabel.setText('{}: {}'.format(filterText, 'disable'))
+
+    # --------------
+    # restart action
+    # --------------
+    def stopStart(self):
+        self.stopButton.click()
+        self.analysisButton.click()
