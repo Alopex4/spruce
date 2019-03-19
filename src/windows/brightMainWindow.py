@@ -84,11 +84,20 @@ class BrightMainWindow(ShineMainWindow):
         self.refreshButton.clicked.connect(self.refreshBtnClick)
         self.rangeButton.clicked.connect(
             lambda: self.scanLanNet(self.rangeLineEdit.text()))
+        self.rangeLineEdit.returnPressed.connect(self.rangeButton.click)
+
         self.maskButton.clicked.connect(
             lambda: self.scanLanNet(self.maskLineEdit.text()))
+        self.maskLineEdit.returnPressed.connect(self.maskButton.click)
+
         self.sipButton.clicked.connect(self.queryIPInfo)
+        self.sipLineEdit.returnPressed.connect(self.sipButton.click)
+
         self.termButton.clicked.connect(self.queryTerms)
+        self.termLineEdit.returnPressed.connect(self.termButton.click)
+
         self.searchButton.clicked.connect(self.searchProt)
+        self.searchLineEdit.returnPressed.connect(self.searchButton.click)
 
         # Scan panel button mapping
         self.nodeListWidget.itemSelectionChanged.connect(self.changAnalBtn)
@@ -762,6 +771,7 @@ class BrightMainWindow(ShineMainWindow):
         self.conciseInfoTable.clearContents()
         for pkt in searchPkts:
             self.insertBriefPkt(pkt)
+        self.conciseInfoTable.scrollToTop()
 
     def searchWarning(self, matchProt):
         title = 'Search warning'

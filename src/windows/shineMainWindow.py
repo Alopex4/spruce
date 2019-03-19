@@ -151,7 +151,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def shineScanPanel(self):
         """ Set process bar look much better """
 
-        # Remove the dotted border
+        # Remove the dotted border and give up the key focus
         self.nodeListWidget.setFocusPolicy(QtCore.Qt.NoFocus)
         self.scanProgressBar.setMinimum(100)
         self.scanProgressBar.setMaximum(100)
@@ -173,7 +173,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.conciseInfoTable.horizontalHeader().setStretchLastSection(True)
         # Text don't wrap
         self.conciseInfoTable.setWordWrap(False)
-        # Remove the dotted border
+        # Remove the dotted border but give up the key focus
         self.conciseInfoTable.setFocusPolicy(QtCore.Qt.NoFocus)
         # Remove focuse in title
         self.conciseInfoTable.horizontalHeader().setHighlightSections(False)
@@ -237,6 +237,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             1. define the rank
             2. action trigger connect
             3. widget status initial
+            4. tabs focus point
         """
 
         # Task 1
@@ -245,6 +246,8 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.triggerInit()
         # Task 3
         self.allWidgetInit()
+        # Task 4
+        self.tabsFocus()
 
     # ---------------
     # define the rank
@@ -620,6 +623,19 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.downloadLabel.setText('download:  KB |')
         self.packageSentLabel.setText('sent: packages |')
         self.packageRecveLabel.setText('receive: packages')
+
+    def tabsFocus(self):
+        """ Set tabs focuse button """
+
+        self.refreshButton.setDefault(True)
+        self.rangeButton.setDefault(True)
+        self.maskButton.setDefault(True)
+        self.searchButton.setDefault(True)
+        self.sipButton.setDefault(True)
+        self.termButton.setDefault(True)
+
+        self.analysisButton.setDefault(True)
+        self.stopButton.setDefault(True)
 
 
 if __name__ == '__main__':

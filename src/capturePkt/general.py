@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import re
+
 
 def getMacAddr(macRaw):
     """  Get mac address via parameter mac raw """
@@ -19,7 +21,10 @@ def getIpv6(addr):
     """ Get ipv6 address via parameter addr """
 
     byte_str = map('{:04x}'.format, addr)
-    ipv6_addr = ':'.join(byte_str).upper().replace('0000', '0')
-    if ipv6_addr.replace('0:', '') == '0':
+    ipv6_addr = ':'.join(byte_str).upper().replace(':0000', ':0')
+    ipv6_addr = ipv6_addr.replace(':000', ':').replace(':00', ':')
+    ipv6_addr = re.sub(r'^0+', '', ipv6_addr, count=1)
+    ipv6_addr = re.sub(r'(:0){2,}', ':', ipv6_addr, count=1)
+    if ipv6_addr == ':':
         return '::'
     return ipv6_addr

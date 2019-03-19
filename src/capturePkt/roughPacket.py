@@ -15,8 +15,8 @@ class RoughPacket:
     EtherMapUpper = {0x0800: 'IP', 0x0806: 'ARP', 0x86DD: 'IPv6',
                      0x8863: 'PPoE', 0x8864: 'PPPoE', 0x888e: 'EAPOL'}
     # https://www.wikiwand.com/en/List_of_IP_protocol_numbers
-    IPMapUpper = {0x01: 'ICMP', 0x02: 'IGMP', 0x06: 'TCP', 0x11: 'UDP',
-                  0x29: 'IPv6', 0x3A: 'IPv6-ICMP'}
+    IPMapUpper = {0x00: 'HOPOPT', 0x01: 'ICMP', 0x02: 'IGMP', 0x06: 'TCP',
+                  0x11: 'UDP', 0x29: 'IPv6', 0x3A: 'IPv6-ICMP'}
     # https://www.wikiwand.com/en/List_of_TCP_and_UDP_port_numbers
     UDP_TCPMapUpper = {20: 'FTP-data', 21: 'FTP', 22: 'SSH', 23: 'Telnet',
                        25: 'SMTP', 53: 'Domain', 67: 'DHCP', 68: 'DHCP',
@@ -43,6 +43,7 @@ class RoughPacket:
                     'HTTPS': QtGui.QColor(128, 222, 234, 200),
                     'DHCP': QtGui.QColor(255, 87, 34, 100),
                     'EAPOL': QtGui.QColor(46, 125, 50, 100),
+                    'HOPOPT': QtGui.QColor(224, 64, 251, 100),
                     }
 
     supportPort = [key.lower() for key in ProtColorMap.keys()]
@@ -79,9 +80,9 @@ class RoughPacket:
         # Set packet length
         self.pktLen = len(self.pktData)
 
-        # Get address
-        # if protocol --> 0x0800 --> get ip
-        # else --> get mac
+        # ----------
+        # Link layer
+        # ----------
         prototype, *_ = struct.unpack('!H', self.pktData[12:14])
         self.pktProt = RoughPacket.EtherMapUpper.get(prototype, 'Unknow')
         if self.pktProt == 'IP':
@@ -99,6 +100,9 @@ class RoughPacket:
 
         self.appendProt(self.pktProt)
 
+        # -------------
+        # Network layer
+        # -------------
         # IP protocol continue analysis upper protocol
         if self.pktProt == 'IP':
             ipHeaderLen = (self.pktData[14] & 15) * 4
@@ -106,6 +110,16 @@ class RoughPacket:
             self.pktProt = RoughPacket.IPMapUpper.get(ipProt, 'Unknow')
         self.appendProt(self.pktProt)
 
+        # IPv6 protocol continue analysis upper protocol
+        if self.pktProt == 'IPv6':
+            ipv6Prot = self.pktData[20]
+            ipHeaderLen = 40
+            self.pktProt = RoughPacket.IPMapUpper.get(ipv6Prot, 'Unknow')
+        self.appendProt(self.pktProt)
+
+        # ---------------
+        # Transport layer
+        # ---------------
         # UDP/TCP protocol continue analysis application protocol
         if self.pktProt == 'UDP':
             # 14 --> Ethernet, ipHeaderLen, 2 --> source port
@@ -135,10 +149,10 @@ class RoughPacket:
                 dstPort, *_ = struct.unpack('!H', rawDstPort)
                 self.pktProt = RoughPacket.UDP_TCPMapUpper.get(dstPort,
                                                                'TCP')
+        self.appendProt(self.pktProt)
         self.pktColor = RoughPacket.ProtColorMap.get(self.pktProt,
                                                      QtGui.QColor(224, 224, 224,
                                                                   255))
-        self.appendProt(self.pktProt)
 
         # Generate package stack string
         stack = ''
