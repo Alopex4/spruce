@@ -13,3 +13,13 @@ def getIpv4(addr):
     """ Get IPv4 address via parameter addr """
 
     return '.'.join(map(str, addr))
+
+
+def getIpv6(addr):
+    """ Get ipv6 address via parameter addr """
+
+    byte_str = map('{:04x}'.format, addr)
+    ipv6_addr = ':'.join(byte_str).upper().replace('0000', '0')
+    if ipv6_addr.replace('0:', '') == '0':
+        return '::'
+    return ipv6_addr

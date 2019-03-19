@@ -88,6 +88,7 @@ class BrightMainWindow(ShineMainWindow):
             lambda: self.scanLanNet(self.maskLineEdit.text()))
         self.sipButton.clicked.connect(self.queryIPInfo)
         self.termButton.clicked.connect(self.queryTerms)
+        self.searchButton.clicked.connect(self.searchProt)
 
         # Scan panel button mapping
         self.nodeListWidget.itemSelectionChanged.connect(self.changAnalBtn)
@@ -738,6 +739,34 @@ class BrightMainWindow(ShineMainWindow):
         """ Display the html text in textEdit """
 
         self.termTextEdit.setText(htmlStr)
+
+    # -------------
+    # search button
+    # -------------
+    def searchProt(self):
+        """ Protocol search button click """
+
+        searchPkts = []
+        prot = self.searchLineEdit.text().strip().lower()
+        matchProt = RoughPacket.supportPort
+        if prot in matchProt:
+            for pkt in self.rarePkts:
+                if prot in pkt.pktProtStack:
+                    searchPkts.append(pkt)
+        elif prot == '':
+            searchPkts = self.rarePkts
+        else:
+            return self.searchWarning(matchProt)
+
+        self.conciseInfoTable.setRowCount(0)
+        self.conciseInfoTable.clearContents()
+        for pkt in searchPkts:
+            self.insertBriefPkt(pkt)
+
+    def searchWarning(self, matchProt):
+        title = 'Search warning'
+        tips = "Make sure your seach key word match protocol" + str(matchProt)
+        QtWidgets.QMessageBox.warning(self, title, tips)
 
     # ----------------------
     # analysis button change

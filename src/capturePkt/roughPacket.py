@@ -6,21 +6,22 @@ import socket
 import struct
 
 from PyQt5 import QtGui
-from capturePkt.general import getMacAddr, getIpv4
+from capturePkt.general import getMacAddr, getIpv4, getIpv6
 
 
 class RoughPacket:
     CST = 8 * 60 * 60
     # http://www.networksorcery.com/enp/protocol/802/ethertypes.htm
     EtherMapUpper = {0x0800: 'IP', 0x0806: 'ARP', 0x86DD: 'IPv6',
-                     0x8863: 'PPoE', 0x8864: 'PPPoE'}
+                     0x8863: 'PPoE', 0x8864: 'PPPoE', 0x888e: 'EAPOL'}
     # https://www.wikiwand.com/en/List_of_IP_protocol_numbers
     IPMapUpper = {0x01: 'ICMP', 0x02: 'IGMP', 0x06: 'TCP', 0x11: 'UDP',
                   0x29: 'IPv6', 0x3A: 'IPv6-ICMP'}
     # https://www.wikiwand.com/en/List_of_TCP_and_UDP_port_numbers
     UDP_TCPMapUpper = {20: 'FTP-data', 21: 'FTP', 22: 'SSH', 23: 'Telnet',
-                       25: 'SMTP', 53: 'Domain', 69: 'TFTP', 80: 'HTTP',
-                       110: 'POP3', 123: 'NTP', 137: 'NBNS', 443: 'HTTPS'}
+                       25: 'SMTP', 53: 'Domain', 67: 'DHCP', 68: 'DHCP',
+                       69: 'TFTP', 80: 'HTTP', 110: 'POP3', 123: 'NTP',
+                       137: 'NBNS', 443: 'HTTPS'}
     ProtColorMap = {'ARP': QtGui.QColor(239, 83, 80, 255),
                     'IPv6': QtGui.QColor(171, 71, 188, 100),
                     'PPoE': QtGui.QColor(236, 64, 122, 100),
@@ -40,9 +41,15 @@ class RoughPacket:
                     'NTP': QtGui.QColor(255, 196, 0, 100),
                     'NBNS': QtGui.QColor(62, 39, 35, 100),
                     'HTTPS': QtGui.QColor(128, 222, 234, 200),
+                    'DHCP': QtGui.QColor(255, 87, 34, 100),
+                    'EAPOL': QtGui.QColor(46, 125, 50, 100),
                     }
 
+    supportPort = [key.lower() for key in ProtColorMap.keys()]
+    supportPort.extend(['ip', 'ethernet'])
+
     def __init__(self, sec, usec, index, pkt):
+        # print(index, pkt)
         self.sec = sec
         self.usec = usec
         self.pktIndex = index
@@ -81,12 +88,15 @@ class RoughPacket:
             srcIp, dstIp = struct.unpack('!4s 4s', self.pktData[26:34])
             self.pktSrc = getIpv4(srcIp)
             self.pktDst = getIpv4(dstIp)
-        elif self.pktProt == 'ARP':
+        elif self.pktProt == 'ARP' or self.pktProt == 'EAPOL':
             dstMac, srcMac = struct.unpack('!6s 6s', self.pktData[:12])
             self.pktDst = getMacAddr(dstMac)
             self.pktSrc = getMacAddr(srcMac)
         elif self.pktProt == 'IPv6':
-            pass
+            srcIpv6, dstIpv6 = struct.unpack('!16s 16s', self.pktData[22:54])
+            self.pktSrc = getIpv6(srcIpv6)
+            self.pktDst = getIpv6(dstIpv6)
+
         self.appendProt(self.pktProt)
 
         # IP protocol continue analysis upper protocol
