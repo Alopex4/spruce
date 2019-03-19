@@ -498,16 +498,22 @@ class BrightMainWindow(ShineMainWindow):
         if openFileName:
             verified = self.checkPcapFile(openFileName)
             if verified:
-                self.rarePkts.clear()
-                self.conciseInfoTable.setRowCount(0)
-                self.conciseInfoTable.clearContents()
-                self.conciseInfoTable.setEnabled(True)
-                self.verboseInfoTab.setEnabled(True)
-                self.decodeInfoTab.setEnabled(True)
+                self._readWidgetChange()
                 self.readPacpFile(openFileName)
                 self.showTableMenu()
             else:
                 self.openWarning()
+
+    def _readWidgetChange(self):
+        """ Read file widget change """
+
+        self.rarePkts.clear()
+        self.conciseInfoTable.setRowCount(0)
+        self.conciseInfoTable.clearContents()
+        self.conciseInfoTable.setEnabled(True)
+        self.verboseInfoTab.setEnabled(True)
+        self.decodeInfoTab.setEnabled(True)
+        self.searchButton.setEnabled(True)
 
     def checkPcapFile(self, fileName):
         """ Check whether it's a pcap file """
@@ -834,7 +840,7 @@ class BrightMainWindow(ShineMainWindow):
         self.maskLineEdit.setEnabled(False)
         self.maskButton.setEnabled(False)
         self.searchLineEdit.setEnabled(True)
-        self.searchButton.setEnabled(True)
+        self.searchButton.setEnabled(False)
 
         # Scan Paenl
         self.nodeListWidget.setEnabled(False)
@@ -1068,7 +1074,8 @@ class BrightMainWindow(ShineMainWindow):
         for pktCol, data in enumerate(pktDatas):
             pktItem = QtWidgets.QTableWidgetItem(str(data))
             pktItem.setBackground(pktColor)
-            pktItem.setTextAlignment(QtCore.Qt.AlignCenter)
+            if pktCol < 6:
+                pktItem.setTextAlignment(QtCore.Qt.AlignCenter)
             self.conciseInfoTable.setItem(pktRow, pktCol, pktItem)
         self.conciseInfoTable.scrollToBottom()
 
@@ -1163,6 +1170,7 @@ class BrightMainWindow(ShineMainWindow):
         self.rangeButton.setEnabled(True)
         self.maskLineEdit.setEnabled(True)
         self.maskButton.setEnabled(True)
+        self.searchButton.setEnabled(True)
 
         # Scan Panel
         self.nodeListWidget.setEnabled(True)

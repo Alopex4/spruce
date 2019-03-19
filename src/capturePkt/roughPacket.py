@@ -20,7 +20,7 @@ class RoughPacket:
     # https://www.wikiwand.com/en/List_of_TCP_and_UDP_port_numbers
     UDP_TCPMapUpper = {20: 'FTP-data', 21: 'FTP', 22: 'SSH', 23: 'Telnet',
                        25: 'SMTP', 53: 'Domain', 69: 'TFTP', 80: 'HTTP',
-                       110: 'POP3', 123: 'NTP', 137: 'NBNS', 443: 'HTTPS', }
+                       110: 'POP3', 123: 'NTP', 137: 'NBNS', 443: 'HTTPS'}
     ProtColorMap = {'ARP': QtGui.QColor(239, 83, 80, 255),
                     'IPv6': QtGui.QColor(171, 71, 188, 100),
                     'PPoE': QtGui.QColor(236, 64, 122, 100),
@@ -50,6 +50,8 @@ class RoughPacket:
         self.pktSrc = 'Unknow'
         self.pktDst = 'Unknow'
         self.pktProt = 'Unknow'
+        self.pktStack = 'Unknow'
+        self.pktProtStack = ['ethernet']
         self.roughCook()
 
     def roughCook(self):
@@ -73,7 +75,6 @@ class RoughPacket:
         # Get address
         # if protocol --> 0x0800 --> get ip
         # else --> get mac
-        # print(self.pktData)
         prototype, *_ = struct.unpack('!H', self.pktData[12:14])
         self.pktProt = RoughPacket.EtherMapUpper.get(prototype, 'Unknow')
         if self.pktProt == 'IP':
@@ -86,12 +87,14 @@ class RoughPacket:
             self.pktSrc = getMacAddr(srcMac)
         elif self.pktProt == 'IPv6':
             pass
+        self.appendProt(self.pktProt)
 
         # IP protocol continue analysis upper protocol
         if self.pktProt == 'IP':
             ipHeaderLen = (self.pktData[14] & 15) * 4
             ipProt = int(self.pktData[23])
             self.pktProt = RoughPacket.IPMapUpper.get(ipProt, 'Unknow')
+        self.appendProt(self.pktProt)
 
         # UDP/TCP protocol continue analysis application protocol
         if self.pktProt == 'UDP':
@@ -107,6 +110,8 @@ class RoughPacket:
                 dstPort, *_ = struct.unpack('!H', rawDstPort)
                 self.pktProt = RoughPacket.UDP_TCPMapUpper.get(dstPort,
                                                                'UDP')
+        self.appendProt(self.pktProt)
+
         if self.pktProt == 'TCP':
             # 14 --> Ethernet, ipHeaderLen, 2 --> source port
             rawSrcPort = (
@@ -123,6 +128,14 @@ class RoughPacket:
         self.pktColor = RoughPacket.ProtColorMap.get(self.pktProt,
                                                      QtGui.QColor(224, 224, 224,
                                                                   255))
+        self.appendProt(self.pktProt)
+
+        # Generate package stack string
+        stack = ''
+        for prot in self.pktProtStack:
+            decorProt = '[<< ' + prot + ' '
+            stack = stack + decorProt
+        self.pktStack = stack + len(self.pktProtStack) * '>>]'
 
     def getBriefPacket(self):
         """ Get the brief packet information """
@@ -131,16 +144,24 @@ class RoughPacket:
         #                          ['no', 'time', 'source', 'destination',
         #                           'protocol', 'length'])
         return (self.pktIndex, self.pktTime, self.pktSrc,
-                self.pktDst, self.pktProt, self.pktLen)
+                self.pktDst, self.pktProt, self.pktLen, self.pktStack)
 
     def getColor(self):
         """ Get that packet color"""
 
         return self.pktColor
 
+    def appendProt(self, prot):
+        """ Append new item to pktProts list """
+
+        prot = prot.lower()
+        if prot not in self.pktProtStack:
+            self.pktProtStack.append(prot)
+
     def __str__(self):
         """ For print function """
 
-        fmt = 'pktIndex: {}\npktTime: {}\npktLen: {}\npktProt: {}\npktSrc:{}\npktDst:{}\n'
+        fmt = 'pktIndex: {}\npktTime: {}\npktLen: {}\npktProt: {}\npktSrc:{}\npktDst:{}\npktProts:{}'
         return fmt.format(self.pktIndex, self.pktTime, self.pktLen,
-                          self.pktProt, self.pktSrc, self.pktDst)
+                          self.pktProt, self.pktSrc, self.pktDst,
+                          self.pktProtStack)
