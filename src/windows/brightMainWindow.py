@@ -29,6 +29,8 @@ from windows.shineMainWindow import ShineMainWindow
 
 
 class BrightMainWindow(ShineMainWindow):
+    iconDir = '../icon'
+
     def __init__(self):
         super().__init__()
         self.variableInit()
@@ -547,9 +549,8 @@ class BrightMainWindow(ShineMainWindow):
             _ = pcapFile.read(24)
             while pcapFile.tell() != fileSize:
                 index += 1
-                ts_sec, ts_usec, incl_len, orig_len = struct.unpack('@I I I I',
-                                                                    pcapFile.read(
-                                                                        16))
+                ts_sec, ts_usec, incl_len, orig_len = struct.unpack(
+                    '@I I I I', pcapFile.read(16))
                 packet = pcapFile.read(incl_len)
                 self.unpackPacket(ts_sec, ts_usec, index, packet)
 
@@ -667,8 +668,7 @@ class BrightMainWindow(ShineMainWindow):
             item = QtWidgets.QListWidgetItem()
             item.setText('{} ({})'.format(node.vendor[:14], node.ipAddr))
             nodeIcon = self._selectIco(node.sort)
-            parentDir = '../icon/'
-            icoFile = '{}/{}'.format(parentDir, nodeIcon)
+            icoFile = '{}/{}'.format(BrightMainWindow.iconDir, nodeIcon)
             item.setIcon(QtGui.QIcon(icoFile))
             self.nodeListWidget.addItem(item)
 
@@ -949,8 +949,7 @@ class BrightMainWindow(ShineMainWindow):
         sipTabIndex = 3
         try:
             addr = self.conciseInfoTable.item(
-                self.conciseInfoTable.currentRow(),
-                addrPos).text()
+                self.conciseInfoTable.currentRow(), addrPos).text()
         except AttributeError:
             pass
         else:
@@ -960,8 +959,9 @@ class BrightMainWindow(ShineMainWindow):
                 self.sipLineEdit.setText(addr)
                 self.sipButton.click()
             else:
-                QtWidgets.QMessageBox.warning(self, 'Query Error',
-                                              'Make sure your query object is IP(eg: 8.8.8.8) address')
+                QtWidgets.QMessageBox.warning(
+                    self, 'Query Error',
+                    'Make sure your query object is IP(eg: 8.8.8.8) address')
 
     def _menuQueryProt(self):
         """ Concise table right crlick query terms """
@@ -970,8 +970,7 @@ class BrightMainWindow(ShineMainWindow):
         protField = 4
         try:
             term = self.conciseInfoTable.item(
-                self.conciseInfoTable.currentRow(),
-                protField).text()
+                self.conciseInfoTable.currentRow(), protField).text()
         except AttributeError:
             pass
         else:

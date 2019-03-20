@@ -3,10 +3,11 @@
 
 import os
 import sys
+import socket
 import subprocess
 from builtins import StopAsyncIteration
 
-import requests
+# import requests
 from PyQt5 import QtGui
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
@@ -19,6 +20,13 @@ ROOT = 1
 NETWORK = 2
 ROUTING = 4
 TCPDUMP = 8
+
+
+class NoFocusDelegate(QtWidgets.QStyledItemDelegate):
+    def paint(self, QPainter, QStyleOptionViewItem, QModelIndex):
+        if QStyleOptionViewItem.state & QtWidgets.QStyle.State_HasFocus:
+            QStyleOptionViewItem.state = QStyleOptionViewItem.state ^ QtWidgets.QStyle.State_HasFocus
+        super().paint(QPainter, QStyleOptionViewItem, QModelIndex)
 
 
 class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -36,6 +44,8 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}"
         "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])/([1-9]|[1-2][0-9]|3[0-2])$"
     )
+
+    iconDir = '../icon'
 
     def __init__(self, parent=None):
         super(QtWidgets.QMainWindow, self).__init__(parent)
@@ -60,12 +70,12 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             4. Adjust window in central of the screen
         """
 
-        # Task 1
+        # Task 1 1:0.61803
         self.resize(1000, 618)
         # Task 2
-        self.setWindowTitle('spruce -- a mix network analysis tool')
+        self.setWindowTitle('spruce -- a mix ethernet analysis tool')
         # Task 3
-        spruceIcon = '{}/{}'.format('../icon', 'spruce.ico')
+        spruceIcon = '{}/{}'.format(ShineMainWindow.iconDir, 'spruce.ico')
         self.setWindowIcon(QtGui.QIcon(spruceIcon))
         # Task 4
         screen = QtWidgets.QDesktopWidget().screenGeometry()
@@ -80,48 +90,47 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
 
         # Set menu icon
-        parentDir = '../icon/'
-        saveFile = '{}/{}'.format(parentDir, 'save.ico')
+        saveFile = '{}/{}'.format(ShineMainWindow.iconDir, 'save.ico')
         saveIcon = QtGui.QIcon(saveFile)
         self.action_Save.setIcon(saveIcon)
 
-        openFile = '{}/{}'.format(parentDir, 'open.ico')
+        openFile = '{}/{}'.format(ShineMainWindow.iconDir, 'open.ico')
         openIcon = QtGui.QIcon(openFile)
         self.action_Open.setIcon(openIcon)
 
-        exitFile = '{}/{}'.format(parentDir, 'exit.ico')
+        exitFile = '{}/{}'.format(ShineMainWindow.iconDir, 'exit.ico')
         exitIcon = QtGui.QIcon(exitFile)
         self.action_close.setIcon(exitIcon)
 
-        startFile = '{}/{}'.format(parentDir, 'start.ico')
+        startFile = '{}/{}'.format(ShineMainWindow.iconDir, 'start.ico')
         startIcon = QtGui.QIcon(startFile)
         self.action_Start.setIcon(startIcon)
 
-        stopFile = '{}/{}'.format(parentDir, 'stop.ico')
+        stopFile = '{}/{}'.format(ShineMainWindow.iconDir, 'stop.ico')
         stopIcon = QtGui.QIcon(stopFile)
         self.action_Stop.setIcon(stopIcon)
 
-        restartFile = '{}/{}'.format(parentDir, 'restart.ico')
+        restartFile = '{}/{}'.format(ShineMainWindow.iconDir, 'restart.ico')
         restartIcon = QtGui.QIcon(restartFile)
         self.action_Restart.setIcon(restartIcon)
 
-        filterFile = '{}/{}'.format(parentDir, 'filter.ico')
+        filterFile = '{}/{}'.format(ShineMainWindow.iconDir, 'filter.ico')
         filterIcon = QtGui.QIcon(filterFile)
         self.action_Filter.setIcon(filterIcon)
 
-        authorFile = '{}/{}'.format(parentDir, 'author.ico')
+        authorFile = '{}/{}'.format(ShineMainWindow.iconDir, 'author.ico')
         authorIcon = QtGui.QIcon(authorFile)
         self.action_Author.setIcon(authorIcon)
 
-        refreshFile = '{}/{}'.format(parentDir, 'refresh.ico')
+        refreshFile = '{}/{}'.format(ShineMainWindow.iconDir, 'refresh.ico')
         refreshIcon = QtGui.QIcon(refreshFile)
         self.action_RefreshRank.setIcon(refreshIcon)
 
-        rankFile = '{}/{}'.format(parentDir, 'rank.ico')
+        rankFile = '{}/{}'.format(ShineMainWindow.iconDir, 'rank.ico')
         rankIcon = QtGui.QIcon(rankFile)
         self.action_Rank.setIcon(rankIcon)
 
-        helpFile = '{}/{}'.format(parentDir, 'help.ico')
+        helpFile = '{}/{}'.format(ShineMainWindow.iconDir, 'help.ico')
         helpIcon = QtGui.QIcon(helpFile)
         self.action_Help.setIcon(helpIcon)
 
@@ -149,10 +158,13 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                   | QtWidgets.QDockWidget.DockWidgetFloatable)
 
     def shineScanPanel(self):
-        """ Set process bar look much better """
+        """ Set scan panel look much better """
 
+        # http://blog.sina.com.cn/s/blog_a6fb6cc90101dd5u.html
+        # Remove the dotted border also keep the key focus
+        self.nodeListWidget.setItemDelegate(NoFocusDelegate())
         # Remove the dotted border and give up the key focus
-        self.nodeListWidget.setFocusPolicy(QtCore.Qt.NoFocus)
+        # self.nodeListWidget.setFocusPolicy(QtCore.Qt.NoFocus)
         self.scanProgressBar.setMinimum(100)
         self.scanProgressBar.setMaximum(100)
         self.scanProgressBar.setValue(0)
@@ -174,7 +186,9 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Text don't wrap
         self.conciseInfoTable.setWordWrap(False)
         # Remove the dotted border but give up the key focus
-        self.conciseInfoTable.setFocusPolicy(QtCore.Qt.NoFocus)
+        # self.conciseInfoTable.setFocusPolicy(QtCore.Qt.NoFocus)
+        # Remove the dotted border also keey the key focus
+        self.conciseInfoTable.setItemDelegate(NoFocusDelegate())
         # Remove focuse in title
         self.conciseInfoTable.horizontalHeader().setHighlightSections(False)
 
@@ -188,16 +202,17 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.statusBar = QtWidgets.QStatusBar(self)
         self.statusBar.setFixedHeight(35)
-        parentDir = '../icon/'
-        filterFile = '{}/{}'.format(parentDir, 'filter.ico')
+        filterFile = '{}/{}'.format(ShineMainWindow.iconDir, 'filter.ico')
         filterIco = QtGui.QPixmap(filterFile)
-        uploadFile = '{}/{}'.format(parentDir, 'upload.ico')
+        uploadFile = '{}/{}'.format(ShineMainWindow.iconDir, 'upload.ico')
         uploadIco = QtGui.QPixmap(uploadFile)
-        downloadFile = '{}/{}'.format(parentDir, 'download.ico')
+        downloadFile = '{}/{}'.format(ShineMainWindow.iconDir, 'download.ico')
         downloadIco = QtGui.QPixmap(downloadFile)
-        packageSentFile = '{}/{}'.format(parentDir, 'packageSent.ico')
+        packageSentFile = '{}/{}'.format(ShineMainWindow.iconDir,
+                                         'packageSent.ico')
         packageSentIco = QtGui.QPixmap(packageSentFile)
-        packageRecvFile = '{}/{}'.format(parentDir, 'packageRecv.ico')
+        packageRecvFile = '{}/{}'.format(ShineMainWindow.iconDir,
+                                         'packageRecv.ico')
         packageRecvIco = QtGui.QPixmap(packageRecvFile)
 
         self.filterLabel = QtWidgets.QLabel('filter: disable')
@@ -276,14 +291,24 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def networkStartUpCheck(self):
         """ Return 2 if network is startup else return 0 """
 
-        test_web = 'http://ipinfo.io/ip'
-        timeout = 0.5
+        host = '114.114.114.114'
+        port = 53
         try:
-            page = requests.get(test_web, timeout=timeout)
+            # socket.setdefaulttimeout(1)
+            socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host,
+                                                                       port))
             return 2
-        except (requests.ConnectionError, requests.ConnectTimeout,
-                requests.ReadTimeout):
+        except Exception:
             return 0
+
+        # test_web = 'http://ipinfo.io/ip'
+        # timeout = 0.5
+        # try:
+        #     page = requests.get(test_web, timeout=timeout)
+        #     return 2
+        # except (requests.ConnectionError, requests.ConnectTimeout,
+        #         requests.ReadTimeout):
+        #     return 0
 
     def ipRoutingCheck(self):
         """ Return 4 if ip routing is open else return 0"""
@@ -306,7 +331,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # Action triggered
     # ----------------
     def triggerInit(self):
-        """ menu acion trigger initial """
+        """ menu static acion trigger initial """
 
         self.action_close.triggered.connect(self.close)
         self.action_Rank.triggered.connect(self.showRankDialog)
@@ -322,10 +347,9 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.rank = self.getRank()
         rankDialog = Ui_RankDialog(self)
 
-        parentDir = '../icon/'
-        trueFile = '{}/{}'.format(parentDir, 'true.ico')
+        trueFile = '{}/{}'.format(ShineMainWindow.iconDir, 'true.ico')
         trueIco = QtGui.QPixmap(trueFile)
-        falseFile = '{}/{}'.format(parentDir, 'false.ico')
+        falseFile = '{}/{}'.format(ShineMainWindow.iconDir, 'false.ico')
         falseIco = QtGui.QPixmap(falseFile)
 
         # Use `and` operator to get current active level
@@ -539,12 +563,11 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """ Scan Dock, conciseTable, verboseTab, decodeTab initial """
 
         # Scan dock
-        parentDir = '../icon'
-        startFile = '{}/{}'.format(parentDir, 'start.ico')
+        startFile = '{}/{}'.format(ShineMainWindow.iconDir, 'start.ico')
         startIcon = QtGui.QIcon(startFile)
         self.analysisButton.setIcon(startIcon)
 
-        stopFile = '{}/{}'.format(parentDir, 'stop.ico')
+        stopFile = '{}/{}'.format(ShineMainWindow.iconDir, 'stop.ico')
         stopIcon = QtGui.QIcon(stopFile)
         self.stopButton.setIcon(stopIcon)
 
