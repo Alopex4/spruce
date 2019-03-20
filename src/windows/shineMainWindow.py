@@ -450,18 +450,18 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.rank & NETWORK == NETWORK:
             self.searchTab.setEnabled(True)
             self.ipinfoTab.setEnabled(True)
+            self.termTab.setEnabled(True)
         else:
             self.searchTab.setEnabled(False)
             self.ipinfoTab.setEnabled(False)
+            self.termTab.setEnabled(False)
 
         if ((ROOT | NETWORK) & self.rank) == (ROOT | NETWORK):
             self.networkTab.setEnabled(True)
             self.scanTab.setEnabled(True)
-            self.termTab.setEnabled(True)
         else:
             self.networkTab.setEnabled(False)
             self.scanTab.setEnabled(False)
-            self.termTab.setEnabled(False)
 
     def ctlPanelContInit(self):
         """
@@ -481,9 +481,9 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         rangeValidator = QtGui.QRegExpValidator(rangeRegexExp,
                                                 self.rangeLineEdit)
         self.rangeLineEdit.setValidator(rangeValidator)
-        self.rangeLineEdit.setPlaceholderText('eg: 192.168.1-100')
-        self.rangeLineEdit.setToolTip('Input Example: 192.168.1.1-100')
-        self.rangeLineEdit.setStatusTip('Input Example: 192.168.1.1-100')
+        self.rangeLineEdit.setPlaceholderText('eg: 192.168.1.0-10')
+        self.rangeLineEdit.setToolTip('Input example: 192.168.1.0-10')
+        self.rangeLineEdit.setStatusTip('Specific your scan ip range.')
         self.rangeLineEdit.setAlignment(QtCore.Qt.AlignCenter)
 
         maskRegexExp = QtCore.QRegExp(ShineMainWindow.maskRegex)
@@ -491,14 +491,14 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.maskLineEdit.setValidator(maskValidator)
         self.maskLineEdit.setPlaceholderText('eg: 192.168.0/24')
         self.maskLineEdit.setToolTip('Input Example: 192.168.1.0/24')
-        self.maskLineEdit.setStatusTip('Input Example: 192.168.1.0/24')
+        self.maskLineEdit.setStatusTip('Specific your scan ip mask.')
         self.maskLineEdit.setAlignment(QtCore.Qt.AlignCenter)
 
         # Search Tab
         self.searchLineEdit.setPlaceholderText('eg: http or https')
-        self.searchLineEdit.setToolTip('search protocol')
+        self.searchLineEdit.setToolTip('Specific protocol you want to display')
         self.searchLineEdit.setStatusTip(
-            'display the specific protocol after you start analysis')
+            'Display the specific protocol after you stop analysis')
         self.searchButton.setEnabled(False)
 
         # Info Tab
@@ -506,11 +506,11 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ipValidator = QtGui.QRegExpValidator(ipRegexExp, self.sipLineEdit)
         self.sipLineEdit.setValidator(ipValidator)
         self.sipLineEdit.setPlaceholderText('eg: 8.8.8.8')
-        self.sipLineEdit.setStatusTip(
-            'Input an ip you want to query (defulat: query your public ip)')
         self.sipLineEdit.setToolTip('Input Example: 8.8.8.8')
+        self.sipLineEdit.setStatusTip(
+            'Specific an ip you want to query (defulat: query your public ip)')
 
-        demoText = """{
+        demoQueryText = """{
     "ip": "8.8.8.8",
     "hostname": "google-public-dns-a.google.com",
     "city": "Mountain View",
@@ -522,26 +522,28 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     "org": "AS15169 Google LLC"
 }
         """
-        self.sipTextEdit.setPlaceholderText(demoText)
+        self.sipTextEdit.setPlaceholderText(demoQueryText)
         self.sipTextEdit.setReadOnly(True)
 
         # Term Tab
         self.termLineEdit.setPlaceholderText('eg: linux')
-        self.termLineEdit.setStatusTip('Query computer terms you want to know')
+        self.termLineEdit.setToolTip('Input example: linux')
+        self.termLineEdit.setStatusTip(
+            'Query computer terminology you want to know.')
         demoTermText = """
-        <p>Linux (pronounced "lih-nux", not "lie-nux") is a Unix-like 
-        <a href="/definition/operating_system">operating system</a> (OS) 
-        created by Linus Torvalds. He developed Linux because he wasn't 
-        happy with the currently available options in
-         <a href="/definition/unix">Unix</a> and felt he could improve it. 
-         So he did what anybody else would do, and created his own operating system.</p>
-        <p>When Linus finished building a working version of Linux, he freely 
-        distributed the OS, which helped it gain popularity.  Today, Linux is 
-        used by millions of people around the world.  Many computer hobbyists 
-        (a.k.a. nerds) like the operating system because it is highly 
-        customizable.  Programmers can even modify the 
-        <a href="/definition/sourcecode">source code</a> and create their own 
-        unique version of the Linux operating system.</p>
+    <p>Linux (pronounced "lih-nux", not "lie-nux") is a Unix-like 
+    <a href="/definition/operating_system">operating system</a> (OS) 
+    created by Linus Torvalds. He developed Linux because he wasn't 
+    happy with the currently available options in
+     <a href="/definition/unix">Unix</a> and felt he could improve it. 
+     So he did what anybody else would do, and created his own operating system.</p>
+    <p>When Linus finished building a working version of Linux, he freely 
+    distributed the OS, which helped it gain popularity.  Today, Linux is 
+    used by millions of people around the world.  Many computer hobbyists 
+    (a.k.a. nerds) like the operating system because it is highly 
+    customizable.  Programmers can even modify the 
+    <a href="/definition/sourcecode">source code</a> and create their own 
+    unique version of the Linux operating system.</p>
         """
         self.termTextEdit.setText(demoTermText)
         self.termTextEdit.setReadOnly(True)
@@ -597,7 +599,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # NodeList
         self.nodeListWidget.clear()
-        # fix bug --> analysis button text init1ial
+        # fix bug --> analysis button text initial
         self.analysisButton.setText('analysis')
         self.analysisButton.setEnabled(False)
         self.action_Start.setEnabled(False)
@@ -608,10 +610,10 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Verbose tabs
         self.linkTextEdit.clear()
         self.interTextEdit.clear()
-        self.TransTextEdit.clear()
+        self.transTextEdit.clear()
+        self.appTextEdit.clear()
 
         # Decode tabs
-        self.appTextEdit.clear()
         self.rawTextEdit.clear()
         self.hexTextEdit.clear()
 
@@ -638,6 +640,9 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Query tab
         self.sipLineEdit.clear()
         self.sipTextEdit.clear()
+
+        # Terms tab
+        self.termLineEdit.clear()
 
     def clearStatusBarText(self):
         """ Status bar text initial """

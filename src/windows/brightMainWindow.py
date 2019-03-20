@@ -6,6 +6,8 @@ import csv
 import json
 import struct
 import subprocess
+from time import sleep
+from copy import deepcopy
 from functools import namedtuple
 
 import netifaces
@@ -62,6 +64,9 @@ class BrightMainWindow(ShineMainWindow):
         # Store all the process packet
         self.rarePkts = []
 
+        # Search package
+        self.searchPkts = []
+
     def signalSlotMap(self):
         """
             Signal and slot mapping
@@ -107,31 +112,42 @@ class BrightMainWindow(ShineMainWindow):
         self.analysisButton.clicked.connect(self.analysisManage)
         self.stopButton.clicked.connect(self.stopManage)
 
+    def XWarning(self, title, warningTips):
+        """ Display all type of  warning message """
+
+        QtWidgets.QMessageBox.warning(self, title, warningTips,
+                                      QtWidgets.QMessageBox.Yes)
+
+    # --------------
+    # refersh Button
+    # --------------
     def refreshBtnClick(self):
         """
             Clicked the `refresh` button
+            * Test the network connection
             1. Acquire local netork work information
             2. Acquire gateway network information
             3. Display the information to the lineEdit
             4. Scan tab fill the lineEdit
             5. Export Menu active
         """
+        connect = self.networkStartUpCheck()
+        if connect:
+            # Acquire local info
+            self._networkInfoAcq()
 
-        # Acquire local info
-        self._networkInfoAcq()
+            # Accquire gateway info
+            self._gatewayInfoAcq()
 
-        # Accquire gateway info
-        self._gatewayInfoAcq()
+            # Display the info
+            self._displayNetInfo()
 
-        # Display the info
-        self._displayNetInfo()
+            # Wire info to Scan tab
+            self._fillScanTab()
 
-        # Wire info to Scan tab
-        self._fillScanTab()
-
-        # Export menu active
-        self.menu_export.setEnabled(True)
-        self.menuNetwork_info.setEnabled(True)
+            # Export menu active
+            self.menu_export.setEnabled(True)
+            self.menuNetwork_info.setEnabled(True)
 
     def _networkInfoAcq(self):
         """ 
@@ -160,11 +176,26 @@ class BrightMainWindow(ShineMainWindow):
         self.vendor = self._macQueryVendor(self.macAddr)
 
     def _getWiredNetName(self):
-        """ Get wired network interface name (include 'en') """
+        """
+            Get wired network interface name (include 'en' or 'eth')
+                * New style:
+                    enp0s10:
+                     v | |
+                    en | |  -- ethernet
+                       v |
+                      p0 |  -- bus number (0)
+                         v
+                        s10 -- slot number (10)
+                * Old style:
+                    eth --> ethernet
+        """
 
-        for netName in netifaces.interfaces():
-            if 'en' in netName:
-                return netName
+        interfaces = netifaces.interfaces()
+        for ifName in interfaces:
+            if 'en' in ifName:
+                return ifName
+            elif 'eth' in ifName:
+                return ifName
 
     def _gatewayInfoAcq(self):
         """ 
@@ -182,8 +213,8 @@ class BrightMainWindow(ShineMainWindow):
             self.gwMacAddr = r.decode('utf-8').replace('\n', '')
             self.gwVendor = self._macQueryVendor(self.gwMacAddr)
         elif self.nicType == 'ppp':
-            self.gwMacAddr = '`pppoe` link no gateway mac'
-            self.gwVendor = '`pppoe` link no gateway vendor'
+            self.gwMacAddr = '`ppp` link no gateway mac'
+            self.gwVendor = '`ppp` link no gateway vendor'
 
     def _macQueryVendor(self, macAddr):
         """ 
@@ -360,6 +391,9 @@ class BrightMainWindow(ShineMainWindow):
             lanData,
             txtRows=True)
 
+    # ---------------
+    # export template
+    # ---------------
     def _fileExportTpl(self,
                        dialogName,
                        fileFilter,
@@ -433,6 +467,9 @@ class BrightMainWindow(ShineMainWindow):
                 saveFileName = saveFileName + suffix
         return saveFileName
 
+    # ---------
+    # Save file
+    # ---------
     def showSaveFile(self):
         """
             Menubar --> File --> &save
@@ -492,6 +529,9 @@ class BrightMainWindow(ShineMainWindow):
                                 pkt.pktLen))
                 pcapFile.write(pkt.pktData)
 
+    # ---------
+    # open file
+    # ---------
     def showOpenFile(self):
         """
             Menubar --> File --> &open
@@ -508,13 +548,19 @@ class BrightMainWindow(ShineMainWindow):
         openFileName, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, 'open file', '.', "packet files (*.pcap)")
         if openFileName:
-            verified = self.checkPcapFile(openFileName)
+            verified = self._checkPcapFile(openFileName)
             if verified:
                 self._readWidgetChange()
                 self.readPacpFile(openFileName)
-                self.showTableMenu()
+                self.menu_export.setEnabled(True)
+                self.menuPackets_info.setEnabled(True)
+                connect = self.networkStartUpCheck()
+                if connect:
+                    self.showTableMenu()
             else:
-                self.openWarning()
+                title = 'Open waring'
+                tips = 'Make sure your open file is `pacp` file'
+                self.XWarning(title, tips)
 
     def _readWidgetChange(self):
         """ Read file widget change """
@@ -527,7 +573,11 @@ class BrightMainWindow(ShineMainWindow):
         self.decodeInfoTab.setEnabled(True)
         self.searchButton.setEnabled(True)
 
-    def checkPcapFile(self, fileName):
+        self.menu_protocol.setEnabled(True)
+        self.menu_length.setEnabled(True)
+        self.menu_time.setEnabled(True)
+
+    def _checkPcapFile(self, fileName):
         """ Check whether it's a pcap file """
 
         with open(fileName, 'rb') as diskFile:
@@ -554,18 +604,12 @@ class BrightMainWindow(ShineMainWindow):
                 packet = pcapFile.read(incl_len)
                 self.unpackPacket(ts_sec, ts_usec, index, packet)
 
-    def openWarning(self):
-        """ If the opening file isn't pcap file trigger the warning """
-
-        title = 'open waring'
-        tips = 'Make sure your open file is `pacp` file'
-        QtWidgets.QMessageBox.warning(self, title, tips)
-
     # -----------
     # scan method
     # -----------
     def scanLanNet(self, scanTarget):
         """
+            * Make sure it's a ip address at least has a dot
             Reset the nodeListWidget current row avoid index out or range
             Store a nodesList data
             Scan thread work to scan Lan network
@@ -573,26 +617,26 @@ class BrightMainWindow(ShineMainWindow):
             When the scan parameter is wrong, emit tips message
         """
 
-        self.nodeListWidget.setCurrentRow(-1)
-        self.nodeItems.clear()
-        self.nodeListWidget.clear()
-        localNode = self.node(self.ipAddr, self.macAddr, self.vendor, 'local')
-        self.nodeItems.append(localNode)
+        if '.' in scanTarget:
+            self.nodeListWidget.setCurrentRow(-1)
+            self.nodeItems.clear()
+            self.nodeListWidget.clear()
+            localNode = self.node(self.ipAddr, self.macAddr, self.vendor,
+                                  'local')
+            self.nodeItems.append(localNode)
 
-        self.scanWorker = ScanThread(self.inetName, scanTarget, self.macAddr,
-                                     self.gwIpAddr, self.node, self.nodeItems,
-                                     self.nicType)
+            self.scanWorker = ScanThread(self.inetName, scanTarget,
+                                         self.macAddr,
+                                         self.gwIpAddr, self.node,
+                                         self.nodeItems,
+                                         self.nicType)
 
-        self.scanWorker.finishSignal[bool, str].connect(self.notifyRelatePanel)
-        self.scanWorker.finishSignal[bool].connect(self.notifyRelatePanel)
-        self.scanWorker.warnSignal.connect(self.scanWarnMessage)
-        self.scanWorker.updateSignal.connect(self.scanNodesInsert)
-        self.scanWorker.start()
-
-    def scanWarnMessage(self, title, warningTips):
-        """ Display scan Warning message """
-
-        QtWidgets.QMessageBox.warning(self, title, warningTips)
+            self.scanWorker.finishSignal[bool, str].connect(
+                self.notifyRelatePanel)
+            self.scanWorker.finishSignal[bool].connect(self.notifyRelatePanel)
+            self.scanWorker.warnSignal.connect(self.XWarning)
+            self.scanWorker.updateSignal.connect(self.scanNodesInsert)
+            self.scanWorker.start()
 
     def notifyRelatePanel(self, finish, scanTarget=None):
         """
@@ -753,30 +797,36 @@ class BrightMainWindow(ShineMainWindow):
     # search button
     # -------------
     def searchProt(self):
-        """ Protocol search button click """
+        """
+            Protocol search button click
+                * search container initial
+                * get the search protocol
+                * filter the package
+         """
 
-        searchPkts = []
+        self.searchPkts.clear()
         prot = self.searchLineEdit.text().strip().lower()
         matchProt = RoughPacket.supportPort
         if prot in matchProt:
             for pkt in self.rarePkts:
                 if prot in pkt.pktProtStack:
-                    searchPkts.append(pkt)
+                    self.searchPkts.append(pkt)
         elif prot == '':
-            searchPkts = self.rarePkts
+            # The rarePkts item is instance so it show be deepcopy
+            self.searchPkts = deepcopy(self.rarePkts)
         else:
-            return self.searchWarning(matchProt)
+            title = 'Search warning'
+            matchProt.sort()
+            support = str(matchProt).replace("'", '').strip('[').strip(
+                ']')
+            tips = "Make sure your seach key contain in below :\n" + support
+            return self.XWarning(title, tips)
 
         self.conciseInfoTable.setRowCount(0)
         self.conciseInfoTable.clearContents()
-        for pkt in searchPkts:
+        for pkt in self.searchPkts:
             self.insertBriefPkt(pkt)
         self.conciseInfoTable.scrollToTop()
-
-    def searchWarning(self, matchProt):
-        title = 'Search warning'
-        tips = "Make sure your seach key word match protocol" + str(matchProt)
-        QtWidgets.QMessageBox.warning(self, title, tips)
 
     # ----------------------
     # analysis button change
@@ -822,6 +872,7 @@ class BrightMainWindow(ShineMainWindow):
                 * capture packets and timestamps
             * Display info to conciseTable
         """
+        title = 'Analysis warn!'
 
         routingTips = '''Tips:\n
 * Make sure you already open ip-routing.\n
@@ -836,20 +887,22 @@ class BrightMainWindow(ShineMainWindow):
         nodeIndex = self.nodeListWidget.currentRow()
         nodeInfo = self.nodeItems[nodeIndex]
 
-        self.analClkWidgetChange()
         filterMacros = self.analClkFilterMacro(nodeInfo)
         if filterMacros:
             Done = self.analClkCapture(nodeInfo, filterMacros)
             if Done:
+                self.analClkWidgetChange()
                 self.analClkNetworkTraffic()
             else:
-                self._analysisWarn(routingTips)
+                self.stopClkWidgetChange()
+                return self.XWarning(title, routingTips)
         else:
-            self._analysisWarn(filterTips)
+            self.stopClkWidgetChange()
+            return self.XWarning(title, filterTips)
 
-    def _analysisWarn(self, tips, title='Analysis warn!'):
-        self.stopClkWidgetChange()
-        QtWidgets.QMessageBox.warning(self, title, tips)
+    # def _analysisWarn(self, tips, title='Analysis warn!'):
+    #     self.stopClkWidgetChange()
+    #     QtWidgets.QMessageBox.warning(self, title, tips)
 
     def analClkWidgetChange(self):
         """
@@ -902,8 +955,8 @@ class BrightMainWindow(ShineMainWindow):
         self.interTextEdit.setReadOnly(True)
         self.interTab.setEnabled(True)
 
-        self.TransTextEdit.clear()
-        self.TransTextEdit.setReadOnly(True)
+        self.transTextEdit.clear()
+        self.transTextEdit.setReadOnly(True)
         self.transTab.setEnabled(True)
 
         self.appTextEdit.clear()
@@ -959,9 +1012,9 @@ class BrightMainWindow(ShineMainWindow):
                 self.sipLineEdit.setText(addr)
                 self.sipButton.click()
             else:
-                QtWidgets.QMessageBox.warning(
-                    self, 'Query Error',
-                    'Make sure your query object is IP(eg: 8.8.8.8) address')
+                title = 'Address Query Warning'
+                tips = 'Make sure your query object is IP(eg: 8.8.8.8) address)'
+                self.XWarning(title, tips)
 
     def _menuQueryProt(self):
         """ Concise table right crlick query terms """
@@ -1190,15 +1243,15 @@ class BrightMainWindow(ShineMainWindow):
         # Menu
         if self.rarePkts:
             self.action_Save.setEnabled(True)
+            self.menuPackets_info.setEnabled(True)
+            self.menu_Statistic.setEnabled(True)
+            self.menu_protocol.setEnabled(True)
+            self.menu_time.setEnabled(True)
+            self.menu_length.setEnabled(True)
         self.action_Open.setEnabled(True)
-        self.menuPackets_info.setEnabled(True)
         self.action_Start.setEnabled(True)
         self.action_Stop.setEnabled(False)
         self.action_Restart.setEnabled(False)
-        self.menu_Statistic.setEnabled(True)
-        self.menu_protocol.setEnabled(True)
-        self.menu_time.setEnabled(True)
-        self.menu_length.setEnabled(True)
         self.action_Filter.setEnabled(True)
         self.action_RefreshRank.setEnabled(True)
 
@@ -1259,4 +1312,5 @@ class BrightMainWindow(ShineMainWindow):
     # --------------
     def stopStart(self):
         self.stopButton.click()
+        sleep(0.5)
         self.analysisButton.click()
