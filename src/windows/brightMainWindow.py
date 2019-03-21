@@ -32,6 +32,14 @@ from windows.shineMainWindow import ShineMainWindow
 
 class BrightMainWindow(ShineMainWindow):
     iconDir = '../icon'
+    netfieldNames = [
+        'Interface name', 'IP address', 'Mac address', 'Vendor',
+        'Gateway IP address', 'Gateway Mac address', 'Gateway Vendor'
+    ]
+    lanFieldNames = ['ip address', 'mac address', 'vendor', 'sort']
+    pktFieldNames = ['No', 'Time', 'Source', 'Destination', 'Protocol',
+                     'Length',
+                     'Stack']
 
     def __init__(self):
         super().__init__()
@@ -80,6 +88,9 @@ class BrightMainWindow(ShineMainWindow):
         self.actionLANCSV.triggered.connect(self.lanCsvExport)
         self.actionLANJSON.triggered.connect(self.lanJsonExport)
         self.actionLANPlain.triggered.connect(self.lanPlainExport)
+        self.actionPktCSV.triggered.connect(self.pktCsvExport)
+        self.actionPktJSON.triggered.connect(self.pktJsonExport)
+        self.actionPktPlain.triggered.connect(self.pktPlainExport)
         self.action_Open.triggered.connect(self.showOpenFile)
         self.action_Save.triggered.connect(self.showSaveFile)
         self.action_Start.triggered.connect(self.analysisButton.click)
@@ -150,7 +161,7 @@ class BrightMainWindow(ShineMainWindow):
             self.menuNetwork_info.setEnabled(True)
 
     def _networkInfoAcq(self):
-        """ 
+        """
             Acquire network information
                 * Network Interface name
                 * Network IP
@@ -198,7 +209,7 @@ class BrightMainWindow(ShineMainWindow):
                 return ifName
 
     def _gatewayInfoAcq(self):
-        """ 
+        """
             Acquire gateway information
                 * Gateway IP
                 * Gateway MAC
@@ -217,8 +228,8 @@ class BrightMainWindow(ShineMainWindow):
             self.gwVendor = '`ppp` link no gateway vendor'
 
     def _macQueryVendor(self, macAddr):
-        """ 
-            Via a Mac address to query the vendor 
+        """
+            Via a Mac address to query the vendor
             OUI file head:
             Registry, Assignment, Organization Name, Organization Address
         """
@@ -253,8 +264,8 @@ class BrightMainWindow(ShineMainWindow):
         self.rangeLineEdit.setText(ipScanRange)
 
     def _calScanParm(self, ipAddr, netMask):
-        """ 
-            Generate the scan parameter 
+        """
+            Generate the scan parameter
             ipMask --> eg: 192.168.1.1/24
             ipRange --> eg: 192.168.1.0-10
         """
@@ -273,28 +284,24 @@ class BrightMainWindow(ShineMainWindow):
     # network export
     # --------------
     def netCsvExport(self):
-        """ 
+        """
             Format the network information to csv format
             File --> export --> networkInfo --> Csv
         """
 
         networkData = []
-        fieldNames = [
-            'Interface name', 'IP address', 'Mac address', 'Vendor',
-            'Gateway IP address', 'Gateway Mac address', 'Gateway Vendor'
-        ]
         fieldDatas = [
             self.inetName, self.ipAddr, self.macAddr, self.vendor,
             self.gwIpAddr, self.gwMacAddr, self.gwVendor
         ]
-        networkData.append(fieldNames)
+        networkData.append(BrightMainWindow.netfieldNames)
         networkData.append(fieldDatas)
 
         self._fileExportTpl('save network csv file', 'csv files(*.csv)',
                             '.csv', networkData)
 
     def netJsonExport(self):
-        """ 
+        """
             Format the network information to JSON format
             File --> export --> networkInfo --> Json
         """
@@ -312,25 +319,21 @@ class BrightMainWindow(ShineMainWindow):
                 'Vendor': self.gwVendor
             }
         }
-        self._fileExportTpl('save network JSON file', 'csv files(*.json)',
+        self._fileExportTpl('save network JSON file', 'json files(*.json)',
                             '.json', networkInfo)
 
     def netPlainExport(self):
-        """ 
+        """
             Format the network information to JSON format
             File --> export --> networkInfo --> Plain text
         """
 
         networkData = []
-        fieldNames = [
-            'Interface name', 'IP address', 'Mac address', 'Vendor',
-            'Gateway IP address', 'Gateway Mac address', 'Gateway Vendor'
-        ]
         fieldDatas = [
             self.inetName, self.ipAddr, self.macAddr, self.vendor,
             self.gwIpAddr, self.gwMacAddr, self.gwVendor
         ]
-        networkData.append(fieldNames)
+        networkData.append(BrightMainWindow.netfieldNames)
         networkData.append(fieldDatas)
         self._fileExportTpl('save network txt file', 'plain text files(*.txt)',
                             '.txt', networkData)
@@ -345,9 +348,8 @@ class BrightMainWindow(ShineMainWindow):
         """
 
         lanData = []
-        fieldNames = ['ip address', 'mac address', 'vendor', 'sort']
         fieldDatas = self.nodeItems
-        lanData.append(fieldNames)
+        lanData.append(BrightMainWindow.lanFieldNames)
         lanData.append(fieldDatas)
 
         self._fileExportTpl(
@@ -364,12 +366,12 @@ class BrightMainWindow(ShineMainWindow):
         """
 
         nodeDict = self.nodeItems
-        nodeNames = ['ip address', 'mac address', 'vendor', 'sort']
+        nodeNames = BrightMainWindow.lanFieldNames
         lanData = [
             dict(zip(nodeNames, nodeDict[i])) for i in range(len(nodeDict))
         ]
 
-        self._fileExportTpl('save network JSON file', 'csv files(*.json)',
+        self._fileExportTpl('save network JSON file', 'json files(*.json)',
                             '.json', lanData)
 
     def lanPlainExport(self):
@@ -379,9 +381,8 @@ class BrightMainWindow(ShineMainWindow):
         """
 
         lanData = []
-        fieldNames = ['ip address', 'mac address', 'vendor', 'sort']
         fieldDatas = self.nodeItems
-        lanData.append(fieldNames)
+        lanData.append(BrightMainWindow.lanFieldNames)
         lanData.append(fieldDatas)
 
         self._fileExportTpl(
@@ -390,6 +391,75 @@ class BrightMainWindow(ShineMainWindow):
             '.txt',
             lanData,
             txtRows=True)
+
+    # -------------
+    # packet export
+    # -------------
+    def pktCsvExport(self):
+        """
+            Format the packet information to Csv format
+            File --> export --> packet info --> Csv
+        """
+
+        pktData = []
+        fieldDatas = self._getExportPkt()
+        pktData.append(BrightMainWindow.pktFieldNames)
+        pktData.append(fieldDatas)
+
+        self._fileExportTpl(
+            'save packet csv file',
+            'csv files(*.csv)',
+            '.csv',
+            pktData,
+            csvRows=True)
+
+    def pktJsonExport(self):
+        """
+            Format the packet information to Json format
+            File --> export --> packet info --> Json
+        """
+
+        pktList = self._getExportPkt()
+        pktData = [
+            dict(zip(BrightMainWindow.pktFieldNames, pktList[i])) for i in
+            range(len(pktList))
+        ]
+
+        self._fileExportTpl('save packet JSON file', 'json files(*.json)',
+                            '.json', pktData)
+
+    def pktPlainExport(self):
+        """
+            Format the packet information to plain text format
+            File --> export --> packet info --> Plain
+        """
+
+        pktData = []
+        fieldDatas = self._getExportPkt()
+        pktData.append(BrightMainWindow.pktFieldNames)
+        pktData.append(fieldDatas)
+
+        self._fileExportTpl(
+            'save packet txt file',
+            'plain text files(*.txt)',
+            '.txt',
+            pktData,
+            txtRows=True)
+
+    def _getExportPkt(self):
+        """
+            Get the export packet brief info
+            * First check the searchPkts
+            * Second check the rarePkts
+                * All the pkt object get brief packet info
+        """
+
+        if self.searchPkts:
+            copyObj = self.searchPkts
+        else:
+            copyObj = self.rarePkts
+        exportPkts = deepcopy(copyObj)
+        return [pkt.getBriefPacket() for pkt in exportPkts]
 
     # ---------------
     # export template
@@ -405,6 +475,8 @@ class BrightMainWindow(ShineMainWindow):
         """
             General public file format export template
             According `fmt` save file in different way
+            csvRows --> multi lines
+            txtRows --> multi lines
         """
 
         saveFileName = self._exportFmtTpl(dialogName, fileFilter, suffix)
@@ -453,9 +525,9 @@ class BrightMainWindow(ShineMainWindow):
                                 key=itmes[0], value=itmes[1]))
 
     def _exportFmtTpl(self, dialogName, fileFilter, suffix, dirctory='.'):
-        """ 
-            Menubar --> File --> export ---> ... 
-            Export csv, json, plaint text format template 
+        """
+            Menubar --> File --> export ---> ...
+            Export csv, json, plaint text format template
         """
 
         # _ -> file type
