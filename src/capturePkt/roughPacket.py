@@ -13,7 +13,7 @@ class RoughPacket:
     CST = 8 * 60 * 60
     # http://www.networksorcery.com/enp/protocol/802/ethertypes.htm
     EtherMapUpper = {0x0800: 'IP', 0x0806: 'ARP', 0x86DD: 'IPv6',
-                     0x8863: 'PPoE', 0x8864: 'PPPoE', 0x888e: 'EAPOL'}
+                     0x8863: 'PPPoE-D', 0x8864: 'PPPoE-S', 0x888e: 'EAPOL'}
     # https://www.wikiwand.com/en/List_of_IP_protocol_numbers
     IPMapUpper = {0x00: 'HOPOPT', 0x01: 'ICMP', 0x02: 'IGMP', 0x06: 'TCP',
                   0x11: 'UDP', 0x29: 'IPv6', 0x3A: 'IPv6-ICMP'}
@@ -24,7 +24,8 @@ class RoughPacket:
                        137: 'NBNS', 443: 'HTTPS'}
     ProtColorMap = {'ARP': QtGui.QColor(239, 83, 80, 255),
                     'IPv6': QtGui.QColor(171, 71, 188, 100),
-                    'PPoE': QtGui.QColor(236, 64, 122, 100),
+                    'PPPoE-D': QtGui.QColor(236, 64, 122, 100),
+                    'PPPoE-S': QtGui.QColor(236, 64, 122, 180),
                     'ICMP': QtGui.QColor(255, 238, 88, 100),
                     'IGMP': QtGui.QColor(255, 167, 38, 100),
                     'TCP': QtGui.QColor(66, 165, 245, 100),
@@ -46,8 +47,9 @@ class RoughPacket:
                     'HOPOPT': QtGui.QColor(224, 64, 251, 100),
                     }
 
-    supportPort = [key.lower() for key in ProtColorMap.keys()]
-    supportPort.extend(['ip', 'ethernet'])
+    supportPort = set()
+    supportPort.update(['ip', 'ethernet'])
+    supportPort.update(key.lower() for key in ProtColorMap.keys())
 
     def __init__(self, sec, usec, index, pkt):
         # print(index, pkt)
@@ -58,7 +60,9 @@ class RoughPacket:
         self.pktSrc = 'Unknow'
         self.pktDst = 'Unknow'
         self.pktProt = 'Unknow'
+        # Stack string
         self.pktStack = 'Unknow'
+        # Stack data it should be list because the oder in under consider
         self.pktProtStack = ['ethernet']
         self.roughCook()
 
@@ -89,7 +93,7 @@ class RoughPacket:
             srcIp, dstIp = struct.unpack('!4s 4s', self.pktData[26:34])
             self.pktSrc = getIpv4(srcIp)
             self.pktDst = getIpv4(dstIp)
-        elif self.pktProt == 'ARP' or self.pktProt == 'EAPOL':
+        elif self.pktProt in ('ARP', 'EAPOL', 'PPPoE-D', 'PPPoE-S'):
             dstMac, srcMac = struct.unpack('!6s 6s', self.pktData[:12])
             self.pktDst = getMacAddr(dstMac)
             self.pktSrc = getMacAddr(srcMac)

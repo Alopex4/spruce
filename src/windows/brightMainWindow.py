@@ -872,33 +872,109 @@ class BrightMainWindow(ShineMainWindow):
         """
             Protocol search button click
                 * search container initial
-                * get the search protocol
-                * filter the package
+                * get search packages
+                * display the package
          """
 
         self.searchPkts.clear()
-        prot = self.searchLineEdit.text().strip().lower()
-        matchProt = RoughPacket.supportPort
-        if prot in matchProt:
-            for pkt in self.rarePkts:
-                if prot in pkt.pktProtStack:
-                    self.searchPkts.append(pkt)
-        elif prot == '':
-            # The rarePkts item is instance so it show be deepcopy
-            self.searchPkts = deepcopy(self.rarePkts)
-        else:
-            title = 'Search warning'
-            matchProt.sort()
-            support = str(matchProt).replace("'", '').strip('[').strip(
-                ']')
-            tips = "Make sure your seach key contain in below :\n" + support
-            return self.XWarning(title, tips)
-
+        self.searchPkts = self._matchProt()
         self.conciseInfoTable.setRowCount(0)
         self.conciseInfoTable.clearContents()
-        for pkt in self.searchPkts:
-            self.insertBriefPkt(pkt)
-        self.conciseInfoTable.scrollToTop()
+        if self.searchPkts:
+            for pkt in self.searchPkts:
+                self.insertBriefPkt(pkt)
+            self.conciseInfoTable.scrollToTop()
+
+    def _matchProt(self):
+        """ Match the search protocol then return package """
+
+        empty = ''
+        prots = self.searchLineEdit.text()
+        if prots is empty:
+            return deepcopy(self.rarePkts)
+        elif '.' in prots:
+            searchResult = self._nestSearch(prots)
+        elif ',' in prots:
+            searchResult = self._multiSearch(prots)
+        else:
+            searchResult = self._singleSearch(prots)
+
+        return searchResult
+
+    def _singleSearch(self, prot):
+        """ Single protocol search """
+
+        pktColletc = []
+        prot = prot.strip().lower()
+        protSet = {prot}
+        success = self._checkSearch(protSet)
+        if success:
+            for pkt in self.rarePkts:
+                if prot in pkt.pktProtStack:
+                    pktColletc.append(pkt)
+            return pktColletc
+        else:
+            self._searchWarning()
+            return []
+
+    def _multiSearch(self, prots):
+        """ Multi protocol search, separate protocol by a (,) """
+
+        pktsCollect = []
+        protSet = set([i.strip().lower() for i in prots.split(',')])
+
+        success = self._checkSearch(protSet)
+        if success:
+            for pkt in self.rarePkts:
+                # Ensure one of the protocol match stack
+                confirm = protSet & set(pkt.pktProtStack)
+                if confirm:
+                    pktsCollect.append(pkt)
+            return pktsCollect
+        else:
+            self._searchWarning()
+            return []
+
+    def _nestSearch(self, prots):
+        """ Nest protocl search, protocol separate by a (.) """
+
+        pktsCollect = []
+        protSet = set([i.strip().lower() for i in prots.split('.')])
+
+        success = self._checkSearch(protSet)
+        if success:
+            for pkt in self.rarePkts:
+                # Ensure every protocol match the stack
+                if protSet & set(pkt.pktProtStack) == protSet:
+                    pktsCollect.append(pkt)
+            return pktsCollect
+        else:
+            self._searchWarning()
+            return []
+
+    def _checkSearch(self, prot):
+        """ Check the search world whether under the search protocol """
+
+        matchProt = RoughPacket.supportPort
+        if prot & matchProt == prot:
+            return True
+        return False
+
+    def _searchWarning(self):
+        """ Search warning display the protol and tips """
+
+        matchProt = RoughPacket.supportPort
+        title = 'Search warning'
+        matchProt = sorted(matchProt)
+        support = str(matchProt).replace("'", '').strip('[').strip(
+            ']')
+        warning = "Make sure your seach protocol contain in below :\n" + support + '\n'
+        theLine = '-' * 100 + '\n'
+        commasTips = '(,) : Multi protocols should separated by commas.\n'
+        periodTips = '(.) : Nest protocols should separated by period.\n'
+        xTips = 'However, mark sure don\'t mix them together! \n'
+        tips = warning + theLine + commasTips + periodTips + xTips + theLine
+        self.XWarning(title, tips)
 
     # ----------------------
     # analysis button change
@@ -979,6 +1055,7 @@ class BrightMainWindow(ShineMainWindow):
     def analClkWidgetChange(self):
         """
             Analysis button click widget change
+                * reinitial the rare package container
                 * menu status manage
                 * control panel manage
                 * scan panel manage
@@ -986,6 +1063,8 @@ class BrightMainWindow(ShineMainWindow):
                 * concise table menu
         """
 
+        # packet container
+        self.rarePkts.clear()
         # Menu
         self.action_Save.setEnabled(False)
         self.action_Open.setEnabled(False)

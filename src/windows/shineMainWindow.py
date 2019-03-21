@@ -495,7 +495,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.maskLineEdit.setAlignment(QtCore.Qt.AlignCenter)
 
         # Search Tab
-        self.searchLineEdit.setPlaceholderText('eg: http or https')
+        self.searchLineEdit.setPlaceholderText('eg: ethernet.ip.tcp.http')
         self.searchLineEdit.setToolTip('Specific protocol you want to display')
         self.searchLineEdit.setStatusTip(
             'Display the specific protocol after you stop analysis')
