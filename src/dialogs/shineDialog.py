@@ -3,12 +3,22 @@
 
 import sys
 
+
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import Qt
+from time import sleep
 
 from dialogs.rankDialog import Ui_Form as shineRankDialoge
 from dialogs.authorDialog import Ui_Dialog as shineAuthorDialog
 from dialogs.filterDialog import Ui_Dialog as shineFilterDialog
 from dialogs.nodeDialog import Ui_Dialog as shineNodeDialog
+from dialogs.loadDialog import Ui_Dialog as shineLoadDialog
+
+# from rankDialog import Ui_Form as shineRankDialoge
+# from authorDialog import Ui_Dialog as shineAuthorDialog
+# from filterDialog import Ui_Dialog as shineFilterDialog
+# from nodeDialog import Ui_Dialog as shineNodeDialog
+# from loadDialog import Ui_Dialog as shineLoadDialog
 
 
 class Ui_RankDialog(QtWidgets.QDialog, shineRankDialoge):
@@ -330,8 +340,34 @@ class Ui_NodeDialog(QtWidgets.QDialog, shineNodeDialog):
         self.nodeTypeLineEdit.setAlignment(QtCore.Qt.AlignCenter)
 
 
+class Ui_LoadDialog(QtWidgets.QDialog, shineLoadDialog):
+
+    def __init__(self, parent=None):
+        super(QtWidgets.QDialog, self).__init__(parent)
+        self.setupUi(self)
+        self.setWindowIcon(QtGui.QIcon('../spruce.ico'))
+        self.setFixedSize(272, 440)
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+
+        loadFile = '../icon/loading.png'
+        loadMovie = QtGui.QPixmap(loadFile)
+        self.moveLabel.setPixmap(loadMovie)
+        self.moveLabel.setAlignment(QtCore.Qt.AlignCenter)
+
+        statusFont = QtGui.QFont()
+        statusFont.setBold(True)
+        statusFont.setPointSize(16)
+        self.statusLabel.setText('Pleas Wait ... ')
+        self.statusLabel.setFont(statusFont)
+        self.statusLabel.setAlignment(QtCore.Qt.AlignCenter)
+
+
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-    author = Ui_NodeDialog()
+    author = Ui_LoadDialog()
     author.show()
     sys.exit(app.exec_())

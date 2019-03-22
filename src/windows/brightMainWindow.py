@@ -24,9 +24,13 @@ from threads.scanThread import ScanThread
 from threads.trafficThread import TrafficThread
 from threads.poisonThread import PoisonThread
 from threads.captureThread import CaptureThread
+from threads.openThread import OpenThread
+from threads.saveThread import SaveThread
+from threads.searchThread import SearchThread
 # Menu open dialogs
 from dialogs.shineDialog import ui_FilterDialog
 from dialogs.shineDialog import Ui_NodeDialog
+from dialogs.shineDialog import Ui_LoadDialog
 from windows.shineMainWindow import ShineMainWindow
 
 
@@ -568,38 +572,10 @@ class BrightMainWindow(ShineMainWindow):
             * write the packet info
         """
 
-        # https://wiki.wireshark.org/Development/LibpcapFileFormat
-        # Header structure
-        # typedef struct pcap_hdr_s {
-        #         guint32 magic_number;   /* magic number */
-        #         guint16 version_major;  /* major version number */
-        #         guint16 version_minor;  /* minor version number */
-        #         gint32  thiszone;       /* GMT to local correction */
-        #         guint32 sigfigs;        /* accuracy of timestamps */
-        #         guint32 snaplen;        /* max length of captured packets, in octets */
-        #         guint32 network;        /* data link type */
-        # } pcap_hdr_t;
-
-        # Package structure
-        # typedef struct pcaprec_hdr_s {
-        #         guint32 ts_sec;         /* timestamp seconds */
-        #         guint32 ts_usec;        /* timestamp microseconds */
-        #         guint32 incl_len;       /* number of octets of packet saved in file */
-        #         guint32 orig_len;       /* actual length of packet */
-        # } pcaprec_hdr_t;
-
-        with open(filename, 'wb') as pcapFile:
-            # Header information
-            pcapFile.write(
-                struct.pack('@ I H H i I I I', 0xa1b2c3d4, 2, 4, 0, 0, 65535,
-                            1))
-
-            # Package information
-            for pkt in self.rarePkts:
-                pcapFile.write(
-                    struct.pack('@ I I I I', pkt.sec, pkt.usec, pkt.pktLen,
-                                pkt.pktLen))
-                pcapFile.write(pkt.pktData)
+        self.saveWorker = SaveThread(filename, self.rarePkts)
+        self.saveWorker.started.connect(lambda: self.loadingWindow(True))
+        self.saveWorker.finished.connect(lambda: self.loadingWindow(False))
+        self.saveWorker.start()
 
     # ---------
     # open file
@@ -664,17 +640,22 @@ class BrightMainWindow(ShineMainWindow):
             Read the pcap file generate the raraPkts
         """
 
-        index = 0
         fileSize = os.path.getsize(openFileName)
-        with open(openFileName, 'rb') as pcapFile:
-            # Remove the header info
-            _ = pcapFile.read(24)
-            while pcapFile.tell() != fileSize:
-                index += 1
-                ts_sec, ts_usec, incl_len, orig_len = struct.unpack(
-                    '@I I I I', pcapFile.read(16))
-                packet = pcapFile.read(incl_len)
-                self.unpackPacket(ts_sec, ts_usec, index, packet)
+
+        self.openWorker = OpenThread(openFileName, fileSize)
+        self.openWorker.readSignal.connect(self.unpackPacket)
+        # If file size gt 5M --> show waiting
+        if fileSize > 5000000:
+            self.openWorker.started.connect(lambda: self.loadingWindow(True))
+            self.openWorker.finished.connect(lambda: self.loadingWindow(False))
+        self.openWorker.start()
+
+    def loadingWindow(self, popUp):
+        if popUp:
+            self.LoadDialog = Ui_LoadDialog()
+            self.LoadDialog.exec_()
+        else:
+            self.LoadDialog.close()
 
     # -----------
     # scan method
@@ -881,8 +862,11 @@ class BrightMainWindow(ShineMainWindow):
         self.conciseInfoTable.setRowCount(0)
         self.conciseInfoTable.clearContents()
         if self.searchPkts:
-            for pkt in self.searchPkts:
-                self.insertBriefPkt(pkt)
+            self.searchWorker = SearchThread(self.searchPkts)
+            self.searchWorker.searchSignal.connect(self.insertBriefPkt)
+            self.searchWorker.started.connect(lambda: self.loadingWindow(True))
+            self.searchWorker.finished.connect(lambda: self.loadingWindow(False))
+            self.searchWorker.start()
             self.conciseInfoTable.scrollToTop()
 
     def _matchProt(self):
