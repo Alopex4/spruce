@@ -127,6 +127,11 @@ class BrightMainWindow(ShineMainWindow):
         self.analysisButton.clicked.connect(self.analysisManage)
         self.stopButton.clicked.connect(self.stopManage)
 
+        # Concise table mapping
+        # Item select by mouse or arrow
+        self.conciseInfoTable.itemSelectionChanged.connect(
+            lambda: self.parsePacket(self.conciseInfoTable.currentRow()))
+
     def XWarning(self, title, warningTips):
         """ Display all type of  warning message """
 
@@ -573,8 +578,9 @@ class BrightMainWindow(ShineMainWindow):
         """
 
         self.saveWorker = SaveThread(filename, self.rarePkts)
-        self.saveWorker.started.connect(lambda: self.loadingWindow(True))
-        self.saveWorker.finished.connect(lambda: self.loadingWindow(False))
+        if len(self.rarePkts) > 5000:
+            self.saveWorker.started.connect(lambda: self.loadingWindow(True))
+            self.saveWorker.finished.connect(lambda: self.loadingWindow(False))
         self.saveWorker.start()
 
     # ---------
@@ -617,7 +623,22 @@ class BrightMainWindow(ShineMainWindow):
         self.conciseInfoTable.setRowCount(0)
         self.conciseInfoTable.clearContents()
         self.conciseInfoTable.setEnabled(True)
+        self.linkTab.setEnabled(True)
+        self.interTab.setEnabled(True)
+        self.transTab.setEnabled(True)
+        self.appTextEdit.setEnabled(True)
+        self.linkTextEdit.setEnabled(True)
+        self.linkTextEdit.setReadOnly(True)
+        self.interTextEdit.setEnabled(True)
+        self.interTextEdit.setReadOnly(True)
+        self.transTextEdit.setEnabled(True)
+        self.transTextEdit.setReadOnly(True)
+        self.appTextEdit.setEnabled(True)
+        self.appTextEdit.setReadOnly(True)
+
         self.verboseInfoTab.setEnabled(True)
+        self.hexTab.setEnabled(True)
+        self.rawTab.setEnabled(True)
         self.decodeInfoTab.setEnabled(True)
         self.searchButton.setEnabled(True)
 
@@ -861,13 +882,35 @@ class BrightMainWindow(ShineMainWindow):
         self.searchPkts = self._matchProt()
         self.conciseInfoTable.setRowCount(0)
         self.conciseInfoTable.clearContents()
+        self._cleanTabs()
         if self.searchPkts:
             self.searchWorker = SearchThread(self.searchPkts)
+            self.searchWorker.scrollSignal.connect(
+                self.conciseInfoTable.scrollToTop)
             self.searchWorker.searchSignal.connect(self.insertBriefPkt)
-            self.searchWorker.started.connect(lambda: self.loadingWindow(True))
-            self.searchWorker.finished.connect(lambda: self.loadingWindow(False))
+            if len(self.searchPkts) > 3000:
+                self.searchWorker.started.connect(
+                    lambda: self.loadingWindow(True))
+                self.searchWorker.finished.connect(
+                    lambda: self.loadingWindow(False))
             self.searchWorker.start()
-            self.conciseInfoTable.scrollToTop()
+
+    def _cleanTabs(self):
+        # concise tabs
+        self.linkTextEdit.clear()
+        self.linkTextEdit.setStyleSheet("")
+        self.interTextEdit.clear()
+        self.interTextEdit.setStyleSheet("")
+        self.transTextEdit.clear()
+        self.transTextEdit.setStyleSheet("")
+        self.appTextEdit.clear()
+        self.appTextEdit.setStyleSheet("")
+
+        # verbose tabs
+        self.hexTextEdit.clear()
+        self.hexTextEdit.setStyleSheet("")
+        self.rawTextEdit.clear()
+        self.rawTextEdit.setStyleSheet("")
 
     def _matchProt(self):
         """ Match the search protocol then return package """
@@ -1107,6 +1150,7 @@ class BrightMainWindow(ShineMainWindow):
         self.hexTextEdit.setReadOnly(True)
         self.hexTab.setEnabled(True)
         self.decodeInfoTab.setEnabled(True)
+        self._cleanTabs()
 
         # table menu
         self.showTableMenu()
@@ -1408,7 +1452,7 @@ class BrightMainWindow(ShineMainWindow):
         self.stopButton.setEnabled(False)
 
         # conciseTable, verboseTabs, decodeTabs manage
-        pass
+        self._cleanTabs()
 
         # Status bar
         self.clearStatusBarText()
@@ -1449,3 +1493,40 @@ class BrightMainWindow(ShineMainWindow):
         self.stopButton.click()
         sleep(0.5)
         self.analysisButton.click()
+
+    # ------------
+    # Parse packet
+    # ------------
+    def parsePacket(self, currentRow):
+        """ 
+            Parse the packet
+                * Get current packet color to set background
+                * Get the packet protocol stack to parse
+                * display the info to tabs
+        """
+
+        noPosit = 0
+        try:
+            index = self.conciseInfoTable.item(currentRow, noPosit).text()
+        except AttributeError:
+            pass
+        else:
+            index = int(index) - 1
+            packet = self.rarePkts[index]
+            bgColor = packet.getColor().getRgb()
+
+            fontColor = 'black'
+            fontSize = '16px'
+            tabsStyle = """background-color: rgba{}; 
+                           color: {}; 
+                           font-size: {};
+                           """.format(bgColor, fontColor, fontSize)
+
+            self.linkTextEdit.setStyleSheet(tabsStyle)
+            self.interTextEdit.setStyleSheet(tabsStyle)
+            self.transTextEdit.setStyleSheet(tabsStyle)
+            self.appTextEdit.setStyleSheet(tabsStyle)
+            self.rawTextEdit.setStyleSheet(tabsStyle)
+            self.hexTextEdit.setStyleSheet(tabsStyle)
+
+            self.linkTextEdit.setPlainText(str(index))

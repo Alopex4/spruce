@@ -13,7 +13,8 @@ class RoughPacket:
     CST = 8 * 60 * 60
     # http://www.networksorcery.com/enp/protocol/802/ethertypes.htm
     EtherMapUpper = {0x0800: 'IP', 0x0806: 'ARP', 0x86DD: 'IPv6',
-                     0x8863: 'PPPoE-D', 0x8864: 'PPPoE-S', 0x888e: 'EAPOL'}
+                     0x8863: 'PPPoE-D', 0x8864: 'PPPoE-S', 0x888e: 'EAPOL',
+                     0x8035: 'RARP'}
     # https://www.wikiwand.com/en/List_of_IP_protocol_numbers
     IPMapUpper = {0x00: 'HOPOPT', 0x01: 'ICMP', 0x02: 'IGMP', 0x06: 'TCP',
                   0x11: 'UDP', 0x29: 'IPv6', 0x3A: 'IPv6-ICMP'}
@@ -45,6 +46,7 @@ class RoughPacket:
                     'DHCP': QtGui.QColor(255, 87, 34, 100),
                     'EAPOL': QtGui.QColor(46, 125, 50, 100),
                     'HOPOPT': QtGui.QColor(224, 64, 251, 100),
+                    'RARP': QtGui.QColor(38, 166, 154, 100),
                     }
 
     supportPort = set()
@@ -93,7 +95,7 @@ class RoughPacket:
             srcIp, dstIp = struct.unpack('!4s 4s', self.pktData[26:34])
             self.pktSrc = getIpv4(srcIp)
             self.pktDst = getIpv4(dstIp)
-        elif self.pktProt in ('ARP', 'EAPOL', 'PPPoE-D', 'PPPoE-S'):
+        elif self.pktProt in ('ARP', 'RARP', 'EAPOL', 'PPPoE-D', 'PPPoE-S'):
             dstMac, srcMac = struct.unpack('!6s 6s', self.pktData[:12])
             self.pktDst = getMacAddr(dstMac)
             self.pktSrc = getMacAddr(srcMac)
