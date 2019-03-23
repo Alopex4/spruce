@@ -644,6 +644,22 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Terms tab
         self.termLineEdit.clear()
 
+        # concise tabs
+        self.linkTextEdit.clear()
+        self.linkTextEdit.setStyleSheet("")
+        self.interTextEdit.clear()
+        self.interTextEdit.setStyleSheet("")
+        self.transTextEdit.clear()
+        self.transTextEdit.setStyleSheet("")
+        self.appTextEdit.clear()
+        self.appTextEdit.setStyleSheet("")
+
+        # verbose tabs
+        self.utfTextEdit.clear()
+        self.utfTextEdit.setStyleSheet("")
+        self.rawTextEdit.clear()
+        self.rawTextEdit.setStyleSheet("")
+
     def clearStatusBarText(self):
         """ Status bar text initial """
 

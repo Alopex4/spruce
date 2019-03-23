@@ -1164,9 +1164,21 @@ class BrightMainWindow(ShineMainWindow):
             self.queryMenuShow)
 
         self.queryMenu = QtWidgets.QMenu()
+        sourceFile = '{}/{}'.format(ShineMainWindow.iconDir, 'source.ico')
+        sourceIcon = QtGui.QIcon(sourceFile)
         querySrc = self.queryMenu.addAction('Query source')
+        querySrc.setIcon(sourceIcon)
+
+        destinationFile = '{}/{}'.format(ShineMainWindow.iconDir,
+                                         'destination.ico')
+        destinationIcon = QtGui.QIcon(destinationFile)
         queryDst = self.queryMenu.addAction('Query destination')
+        queryDst.setIcon(destinationIcon)
+
+        protocolFile = '{}/{}'.format(ShineMainWindow.iconDir, 'protocol.ico')
+        protocolIcon = QtGui.QIcon(protocolFile)
         queryProt = self.queryMenu.addAction('Query protocol')
+        queryProt.setIcon(protocolIcon)
 
         querySrc.triggered.connect(lambda: self._menuQueryAddr(2))
         queryDst.triggered.connect(lambda: self._menuQueryAddr(3))
