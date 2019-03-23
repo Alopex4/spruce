@@ -27,6 +27,7 @@ from threads.captureThread import CaptureThread
 from threads.openThread import OpenThread
 from threads.saveThread import SaveThread
 from threads.searchThread import SearchThread
+from threads.parseThread import ParseThread
 # Menu open dialogs
 from dialogs.shineDialog import ui_FilterDialog
 from dialogs.shineDialog import Ui_NodeDialog
@@ -626,7 +627,7 @@ class BrightMainWindow(ShineMainWindow):
         self.linkTab.setEnabled(True)
         self.interTab.setEnabled(True)
         self.transTab.setEnabled(True)
-        self.appTextEdit.setEnabled(True)
+        self.appTab.setEnabled(True)
         self.linkTextEdit.setEnabled(True)
         self.linkTextEdit.setReadOnly(True)
         self.interTextEdit.setEnabled(True)
@@ -645,6 +646,8 @@ class BrightMainWindow(ShineMainWindow):
         self.menu_protocol.setEnabled(True)
         self.menu_length.setEnabled(True)
         self.menu_time.setEnabled(True)
+
+        self._resetTabs()
 
     def _checkPcapFile(self, fileName):
         """ Check whether it's a pcap file """
@@ -882,7 +885,7 @@ class BrightMainWindow(ShineMainWindow):
         self.searchPkts = self._matchProt()
         self.conciseInfoTable.setRowCount(0)
         self.conciseInfoTable.clearContents()
-        self._cleanTabs()
+        self._resetTabs()
         if self.searchPkts:
             self.searchWorker = SearchThread(self.searchPkts)
             self.searchWorker.scrollSignal.connect(
@@ -895,7 +898,7 @@ class BrightMainWindow(ShineMainWindow):
                     lambda: self.loadingWindow(False))
             self.searchWorker.start()
 
-    def _cleanTabs(self):
+    def _resetTabs(self):
         # concise tabs
         self.linkTextEdit.clear()
         self.linkTextEdit.setStyleSheet("")
@@ -1150,7 +1153,7 @@ class BrightMainWindow(ShineMainWindow):
         self.hexTextEdit.setReadOnly(True)
         self.hexTab.setEnabled(True)
         self.decodeInfoTab.setEnabled(True)
-        self._cleanTabs()
+        self._resetTabs()
 
         # table menu
         self.showTableMenu()
@@ -1407,6 +1410,11 @@ class BrightMainWindow(ShineMainWindow):
         except AttributeError:
             pass
 
+        try:
+            self.parseWorker.stop()
+        except AttributeError:
+            pass
+
         # Widget control manage
         self.stopClkWidgetChange()
 
@@ -1452,7 +1460,7 @@ class BrightMainWindow(ShineMainWindow):
         self.stopButton.setEnabled(False)
 
         # conciseTable, verboseTabs, decodeTabs manage
-        self._cleanTabs()
+        self._resetTabs()
 
         # Status bar
         self.clearStatusBarText()
@@ -1513,20 +1521,39 @@ class BrightMainWindow(ShineMainWindow):
         else:
             index = int(index) - 1
             packet = self.rarePkts[index]
-            bgColor = packet.getColor().getRgb()
+            color = packet.getColor().getRgb()
 
-            fontColor = 'black'
-            fontSize = '16px'
-            tabsStyle = """background-color: rgba{}; 
+            self.parseWorker = ParseThread(packet)
+            self.parseWorker.started.connect(lambda: self._followStyle(color))
+            self.parseWorker.cookedSignal.connect(self.displayParse)
+            self.parseWorker.start()
+
+    def displayParse(self, cookedPkt):
+        """ Display the parse info to verbose tabs and decode tabs """
+
+        self.linkTextEdit.setPlainText(cookedPkt.linkLayer)
+        self.interTextEdit.setPlainText(cookedPkt.interLayer)
+        self.transTextEdit.setPlainText(cookedPkt.transLayer)
+        self.appTextEdit.setPlainText(cookedPkt.appLayer)
+
+        self.rawTextEdit.setPlainText(cookedPkt.rawDecode)
+        self.hexTextEdit.setPlainText(cookedPkt.hexDecode)
+
+    def _followStyle(self, bgColor):
+        """ Follow the packet color set the verbose tabs and decode tabs style """
+
+        font = 'DejaVu Sans Mono, consolas'
+        fontColor = 'black'
+        fontSize = '16px'
+        tabsStyle = """background-color: rgba{}; 
                            color: {}; 
                            font-size: {};
-                           """.format(bgColor, fontColor, fontSize)
+                           font-family: {};
+                           """.format(bgColor, fontColor, fontSize, font)
 
-            self.linkTextEdit.setStyleSheet(tabsStyle)
-            self.interTextEdit.setStyleSheet(tabsStyle)
-            self.transTextEdit.setStyleSheet(tabsStyle)
-            self.appTextEdit.setStyleSheet(tabsStyle)
-            self.rawTextEdit.setStyleSheet(tabsStyle)
-            self.hexTextEdit.setStyleSheet(tabsStyle)
-
-            self.linkTextEdit.setPlainText(str(index))
+        self.linkTextEdit.setStyleSheet(tabsStyle)
+        self.interTextEdit.setStyleSheet(tabsStyle)
+        self.transTextEdit.setStyleSheet(tabsStyle)
+        self.appTextEdit.setStyleSheet(tabsStyle)
+        self.rawTextEdit.setStyleSheet(tabsStyle)
+        self.hexTextEdit.setStyleSheet(tabsStyle)

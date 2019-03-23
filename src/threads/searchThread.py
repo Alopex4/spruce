@@ -16,3 +16,7 @@ class SearchThread(QtCore.QThread):
         for pkt in self.package:
             self.searchSignal.emit(pkt)
         self.scrollSignal.emit()
+
+    def __del__(self):
+        self.quit()
+        self.wait()

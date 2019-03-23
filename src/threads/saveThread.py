@@ -11,6 +11,10 @@ class SaveThread(QtCore.QThread):
         self.file = fileName
         self.packets = packets
 
+    def __del__(self):
+        self.quit()
+        self.wait()
+
     def run(self):
         # https://wiki.wireshark.org/Development/LibpcapFileFormat
         # Header structure
