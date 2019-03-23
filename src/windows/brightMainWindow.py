@@ -1544,7 +1544,7 @@ class BrightMainWindow(ShineMainWindow):
 
         font = 'DejaVu Sans Mono, consolas'
         fontColor = 'black'
-        fontSize = '16px'
+        fontSize = '14px'
         tabsStyle = """background-color: rgba{}; 
                            color: {}; 
                            font-size: {};

@@ -473,7 +473,7 @@ class Ui_MainWindow(object):
             _translate("MainWindow", "internet"))
         self.verboseInfoTab.setTabText(
             self.verboseInfoTab.indexOf(self.transTab),
-            _translate("MainWindow", "transport"))
+            _translate("MainWindow", "transport / extend"))
         self.verboseInfoTab.setTabText(self.verboseInfoTab.indexOf(self.appTab),
                                        _translate("MainWindow", "application"))
         self.decodeInfoTab.setTabText(self.decodeInfoTab.indexOf(self.rawTab),
