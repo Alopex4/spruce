@@ -588,7 +588,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # decode tabs
         self.rawTab.setEnabled(False)
-        self.hexTab.setEnabled(False)
+        self.utfTab.setEnabled(False)
         self.decodeInfoTab.setEnabled(False)
 
     def clearAllText(self):
@@ -615,7 +615,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Decode tabs
         self.rawTextEdit.clear()
-        self.hexTextEdit.clear()
+        self.utfTextEdit.clear()
 
     def _clearCtlTabsText(self):
         """ Clean control panel tabs text info """

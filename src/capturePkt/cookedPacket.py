@@ -14,7 +14,7 @@ class CookedPacket:
         self.transLayer = CookedPacket.emptyStr
         self.appLayer = CookedPacket.emptyStr
         self.rawDecode = CookedPacket.emptyStr
-        self.hexDecode = CookedPacket.emptyStr
+        self.utfDecode = CookedPacket.emptyStr
 
 
 

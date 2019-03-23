@@ -638,7 +638,7 @@ class BrightMainWindow(ShineMainWindow):
         self.appTextEdit.setReadOnly(True)
 
         self.verboseInfoTab.setEnabled(True)
-        self.hexTab.setEnabled(True)
+        self.utfTab.setEnabled(True)
         self.rawTab.setEnabled(True)
         self.decodeInfoTab.setEnabled(True)
         self.searchButton.setEnabled(True)
@@ -910,8 +910,8 @@ class BrightMainWindow(ShineMainWindow):
         self.appTextEdit.setStyleSheet("")
 
         # verbose tabs
-        self.hexTextEdit.clear()
-        self.hexTextEdit.setStyleSheet("")
+        self.utfTextEdit.clear()
+        self.utfTextEdit.setStyleSheet("")
         self.rawTextEdit.clear()
         self.rawTextEdit.setStyleSheet("")
 
@@ -1149,9 +1149,9 @@ class BrightMainWindow(ShineMainWindow):
         self.rawTextEdit.setReadOnly(True)
         self.rawTab.setEnabled(True)
 
-        self.hexTextEdit.clear()
-        self.hexTextEdit.setReadOnly(True)
-        self.hexTab.setEnabled(True)
+        self.utfTextEdit.clear()
+        self.utfTextEdit.setReadOnly(True)
+        self.utfTab.setEnabled(True)
         self.decodeInfoTab.setEnabled(True)
         self._resetTabs()
 
@@ -1537,7 +1537,7 @@ class BrightMainWindow(ShineMainWindow):
         self.appTextEdit.setPlainText(cookedPkt.appLayer)
 
         self.rawTextEdit.setPlainText(cookedPkt.rawDecode)
-        self.hexTextEdit.setPlainText(cookedPkt.hexDecode)
+        self.utfTextEdit.setPlainText(cookedPkt.utfDecode)
 
     def _followStyle(self, bgColor):
         """ Follow the packet color set the verbose tabs and decode tabs style """
@@ -1556,4 +1556,4 @@ class BrightMainWindow(ShineMainWindow):
         self.transTextEdit.setStyleSheet(tabsStyle)
         self.appTextEdit.setStyleSheet(tabsStyle)
         self.rawTextEdit.setStyleSheet(tabsStyle)
-        self.hexTextEdit.setStyleSheet(tabsStyle)
+        self.utfTextEdit.setStyleSheet(tabsStyle)

@@ -85,14 +85,14 @@ class Ui_MainWindow(object):
         self.rawTextEdit.setObjectName("rawTextEdit")
         self.verticalLayout_8.addWidget(self.rawTextEdit)
         self.decodeInfoTab.addTab(self.rawTab, "")
-        self.hexTab = QtWidgets.QWidget()
-        self.hexTab.setObjectName("hexTab")
-        self.verticalLayout_9 = QtWidgets.QVBoxLayout(self.hexTab)
+        self.utfTab = QtWidgets.QWidget()
+        self.utfTab.setObjectName("utfTab")
+        self.verticalLayout_9 = QtWidgets.QVBoxLayout(self.utfTab)
         self.verticalLayout_9.setObjectName("verticalLayout_9")
-        self.hexTextEdit = QtWidgets.QPlainTextEdit(self.hexTab)
-        self.hexTextEdit.setObjectName("hexTextEdit")
-        self.verticalLayout_9.addWidget(self.hexTextEdit)
-        self.decodeInfoTab.addTab(self.hexTab, "")
+        self.utfTextEdit = QtWidgets.QPlainTextEdit(self.utfTab)
+        self.utfTextEdit.setObjectName("utfTextEdit")
+        self.verticalLayout_9.addWidget(self.utfTextEdit)
+        self.decodeInfoTab.addTab(self.utfTab, "")
         self.horizontalLayout_8.addWidget(self.splitter)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -477,9 +477,9 @@ class Ui_MainWindow(object):
         self.verboseInfoTab.setTabText(self.verboseInfoTab.indexOf(self.appTab),
                                        _translate("MainWindow", "application"))
         self.decodeInfoTab.setTabText(self.decodeInfoTab.indexOf(self.rawTab),
-                                      _translate("MainWindow", "raw binary"))
-        self.decodeInfoTab.setTabText(self.decodeInfoTab.indexOf(self.hexTab),
-                                      _translate("MainWindow", "hex decode"))
+                                      _translate("MainWindow", "raw decode"))
+        self.decodeInfoTab.setTabText(self.decodeInfoTab.indexOf(self.utfTab),
+                                      _translate("MainWindow", "utf decode"))
         self.menu_File.setTitle(_translate("MainWindow", "&File"))
         self.menu_export.setTitle(_translate("MainWindow", "&export"))
         self.menuNetwork_info.setTitle(
