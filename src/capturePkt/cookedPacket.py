@@ -3,6 +3,7 @@
 
 # Link layer
 from capturePkt.ethernet import Ethernet
+from capturePkt.pppoed import PPPoED
 
 # Network layer
 from capturePkt.ipv4 import IPv4
@@ -21,7 +22,7 @@ class CookedPacket:
     initialText = '|' + ' ' * 4 + 'lack of data!' + ' ' * 4 + '|\n'
     initStr = separator + initialText + separator
 
-    # Protocol mapping class
+    # Internet protocol mapping class
     InternetMap = {'Unknow': None, 'ip': IPv4, 'arp': ARP, 'rarp': ARP,
                    'ipv6': IPv6}
 

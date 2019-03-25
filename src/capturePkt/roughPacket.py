@@ -66,6 +66,7 @@ class RoughPacket:
         self.pktStack = 'Unknow'
         # Stack data it should be list because the oder in under consider
         self.pktProtStack = ['ethernet']
+        self.pppExtendLen = 0
         self.roughCook()
 
     def roughCook(self):
@@ -114,13 +115,21 @@ class RoughPacket:
             ipHeaderLen = (self.pktData[14] & 15) * 4
             ipProt = int(self.pktData[23])
             self.pktProt = RoughPacket.IPMapUpper.get(ipProt, 'Unknow')
-        self.appendProt(self.pktProt)
 
         # IPv6 protocol continue analysis upper protocol
-        if self.pktProt == 'IPv6':
+        elif self.pktProt == 'IPv6':
             ipv6Prot = self.pktData[20]
             ipHeaderLen = 40
             self.pktProt = RoughPacket.IPMapUpper.get(ipv6Prot, 'Unknow')
+
+        elif self.pktProt == 'PPPoE-S':
+            pppProt = int(self.pktData[20:22].hex(), base=16)
+            if pppProt == 0x0021:
+                ipProt = int(self.pktData[31])
+                self.pktProt = RoughPacket.IPMapUpper.get(ipProt, 'Unknow')
+                ipHeaderLen = 20
+                self.pppExtendLen = 8
+
         self.appendProt(self.pktProt)
 
         # ---------------
@@ -130,13 +139,15 @@ class RoughPacket:
         if self.pktProt == 'UDP':
             # 14 --> Ethernet, ipHeaderLen, 2 --> source port
             rawSrcPort = (
-                self.pktData[14 + ipHeaderLen + 0: 14 + ipHeaderLen + 2])
+                self.pktData[
+                14 + ipHeaderLen + self.pppExtendLen + 0: 14 + ipHeaderLen + self.pppExtendLen + 2])
             srcPort, *_ = struct.unpack('!H', rawSrcPort)
             self.pktProt = RoughPacket.UDP_TCPMapUpper.get(srcPort,
                                                            'UDP')
             if self.pktProt == 'UDP':
                 rawDstPort = (
-                    self.pktData[14 + ipHeaderLen + 2: 14 + ipHeaderLen + 4])
+                    self.pktData[
+                    14 + ipHeaderLen + self.pppExtendLen + 2: 14 + ipHeaderLen + self.pppExtendLen + 4])
                 dstPort, *_ = struct.unpack('!H', rawDstPort)
                 self.pktProt = RoughPacket.UDP_TCPMapUpper.get(dstPort,
                                                                'UDP')

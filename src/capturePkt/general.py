@@ -32,11 +32,3 @@ def getIpv6(addr):
     if ipv6_addr == ':':
         return '::'
     return ipv6_addr
-
-    # ipv6_addr = ':'.join(byte_str).upper().replace(':0000', ':0')
-    # ipv6_addr = ipv6_addr.replace(':000', ':').replace(':00', ':')
-    # ipv6_addr = re.sub(r'^0+', '', ipv6_addr, count=1)
-    # ipv6_addr = re.sub(r'(:0){2,}', ':', ipv6_addr, count=1)
-    # if ipv6_addr == ':':
-    #     return '::'
-    # return ipv6_addr
