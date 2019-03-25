@@ -794,7 +794,7 @@ class BrightMainWindow(ShineMainWindow):
             self.nodeListWidget.addItem(item)
 
         self.menuLAN_info.setEnabled(True)
-        print(self.nodeItems)
+        # print(self.nodeItems)
 
     def _selectIco(self, sort):
         """ Via node sort to select ico file"""
@@ -1276,7 +1276,7 @@ class BrightMainWindow(ShineMainWindow):
                 pass
             else:
                 macros = self._generateMacro(tcpdumpBinary)
-                print(macros)
+                # print(macros)
                 return macros
         return None
 

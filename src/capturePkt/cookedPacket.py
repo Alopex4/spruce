@@ -6,6 +6,8 @@ from capturePkt.ethernet import Ethernet
 
 # Network layer
 from capturePkt.ipv4 import IPv4
+from capturePkt.ipv6 import IPv6
+from capturePkt.arp import ARP
 
 
 class CookedPacket:
@@ -16,11 +18,12 @@ class CookedPacket:
     APPLICATION = 3
 
     separator = '+-' * 11 + '+\n'
-    initialText = '|' + ' ' * 4 + 'Lack of data!' + ' ' * 4 + '|\n'
+    initialText = '|' + ' ' * 4 + 'lack of data!' + ' ' * 4 + '|\n'
     initStr = separator + initialText + separator
 
     # Protocol mapping class
-    InternetMap = {'ip': IPv4, 'Unknow': None, }
+    InternetMap = {'Unknow': None, 'ip': IPv4, 'arp': ARP, 'rarp': ARP,
+                   'ipv6': IPv6}
 
     def __init__(self, packet):
         self.packet = packet
@@ -39,7 +42,7 @@ class CookedPacket:
         link = Ethernet(self.packet.pktData[:14])
         linkField = link.getFields()
         linkParse = link.getParses()
-        self.linkLayer = self._cookAssistant('Ethernet', linkField, linkParse)
+        self.linkLayer = self._cookAssistant('ethernet', linkField, linkParse)
 
         # Cook internet protocol
         try:
@@ -92,7 +95,7 @@ class CookedPacket:
         """ Format the header field and datas """
 
         containStr = ''
-        separator = '+-' * 23 + '+\n'
+        separator = '+-' * 26 + '+\n'
         rightSpace = len(separator) - 3
         for k, v in paraData:
             item = '{}: {}'.format(k, v)

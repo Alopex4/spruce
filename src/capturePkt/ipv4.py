@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import struct
+from struct import unpack
+
 from capturePkt.general import getIpv4
 from capturePkt.networkProtocol import NetworkProtocol
 
@@ -15,7 +16,7 @@ class IPv4(NetworkProtocol):
         'Destination address')
 
     def __init__(self, raw_data):
-        ip = struct.unpack('!B B H H H B B H 4s 4s', raw_data[:20])
+        ip = unpack('!B B H H H B B H 4s 4s', raw_data[:20])
         self.version = ip[0] >> 4
         self.ihl = (ip[0] & 0xf) * 4
         self.tosDSCP = ip[1] >> 2
@@ -37,9 +38,9 @@ class IPv4(NetworkProtocol):
         return IPv4.IPv4Fields
 
     def getParses(self):
-        parse = (
+        parses = (
             self.version, self.ihl, self.tosDSCP, self.tosECN, self.totalLength,
             self.identification, self.reserved, self.donotFragment,
             self.moreFragments, self.fragmentOffset, self.ttl, self.protocol,
             self.headerChecksum, self.srcAddr, self.destAddr)
-        return parse
+        return parses
