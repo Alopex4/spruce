@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# Link layer
 from capturePkt.ethernet import Ethernet
+
+# Network layer
+from capturePkt.ipv4 import IPv4
 
 
 class CookedPacket:
+    # Global variable
     LINK = 0
     INTERNET = 1
     TRANSPORT_EXTEND = 2
@@ -13,6 +18,9 @@ class CookedPacket:
     separator = '+-' * 11 + '+\n'
     initialText = '|' + ' ' * 4 + 'Lack of data!' + ' ' * 4 + '|\n'
     initStr = separator + initialText + separator
+
+    # Protocol mapping class
+    InternetMap = {'ip': IPv4, 'Unknow': None, }
 
     def __init__(self, packet):
         self.packet = packet
@@ -24,35 +32,13 @@ class CookedPacket:
         self.utfDecode = CookedPacket.initStr
         self.cooking()
 
-    def _formatTitle(self, title):
-        """ Format the layer title """
-
-        separator = '+-' * 11 + '+\n'
-        centerSpace = len(separator) - 3
-        centerTitle = title.center(centerSpace)
-        titleLine = '|{}|\n'.format(centerTitle)
-        return separator + titleLine + separator
-
-    def _formatParagraph(self, paraData):
-        """ Format the header field and datas """
-
-        containStr = ''
-        separator = '+-' * 23 + '+\n'
-        rightSpace = len(separator) - 3
-        for k, v in paraData:
-            item = '{}: {}'.format(k, v)
-            itemSpace = item.ljust(rightSpace)
-            itemLine = '|{}|\n'.format(itemSpace)
-            containStr = containStr + itemLine
-        return separator + containStr + separator
-
     def cooking(self):
         """ Cook the package to parse it ~"""
 
         # Cook link protocol
         link = Ethernet(self.packet.pktData[:14])
-        linkField = 'Destination address: ', 'Source address: ', 'Ether Type: '
-        linkParse = link.destMac, link.srcMac, link.proto
+        linkField = link.getFields()
+        linkParse = link.getParses()
         self.linkLayer = self._cookAssistant('Ethernet', linkField, linkParse)
 
         # Cook internet protocol
@@ -61,11 +47,11 @@ class CookedPacket:
         except IndexError:
             pass
         else:
-            pass
-            # interField, interParse = self.cookInternet(internetProt,
-            #                                            self.pktData[14:])
-            # self.interLayer = self._cookAssistant(internetProt, interField,
-            #                                       interParse)
+            interField, interParse = self.cookLayer(internetProt,
+                                                    CookedPacket.InternetMap,
+                                                    self.packet.pktData[14:])
+            self.interLayer = self._cookAssistant(internetProt, interField,
+                                                  interParse)
 
         # Cook transport protocol or internet extend
         try:
@@ -91,20 +77,40 @@ class CookedPacket:
         contains = self._formatParagraph(layerData)
         return header + contains
 
-    def cookInternet(prot, packet):
-        if prot == 'ip':
-            pass
-        elif prot == 'arp':
-            pass
-        elif prot == 'ipv6':
-            pass
-        elif prot == 'pppoe-d':
-            pass
-        elif prot == 'pppoe-s':
-            pass
-        elif prot == 'eapol':
-            pass
-        elif prot == 'rarp':
-            pass
+    @staticmethod
+    def _formatTitle(title):
+        """ Format the layer title """
+
+        separator = '+-' * 11 + '+\n'
+        centerSpace = len(separator) - 3
+        centerTitle = title.center(centerSpace)
+        titleLine = '|{}|\n'.format(centerTitle)
+        return separator + titleLine + separator
+
+    @staticmethod
+    def _formatParagraph(paraData):
+        """ Format the header field and datas """
+
+        containStr = ''
+        separator = '+-' * 23 + '+\n'
+        rightSpace = len(separator) - 3
+        for k, v in paraData:
+            item = '{}: {}'.format(k, v)
+            itemSpace = item.ljust(rightSpace)
+            itemLine = '|{}|\n'.format(itemSpace)
+            containStr = containStr + itemLine
+        return separator + containStr + separator
+
+    @staticmethod
+    def cookLayer(prot, mapping, packet):
+        protClsss = mapping.get(prot, 'Unknow')
+        try:
+            protObj = protClsss(packet)
+        except Exception:
+            field = ('Protocol header',)
+            parse = ('Unknow',)
         else:
-            ('Protocol',), ('Unknow')
+            field = protObj.getFields()
+            parse = protObj.getParses()
+        finally:
+            return field, parse

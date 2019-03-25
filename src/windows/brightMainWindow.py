@@ -1275,7 +1275,7 @@ class BrightMainWindow(ShineMainWindow):
             except subprocess.CalledProcessError:
                 pass
             else:
-                macros = BrightMainWindow._generateMacro(tcpdumpBinary)
+                macros = self._generateMacro(tcpdumpBinary)
                 print(macros)
                 return macros
         return None
@@ -1472,7 +1472,7 @@ class BrightMainWindow(ShineMainWindow):
         self.stopButton.setEnabled(False)
 
         # conciseTable, verboseTabs, decodeTabs manage
-        self._resetTabs()
+        # self._resetTabs()
 
         # Status bar
         self.clearStatusBarText()

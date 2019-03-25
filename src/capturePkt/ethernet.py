@@ -3,11 +3,20 @@
 
 import struct
 from capturePkt.general import getMacAddr
+from capturePkt.networkProtocol import NetworkProtocol
 
 
-class Ethernet:
+class Ethernet(NetworkProtocol):
+    EthernetFields = ('Destination Address', 'Source Address', 'Ether Tyep')
+
     def __init__(self, packet):
-        dest, src, prototype = struct.unpack('! 6s 6s H', packet)
-        self.destMac = getMacAddr(dest)
-        self.srcMac = getMacAddr(src)
-        self.proto = hex(prototype)
+        eth = struct.unpack('! 6s 6s H', packet)
+        self.destMac = getMacAddr(eth[0])
+        self.srcMac = getMacAddr(eth[1])
+        self.proto = hex(eth[2])
+
+    def getFields(self):
+        return Ethernet.EthernetFields
+
+    def getParses(self):
+        return (self.destMac, self.srcMac, self.proto)

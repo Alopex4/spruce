@@ -189,6 +189,7 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
 
         self.enableRaido.setChecked(True)
         self.customCheckBox.setCheckState(QtCore.Qt.Unchecked)
+        self.customLineEdit.setEnabled(False)
         filterString = self.recvFilterDict['filter']
         filterTuple = tuple(
             filter(None,
