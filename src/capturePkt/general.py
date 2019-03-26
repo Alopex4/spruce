@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import re
 
+from prettytable import PrettyTable
+
 
 def getMacAddr(macRaw):
     """  Get mac address via parameter mac raw """
@@ -36,32 +38,10 @@ def getIpv6(addr):
 
 def formatAssistant(title, field, parse):
     """ Zip field and data together and return a foramt info"""
-
-    layerData = tuple(zip(field, parse))
-    header = formatTitle(title)
-    contains = formatParagraph(layerData)
-    return header + contains
-
-
-def formatTitle(title):
-    """ Format the layer title """
-
-    separator = '+-' * 11 + '+\n'
-    centerSpace = len(separator) - 3
-    centerTitle = title.center(centerSpace)
-    titleLine = '|{}|\n'.format(centerTitle)
-    return separator + titleLine + separator
-
-
-def formatParagraph(paraData):
-    """ Format the header field and datas """
-
-    containStr = ''
-    separator = '+-' * 26 + '+\n'
-    rightSpace = len(separator) - 3
-    for k, v in paraData:
-        item = '{}: {}'.format(k, v)
-        itemSpace = item.ljust(rightSpace)
-        itemLine = '|{}|\n'.format(itemSpace)
-        containStr = containStr + itemLine
-    return separator + containStr + separator
+    formatTable = PrettyTable()
+    columnName = ['fields', 'parses']
+    formatTable.add_column(columnName[0], field)
+    formatTable.add_column(columnName[1], parse)
+    formatTable.align['fields'] = "l"
+    formatTable.align['parses'] = "l"
+    return formatTable.get_string(title=title)

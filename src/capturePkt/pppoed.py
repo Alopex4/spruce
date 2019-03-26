@@ -10,8 +10,7 @@ from capturePkt.networkProtocol import NetworkProtocol
 # http://jhengda.blogspot.com/2009/12/ppp-over-ethernet-pppoe.html
 class PPPoED(NetworkProtocol):
     PPPoeDFields = (
-        'Version', 'Type', 'Code', 'Session-ID', 'Length', 'Payload',
-        'TagType', 'Tag Info')
+        'Version', 'Type', 'Code', 'Session-ID', 'Length', 'Tag Info')
 
     codeDict = {0x09: '0x09 Initiation Packet(PADI)',
                 0x07: '0x07 Offer Packet(PADO)',
@@ -36,13 +35,15 @@ class PPPoED(NetworkProtocol):
         self.sessionID = self.getSessionID(ppp[2])
         self.length = ppp[3]
         # 4 --> separate (0101 0000)
-        self.data = packet[PPPoED.PPPHeader + 4:]
-        self.tags = self.getTags(self.data)
+        data = packet[PPPoED.PPPHeader + 4:]
+        self.tags = self.getTags(data)
 
-    def getSessionID(self, sid):
+    @staticmethod
+    def getSessionID(sid):
         return '0x{:04x}'.format(sid)
 
-    def getTags(self, data):
+    @staticmethod
+    def getTags(data):
         # tag type, tag data length, tag data
 
         res = ''
@@ -63,24 +64,8 @@ class PPPoED(NetworkProtocol):
             else:
                 tagData = '0x{}'.format(tagData.hex())
             data = data[tagDataLen:]
-            res = res + tag + '-->' + tagData
+            res = res + tag + ' (' + tagData + ')\n'
         return res
-
-        # res = ''
-        # fmtTemp = '!{}s'
-        # ppp = unpack('!H H', data[:4])
-        # xData = data[4:]
-        # tag = PPPoED.tagTypes[ppp[0]]
-        # tagDataLen = ppp[1]
-        #
-        # while xData and '0x0000' not in tag:
-        #     tagData = unpack(fmtTemp.format(tagDataLen), xData[:tagDataLen])
-        #     if '0x0102' in tag:
-        #         pass
-        #     else:
-        #         pass
-        #     xData = xData[tagDataLen:]
-        #     res = res + tag + tagData + '\n'
 
     def getFields(self):
         return PPPoED.PPPoeDFields
