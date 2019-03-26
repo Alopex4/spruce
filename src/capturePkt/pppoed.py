@@ -10,7 +10,7 @@ from capturePkt.networkProtocol import NetworkProtocol
 # http://jhengda.blogspot.com/2009/12/ppp-over-ethernet-pppoe.html
 class PPPoED(NetworkProtocol):
     PPPoeDFields = (
-        'Version', 'Type', 'Code', 'Session-ID', 'Length', 'Tag Info')
+        'Version', 'Type', 'Code', 'Session-ID', 'Payload Length', 'Tag Info')
 
     codeDict = {0x09: '0x09 Initiation Packet(PADI)',
                 0x07: '0x07 Offer Packet(PADO)',
@@ -32,15 +32,11 @@ class PPPoED(NetworkProtocol):
         self.version = ppp[0] >> 4
         self.type = ppp[0] & 0x0f
         self.code = PPPoED.codeDict[ppp[1]]
-        self.sessionID = self.getSessionID(ppp[2])
+        self.sessionID = '0x{:04x}'.format(ppp[2])
         self.length = ppp[3]
         # 4 --> separate (0101 0000)
         data = packet[PPPoED.PPPHeader + 4:]
         self.tags = self.getTags(data)
-
-    @staticmethod
-    def getSessionID(sid):
-        return '0x{:04x}'.format(sid)
 
     @staticmethod
     def getTags(data):
@@ -65,7 +61,7 @@ class PPPoED(NetworkProtocol):
                 tagData = '0x{}'.format(tagData.hex())
             data = data[tagDataLen:]
             res = res + tag + ' (' + tagData + ')\n'
-        return res
+        return res.rstrip('\n')
 
     def getFields(self):
         return PPPoED.PPPoeDFields

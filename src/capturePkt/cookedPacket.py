@@ -10,6 +10,7 @@ from capturePkt.ipv6 import IPv6
 from capturePkt.ipv4 import IPv4
 from capturePkt.arp import ARP
 from capturePkt.pppoed import PPPoED
+from capturePkt.pppoes import PPPoES
 
 
 class CookedPacket:
@@ -25,7 +26,7 @@ class CookedPacket:
 
     # Internet protocol mapping class
     InternetMap = {'Unknow': None, 'ip': IPv4, 'arp': ARP, 'rarp': ARP,
-                   'ipv6': IPv6, 'pppoe-d': PPPoED}
+                   'ipv6': IPv6, 'pppoe-d': PPPoED, 'pppoe-s': PPPoES}
 
     def __init__(self, packet):
         self.packet = packet
@@ -77,14 +78,18 @@ class CookedPacket:
     @staticmethod
     def cookLayer(prot, mapping, packet):
         protClsss = mapping.get(prot, 'Unknow')
-        try:
-            protObj = protClsss(packet)
-        except Exception as e:
-            print(e)
-            field = ('Protocol header',)
-            parse = ('Unknow',)
-        else:
-            field = protObj.getFields()
-            parse = protObj.getParses()
-        finally:
-            return field, parse
+        protObj = protClsss(packet)
+        field = protObj.getFields()
+        parse = protObj.getParses()
+        return field, parse
+        # try:
+        #     protObj = protClsss(packet)
+        # except Exception as e:
+        #     print(e)
+        #     field = ('Protocol header',)
+        #     parse = ('Unknow',)
+        # else:
+        #     field = protObj.getFields()
+        #     parse = protObj.getParses()
+        # finally:
+        #     return field, parse
