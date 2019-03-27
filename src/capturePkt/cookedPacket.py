@@ -11,6 +11,11 @@ from capturePkt.ipv4 import IPv4
 from capturePkt.arp import ARP
 from capturePkt.pppoed import PPPoED
 from capturePkt.pppoes import PPPoES
+from capturePkt.eapol import EAPOL
+
+# Transport or extend layer
+from capturePkt.icmp import ICMP
+from capturePkt.igmp import IGMP
 
 
 class CookedPacket:
@@ -26,7 +31,11 @@ class CookedPacket:
 
     # Internet protocol mapping class
     InternetMap = {'Unknow': None, 'ip': IPv4, 'arp': ARP, 'rarp': ARP,
-                   'ipv6': IPv6, 'pppoe-d': PPPoED, 'pppoe-s': PPPoES}
+                   'ipv6': IPv6, 'pppoe-d': PPPoED, 'pppoe-s': PPPoES,
+                   'eapol': EAPOL}
+
+    # TransExtend protocol mapping class
+    TransExtendMap = {'Unknow': None, 'icmp': ICMP, 'igmp': IGMP}
 
     def __init__(self, packet):
         self.packet = packet
@@ -65,7 +74,17 @@ class CookedPacket:
         except IndexError:
             pass
         else:
-            pass
+            if self.packet.pktProtStack[CookedPacket.INTERNET] == 'pppoe-s':
+                pppoeHeaderLen = 8
+            else:
+                pppoeHeaderLen = 0
+            ipHeaderLen = (self.packet.pktData[14] & 15) * 4
+            transExtendField, transExtendParse = self.cookLayer(transProt,
+                                                                CookedPacket.TransExtendMap,
+                                                                self.packet.pktData[
+                                                                14 + pppoeHeaderLen + ipHeaderLen:])
+            self.transLayer = formatAssistant(transProt, transExtendField,
+                                              transExtendParse)
 
         # Cook application protocol
         try:

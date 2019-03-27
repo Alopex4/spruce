@@ -30,7 +30,8 @@ class IPv4(NetworkProtocol):
         self.fragmentOffset = ip[4] & 0x1fff
         self.ttl = ip[5]
         self.protocol = ip[6]
-        self.headerChecksum = str(ip[7]) + ' (' + str(hex(ip[7])) + ')'
+        # self.headerChecksum = str(ip[7]) + ' (' + str(hex(ip[7])) + ')'
+        self.headerChecksum = '0x{:04x} ({})'.format(ip[7], ip[7])
         self.srcAddr = getIpv4(ip[8])
         self.destAddr = getIpv4(ip[9])
 
