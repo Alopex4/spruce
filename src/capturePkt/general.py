@@ -13,6 +13,13 @@ def getMacAddr(macRaw):
     return mac_addr
 
 
+def getIdentifier(RawInfo):
+    """  Get interface identifier """
+
+    ident = getMacAddr(RawInfo)
+    return ident
+
+
 def getIpv4(addr):
     """ Get IPv4 address via parameter addr """
 

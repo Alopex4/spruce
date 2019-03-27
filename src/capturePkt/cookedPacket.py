@@ -77,11 +77,6 @@ class CookedPacket:
 
     @staticmethod
     def cookLayer(prot, mapping, packet):
-        protClsss = mapping.get(prot, 'Unknow')
-        protObj = protClsss(packet)
-        field = protObj.getFields()
-        parse = protObj.getParses()
-        return field, parse
         # try:
         #     protObj = protClsss(packet)
         # except Exception as e:
@@ -93,3 +88,10 @@ class CookedPacket:
         #     parse = protObj.getParses()
         # finally:
         #     return field, parse
+
+        # Test
+        protClsss = mapping.get(prot, 'Unknow')
+        protObj = protClsss(packet)
+        field = protObj.getFields()
+        parse = protObj.getParses()
+        return field, parse
