@@ -16,7 +16,7 @@ class RoughPacket:
                      0x8863: 'PPPoE-D', 0x8864: 'PPPoE-S', 0x888e: 'EAPOL',
                      0x8035: 'RARP'}
     # https://www.wikiwand.com/en/List_of_IP_protocol_numbers
-    IPMapUpper = {0x00: 'ICMPv6', 0x01: 'ICMP', 0x02: 'IGMP', 0x06: 'TCP',
+    IPMapUpper = {0x00: 'HOPOPT', 0x01: 'ICMP', 0x02: 'IGMP', 0x06: 'TCP',
                   0x11: 'UDP', 0x29: 'IPv6', 0x3A: 'IPv6-ICMP'}
     # https://www.wikiwand.com/en/List_of_TCP_and_UDP_port_numbers
     UDP_TCPMapUpper = {20: 'FTP-data', 21: 'FTP', 22: 'SSH', 23: 'Telnet',
@@ -45,8 +45,9 @@ class RoughPacket:
                     'HTTPS': QtGui.QColor(128, 222, 234, 200),
                     'DHCP': QtGui.QColor(255, 87, 34, 100),
                     'EAPOL': QtGui.QColor(46, 125, 50, 100),
-                    'ICMPv6': QtGui.QColor(224, 64, 251, 100),
+                    'HOPOPT': QtGui.QColor(224, 64, 251, 100),
                     'RARP': QtGui.QColor(38, 166, 154, 100),
+                    'IPv6-ICMP': QtGui.QColor(146, 225, 50, 100),
                     }
 
     supportPort = set()
@@ -96,11 +97,11 @@ class RoughPacket:
             srcIp, dstIp = struct.unpack('!4s 4s', self.pktData[26:34])
             self.pktSrc = getIpv4(srcIp)
             self.pktDst = getIpv4(dstIp)
-        elif self.pktProt in ('ARP', 'RARP', 'ICMPv6', 'PPPoE-D', 'PPPoE-S'):
+        elif self.pktProt in ('ARP', 'RARP', 'PPPoE-D', 'PPPoE-S'):
             dstMac, srcMac = struct.unpack('!6s 6s', self.pktData[:12])
             self.pktDst = getMacAddr(dstMac)
             self.pktSrc = getMacAddr(srcMac)
-        elif self.pktProt == 'IPv6':
+        elif self.pktProt in ('IPv6', 'HOPOPT', 'IPv6-ICMP'):
             srcIpv6, dstIpv6 = struct.unpack('!16s 16s', self.pktData[22:54])
             self.pktSrc = getIpv6(srcIpv6)
             self.pktDst = getIpv6(dstIpv6)

@@ -12,13 +12,14 @@ from capturePkt.arp import ARP
 from capturePkt.pppoed import PPPoED
 from capturePkt.pppoes import PPPoES
 from capturePkt.eapol import EAPOL
-from capturePkt.icmpv6 import ICMPv6
 
 # Transport or extend layer
 from capturePkt.icmp import ICMP
 from capturePkt.igmp import IGMP
 from capturePkt.udp import UDP
 from capturePkt.tcp import TCP
+from capturePkt.icmpv6 import ICMPv6
+from capturePkt.hopopt import HOPOPT
 
 
 class CookedPacket:
@@ -39,7 +40,7 @@ class CookedPacket:
 
     # TransExtend protocol mapping class
     TransExtendMap = {'Unknow': None, 'icmp': ICMP, 'igmp': IGMP, 'udp': UDP,
-                      'tcp': TCP, 'icmpv6': ICMPv6}
+                      'tcp': TCP, 'ipv6-icmp': ICMPv6, 'hopopt': HOPOPT}
 
     def __init__(self, packet):
         self.packet = packet
@@ -87,9 +88,9 @@ class CookedPacket:
 
             if self.packet.pktProtStack[CookedPacket.INTERNET] == 'ipv6':
                 ipHeaderLen = 40
-                if self.packet.pktProtStack[
-                    CookedPacket.TRANSPORT_EXTEND] == 'icmpv6':
-                    ipHeaderLen = 48
+                # if self.packet.pktProtStack[
+                #     CookedPacket.TRANSPORT_EXTEND] == 'HOPOPT':
+                #     ipHeaderLen = 48
             else:
                 ipHeaderLen = (self.packet.pktData[
                                    14 + pppoeHeaderLen] & 15) * 4
