@@ -12,6 +12,7 @@ from capturePkt.arp import ARP
 from capturePkt.pppoed import PPPoED
 from capturePkt.pppoes import PPPoES
 from capturePkt.eapol import EAPOL
+from capturePkt.icmpv6 import ICMPv6
 
 # Transport or extend layer
 from capturePkt.icmp import ICMP
@@ -38,7 +39,7 @@ class CookedPacket:
 
     # TransExtend protocol mapping class
     TransExtendMap = {'Unknow': None, 'icmp': ICMP, 'igmp': IGMP, 'udp': UDP,
-                      'tcp': TCP}
+                      'tcp': TCP, 'icmpv6': ICMPv6}
 
     def __init__(self, packet):
         self.packet = packet
@@ -83,7 +84,16 @@ class CookedPacket:
                 pppoeHeaderLen = 8
             else:
                 pppoeHeaderLen = 0
-            ipHeaderLen = (self.packet.pktData[14 + pppoeHeaderLen] & 15) * 4
+
+            if self.packet.pktProtStack[CookedPacket.INTERNET] == 'ipv6':
+                ipHeaderLen = 40
+                if self.packet.pktProtStack[
+                    CookedPacket.TRANSPORT_EXTEND] == 'icmpv6':
+                    ipHeaderLen = 48
+            else:
+                ipHeaderLen = (self.packet.pktData[
+                                   14 + pppoeHeaderLen] & 15) * 4
+
             transExtendField, transExtendParse = self.cookLayer(transProt,
                                                                 CookedPacket.TransExtendMap,
                                                                 self.packet.pktData[
@@ -101,6 +111,7 @@ class CookedPacket:
 
     @staticmethod
     def cookLayer(prot, mapping, packet):
+        # protClsss = mapping.get(prot, 'Unknow')
         # try:
         #     protObj = protClsss(packet)
         # except Exception as e:
