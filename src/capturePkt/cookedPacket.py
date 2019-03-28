@@ -42,6 +42,9 @@ class CookedPacket:
     TransExtendMap = {'Unknow': None, 'icmp': ICMP, 'igmp': IGMP, 'udp': UDP,
                       'tcp': TCP, 'ipv6-icmp': ICMPv6, 'hopopt': HOPOPT}
 
+    # Application protocol mapping class
+    AppMap = {'Unknow', None}
+
     def __init__(self, packet):
         self.packet = packet
         self.linkLayer = CookedPacket.initStr
@@ -78,27 +81,29 @@ class CookedPacket:
         # Cook transport protocol or internet extend
         try:
             transProt = self.packet.pktProtStack[CookedPacket.TRANSPORT_EXTEND]
+            print(transProt)
         except IndexError:
             pass
         else:
-            if self.packet.pktProtStack[CookedPacket.INTERNET] == 'pppoe-s':
+            if internetProt == 'pppoe-s':
                 pppoeHeaderLen = 8
             else:
                 pppoeHeaderLen = 0
 
-            if self.packet.pktProtStack[CookedPacket.INTERNET] == 'ipv6':
+            if internetProt == 'ipv6':
                 ipHeaderLen = 40
-                # if self.packet.pktProtStack[
-                #     CookedPacket.TRANSPORT_EXTEND] == 'HOPOPT':
-                #     ipHeaderLen = 48
+                if self.packet.pktProtStack[
+                    CookedPacket.TRANSPORT_EXTEND] == 'HOPOPT':
+                    ipHeaderLen = 48
             else:
                 ipHeaderLen = (self.packet.pktData[
                                    14 + pppoeHeaderLen] & 15) * 4
 
+            internetHeaderLen = ethHeaderLen + pppoeHeaderLen + ipHeaderLen
             transExtendField, transExtendParse = self.cookLayer(transProt,
                                                                 CookedPacket.TransExtendMap,
                                                                 self.packet.pktData[
-                                                                ethHeaderLen + pppoeHeaderLen + ipHeaderLen:])
+                                                                internetHeaderLen:])
             self.transLayer = formatAssistant(transProt, transExtendField,
                                               transExtendParse)
 
@@ -108,7 +113,18 @@ class CookedPacket:
         except IndexError:
             pass
         else:
-            pass
+            if transProt == 'udp':
+                transHeaderLen = 8
+            elif transProt == 'tcp':
+                transHeaderLen = (self.packet.pktData[
+                                      internetHeaderLen] >> 12) * 4
+            appHeaderLen = internetHeaderLen + transHeaderLen
+            print(appHeaderLen)
+
+            appField, appParse = self.cookLayer(appProt, CookedPacket.AppMap,
+                                                self.packet.pktData[
+                                                appHeaderLen:])
+            self.appLayer = formatAssistant(appProt, appField, appParse)
 
     @staticmethod
     def cookLayer(prot, mapping, packet):

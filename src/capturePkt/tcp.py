@@ -13,13 +13,49 @@ class TCP(NetworkProtocol):
         '    URG', '    ACK', '    PSH', '    RST', '    SYN', '    FIN',
         'Window size', 'Checksum', 'Urgent Pointer')
 
+    optionDict = {1: 'No-Operation',
+                  2: 'Maximum Segment Size',
+                  3: 'Window Scale',
+                  4: 'SACK Permitted',
+                  5: 'SACK',
+                  6: 'Echo (obsoleted by option 8)',
+                  7: 'Echo Reply (obsoleted by option 8)',
+                  8: 'Timestamps',
+                  9: 'Partial Order Connection Permitted (obsolete)',
+                  10: 'Partial Order Service Profile (obsolete)',
+                  11: 'CC (obsolete)',
+                  12: 'CC.NEW (obsolete)',
+                  13: 'CC.ECHO (obsolete)',
+                  14: 'TCP Alternate Checksum Request (obsolete)',
+                  15: 'TCP Alternate Checksum Data (obsolete)',
+                  16: 'Skeeter',
+                  17: 'Bubba',
+                  18: 'Trailer Checksum Option',
+                  19: 'MD5 Signature Option (obsoleted by option 29)',
+                  20: 'SCPS Capabilities',
+                  21: 'Selective Negative Acknowledgements',
+                  22: 'Record Boundaries',
+                  23: 'Corruption experienced',
+                  24: 'SNAP',
+                  25: 'Unassigned (released 2000-12-18)',
+                  26: 'TCP Compression Filter',
+                  27: 'Quick-Start Response',
+                  28: 'User Timeout Option (also, other known unauthorized use) [***][1]',
+                  29: 'TCP Authentication Option (TCP-AO)',
+                  30: 'Multipath TCP (MPTCP)',
+                  31: 'Reserved (known unauthorized use without proper IANA assignment) [**]',
+                  32: 'Reserved (known unauthorized use without proper IANA assignment) [**]',
+                  33: 'Reserved (known unauthorized use without proper IANA assignment) [**]',
+                  34: 'TCP Fast Open Cookie',
+                  }
+
     def __init__(self, packet):
         tcp = unpack('!H H I I H H H H', packet[:20])
         self.srcPort = tcp[0]
         self.dstPort = tcp[1]
         self.seqNumber = tcp[2]
         self.ackNumber = tcp[3]
-        self.headerLen = tcp[4] >> 12
+        self.headerLen = (tcp[4] >> 12) * 5
         self.reserved = (tcp[4] & 0xfc) >> 6
         self.urg = 1 if (tcp[4] & 0x20) else 0
         self.ack = 1 if (tcp[4] & 0x10) else 0
@@ -34,13 +70,23 @@ class TCP(NetworkProtocol):
         self.flags = '/'.join(flags).upper()
         self.checksum = '0x{:04x} ({})'.format(tcp[6], tcp[6])
         self.urgentPointer = '0x{:04x} ({})'.format(tcp[7], tcp[7])
+        self.extendField = tuple()
+        self.extendParse = tuple()
+
+        if self.headerLen > 20:
+            self.remainParse(packet[20:])
+
+    def remainParse(self, packet):
+        self.option = TCP.optionDict.get(packet[0], 'Unknown')
+        self.extendField = ('Option',)
+        self.extendParse = (self.option,)
 
     def getFields(self):
-        return TCP.TCPFields
+        return TCP.TCPFields + self.extendField
 
     def getParses(self):
         parses = (self.srcPort, self.dstPort, self.seqNumber, self.ackNumber,
                   self.headerLen, self.reserved, self.flags, self.urg, self.ack,
                   self.psh, self.rst, self.syn, self.fin, self.windowLen,
-                  self.checksum, self.urgentPointer)
+                  self.checksum, self.urgentPointer) + self.extendParse
         return parses
