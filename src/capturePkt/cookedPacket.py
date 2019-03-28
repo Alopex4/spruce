@@ -16,6 +16,8 @@ from capturePkt.eapol import EAPOL
 # Transport or extend layer
 from capturePkt.icmp import ICMP
 from capturePkt.igmp import IGMP
+from capturePkt.udp import UDP
+from capturePkt.tcp import TCP
 
 
 class CookedPacket:
@@ -35,7 +37,8 @@ class CookedPacket:
                    'eapol': EAPOL}
 
     # TransExtend protocol mapping class
-    TransExtendMap = {'Unknow': None, 'icmp': ICMP, 'igmp': IGMP}
+    TransExtendMap = {'Unknow': None, 'icmp': ICMP, 'igmp': IGMP, 'udp': UDP,
+                      'tcp': TCP}
 
     def __init__(self, packet):
         self.packet = packet
@@ -55,6 +58,7 @@ class CookedPacket:
         linkField = link.getFields()
         linkParse = link.getParses()
         self.linkLayer = formatAssistant('ethernet', linkField, linkParse)
+        ethHeaderLen = 14
 
         # Cook internet protocol
         try:
@@ -64,7 +68,8 @@ class CookedPacket:
         else:
             interField, interParse = self.cookLayer(internetProt,
                                                     CookedPacket.InternetMap,
-                                                    self.packet.pktData[14:])
+                                                    self.packet.pktData[
+                                                    ethHeaderLen:])
             self.interLayer = formatAssistant(internetProt, interField,
                                               interParse)
 
@@ -78,11 +83,11 @@ class CookedPacket:
                 pppoeHeaderLen = 8
             else:
                 pppoeHeaderLen = 0
-            ipHeaderLen = (self.packet.pktData[14] & 15) * 4
+            ipHeaderLen = (self.packet.pktData[14 + pppoeHeaderLen] & 15) * 4
             transExtendField, transExtendParse = self.cookLayer(transProt,
                                                                 CookedPacket.TransExtendMap,
                                                                 self.packet.pktData[
-                                                                14 + pppoeHeaderLen + ipHeaderLen:])
+                                                                ethHeaderLen + pppoeHeaderLen + ipHeaderLen:])
             self.transLayer = formatAssistant(transProt, transExtendField,
                                               transExtendParse)
 
