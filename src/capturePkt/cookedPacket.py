@@ -21,6 +21,9 @@ from capturePkt.tcp import TCP
 from capturePkt.icmpv6 import ICMPv6
 from capturePkt.hopopt import HOPOPT
 
+# Application layer
+from capturePkt.domain import Domain
+
 
 class CookedPacket:
     # Global variable
@@ -43,7 +46,7 @@ class CookedPacket:
                       'tcp': TCP, 'ipv6-icmp': ICMPv6, 'hopopt': HOPOPT}
 
     # Application protocol mapping class
-    AppMap = {'Unknow', None}
+    AppMap = {'Unknow': None, 'domain': Domain}
 
     def __init__(self, packet):
         self.packet = packet
@@ -81,7 +84,6 @@ class CookedPacket:
         # Cook transport protocol or internet extend
         try:
             transProt = self.packet.pktProtStack[CookedPacket.TRANSPORT_EXTEND]
-            print(transProt)
         except IndexError:
             pass
         else:
@@ -119,7 +121,8 @@ class CookedPacket:
                 transHeaderLen = (self.packet.pktData[
                                       internetHeaderLen] >> 12) * 4
             appHeaderLen = internetHeaderLen + transHeaderLen
-            print(appHeaderLen)
+            # print(self.packet.pktData[appHeaderLen:])
+            # print(appHeaderLen)
 
             appField, appParse = self.cookLayer(appProt, CookedPacket.AppMap,
                                                 self.packet.pktData[
