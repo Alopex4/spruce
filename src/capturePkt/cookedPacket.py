@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from re import findall
+
 # Unknow Layer
 from capturePkt.networkProtocol import NetworkProtocol
 
@@ -136,6 +138,22 @@ class CookedPacket:
                                                     self.packet.pktData[
                                                     appHeaderLen:])
                 self.appLayer = formatAssistant(appProt, appField, appParse)
+
+        # rar packet decode
+        hexField = []
+        hexParse = []
+        hexdata = self.packet.pktData.hex()
+        hexdata = findall(r'.{2}', hexdata)
+        hexdata.extend([''] * 48)
+        hexdata = ' '.join(hexdata)
+        hexdata = findall(r'.{24}', hexdata)
+        for index, data in enumerate(zip(hexdata[0::2], hexdata[1::2])):
+            line = '0x{:04x}'.format(index)
+            hexField.append(line)
+            hexParse.append('{}  {}'.format(data[0], data[1]))
+        self.rawDecode = formatAssistant('Hex Format', hexField, hexParse)
+
+        # utf-8 packet decode
 
     @staticmethod
     def cookLayer(prot, mapping, packet):
