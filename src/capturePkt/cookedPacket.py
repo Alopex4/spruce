@@ -26,6 +26,7 @@ from capturePkt.hopopt import HOPOPT
 
 # Application layer
 from capturePkt.domain import Domain
+from capturePkt.telnet import Telnet
 
 
 class CookedPacket:
@@ -50,7 +51,7 @@ class CookedPacket:
                       'hopopt': HOPOPT}
 
     # Application protocol mapping class
-    AppMap = {'Unknown': NetworkProtocol, 'domain': Domain}
+    AppMap = {'Unknown': NetworkProtocol, 'domain': Domain, 'telnet': Telnet}
 
     def __init__(self, packet):
         self.packet = packet
@@ -153,7 +154,6 @@ class CookedPacket:
 
         # Test
         protClsss = mapping.get(prot, NetworkProtocol)
-        print(protClsss)
         protObj = protClsss(packet)
         field = protObj.getFields()
         parse = protObj.getParses()
