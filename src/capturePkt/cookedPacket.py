@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# Unknow Layer
+from capturePkt.networkProtocol import NetworkProtocol
+
 # Link layer
 from capturePkt.general import formatAssistant
 from capturePkt.ethernet import Ethernet
@@ -37,16 +40,17 @@ class CookedPacket:
     initStr = separator + initialText + separator
 
     # Internet protocol mapping class
-    InternetMap = {'Unknow': None, 'ip': IPv4, 'arp': ARP, 'rarp': ARP,
-                   'ipv6': IPv6, 'pppoe-d': PPPoED, 'pppoe-s': PPPoES,
-                   'eapol': EAPOL}
+    InternetMap = {'Unknown': NetworkProtocol, 'ip': IPv4, 'arp': ARP,
+                   'rarp': ARP, 'ipv6': IPv6, 'pppoe-d': PPPoED,
+                   'pppoe-s': PPPoES, 'eapol': EAPOL}
 
     # TransExtend protocol mapping class
-    TransExtendMap = {'Unknow': None, 'icmp': ICMP, 'igmp': IGMP, 'udp': UDP,
-                      'tcp': TCP, 'ipv6-icmp': ICMPv6, 'hopopt': HOPOPT}
+    TransExtendMap = {'Unknown': NetworkProtocol, 'icmp': ICMP, 'igmp': IGMP,
+                      'udp': UDP, 'tcp': TCP, 'ipv6-icmp': ICMPv6,
+                      'hopopt': HOPOPT}
 
     # Application protocol mapping class
-    AppMap = {'Unknow': None, 'domain': Domain}
+    AppMap = {'Unknown': NetworkProtocol, 'domain': Domain}
 
     def __init__(self, packet):
         self.packet = packet
@@ -119,15 +123,18 @@ class CookedPacket:
                 transHeaderLen = 8
             elif transProt == 'tcp':
                 transHeaderLen = (self.packet.pktData[
-                                      internetHeaderLen] >> 12) * 4
+                                      internetHeaderLen + 12] >> 4) * 4
+                # print(transHeaderLen)
+                # print(self.packet.pktLen)
             appHeaderLen = internetHeaderLen + transHeaderLen
             # print(self.packet.pktData[appHeaderLen:])
             # print(appHeaderLen)
-
-            appField, appParse = self.cookLayer(appProt, CookedPacket.AppMap,
-                                                self.packet.pktData[
-                                                appHeaderLen:])
-            self.appLayer = formatAssistant(appProt, appField, appParse)
+            if self.packet.pktData[appHeaderLen:]:
+                appField, appParse = self.cookLayer(appProt,
+                                                    CookedPacket.AppMap,
+                                                    self.packet.pktData[
+                                                    appHeaderLen:])
+                self.appLayer = formatAssistant(appProt, appField, appParse)
 
     @staticmethod
     def cookLayer(prot, mapping, packet):
@@ -145,7 +152,8 @@ class CookedPacket:
         #     return field, parse
 
         # Test
-        protClsss = mapping.get(prot, 'Unknow')
+        protClsss = mapping.get(prot, NetworkProtocol)
+        print(protClsss)
         protObj = protClsss(packet)
         field = protObj.getFields()
         parse = protObj.getParses()

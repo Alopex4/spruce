@@ -109,7 +109,7 @@ class Domain(NetworkProtocol):
     }
 
     def __init__(self, packet):
-        self.packt = packet
+        self.packet = packet
         domain = unpack('!H H H H H H', self.packet[:12])
         self.identification = '0x{:04x}'.format(domain[0])
         self.flags = '0x{:04x}'.format(domain[1])

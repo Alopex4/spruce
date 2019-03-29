@@ -55,7 +55,7 @@ class TCP(NetworkProtocol):
         self.dstPort = tcp[1]
         self.seqNumber = tcp[2]
         self.ackNumber = tcp[3]
-        self.headerLen = (tcp[4] >> 12) * 5
+        self.headerLen = (tcp[4] >> 12) * 4
         self.reserved = (tcp[4] & 0xfc) >> 6
         self.urg = 1 if (tcp[4] & 0x20) else 0
         self.ack = 1 if (tcp[4] & 0x10) else 0
