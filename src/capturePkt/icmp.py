@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
+from string import printable
 
 from struct import unpack
 from socket import ntohl
@@ -81,11 +82,12 @@ class ICMP(NetworkProtocol):
                 packet = packet[12:]
                 data, *_ = unpack(dataFmt.format(len(packet)), packet)
                 data = data.decode('utf-8', 'replace')
-
+                data = list(filter(lambda x: x in printable, data))
+                data = ''.join(data)
                 field = (
                     'Identifier', 'Sequence Number', 'Timestamp CST', 'Data')
                 parse = (
-                identifer, sequence, timestamp, data[-24:] + '... (omit)')
+                    identifer, sequence, timestamp, data[:70] + '... (omit)')
 
         self.extendField = field
         self.extendParse = parse
