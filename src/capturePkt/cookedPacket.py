@@ -29,6 +29,7 @@ from capturePkt.hopopt import HOPOPT
 # Application layer
 from capturePkt.domain import Domain
 from capturePkt.telnet import Telnet
+from capturePkt.publicApp import PublicApp
 
 
 class CookedPacket:
@@ -53,7 +54,9 @@ class CookedPacket:
                       'hopopt': HOPOPT}
 
     # Application protocol mapping class
-    AppMap = {'Unknown': NetworkProtocol, 'domain': Domain, 'telnet': Telnet}
+    AppMap = {'Unknown': NetworkProtocol, 'domain': Domain, 'telnet': Telnet,
+              'ssh': PublicApp, 'http': PublicApp, 'mdns': Domain,
+              'nbns': Domain}
 
     def __init__(self, packet):
         self.packet = packet

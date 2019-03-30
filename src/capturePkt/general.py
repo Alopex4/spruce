@@ -43,6 +43,27 @@ def getIpv6(addr):
     return ipv6_addr
 
 
+def hexToASCII(packet, padding):
+    chCodes = []
+    oneLineChar = r'.{{{}}}'.format(padding)
+    rawData = packet.hex()
+    rawData = re.findall(r'.{2}', rawData)
+    rawData.extend([''] * padding)
+    for ch in rawData:
+        if ch:
+            chCode = int(ch, base=16)
+            if chCode > 33 and chCode < 126:
+                chCodes.append(chr(chCode))
+            else:
+                chCodes.append('.')
+        else:
+            chCodes.append(ch)
+    data = ''.join(chCodes) + ' ' * padding
+    data = '\n'.join(re.findall(oneLineChar, data))
+    data = data.strip()
+    return data
+
+
 def formatAssistant(title, field, parse):
     """ Zip field and data together and return a foramt info"""
     formatTable = PrettyTable()

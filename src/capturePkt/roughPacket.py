@@ -22,7 +22,7 @@ class RoughPacket:
     UDP_TCPMapUpper = {20: 'FTP-data', 21: 'FTP', 22: 'SSH', 23: 'Telnet',
                        25: 'SMTP', 53: 'Domain', 67: 'DHCP', 68: 'DHCP',
                        69: 'TFTP', 80: 'HTTP', 110: 'POP3', 123: 'NTP',
-                       137: 'NBNS', 443: 'HTTPS'}
+                       137: 'NBNS', 443: 'HTTPS', 5353: 'MDNS'}
     ProtColorMap = {'ARP': QtGui.QColor(239, 83, 80, 255),
                     'IPv6': QtGui.QColor(171, 71, 188, 100),
                     'PPPoE-D': QtGui.QColor(236, 64, 122, 100),
@@ -47,6 +47,7 @@ class RoughPacket:
                     'EAPOL': QtGui.QColor(46, 125, 50, 100),
                     'HOPOPT': QtGui.QColor(224, 64, 251, 100),
                     'RARP': QtGui.QColor(38, 166, 154, 100),
+                    'MDNS': QtGui.QColor(173, 120, 77, 100),
                     'IPv6-ICMP': QtGui.QColor(146, 225, 50, 100),
                     }
 

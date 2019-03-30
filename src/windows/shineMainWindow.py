@@ -588,7 +588,9 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # decode tabs
         self.rawTab.setEnabled(False)
+        self.rawTextEdit.setReadOnly(True)
         self.utfTab.setEnabled(False)
+        self.utfTextEdit.setReadOnly(True)
         self.decodeInfoTab.setEnabled(False)
 
     def clearAllText(self):
