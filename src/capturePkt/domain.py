@@ -26,7 +26,7 @@ class Domain(NetworkProtocol):
         3: 'MD a mail destination (OBSOLETE - use MX)',
         4: 'MF a mail forwarder (OBSOLETE - use MX)',
         5: 'CNAME the canonical name for an alias',
-        6: 'SOA	marks the start of a zone of authority',
+        6: 'SOA marks the start of a zone of authority',
         7: 'MB a mailbox domain name (EXPERIMENTAL)',
         8: 'MG a mail group member (EXPERIMENTAL)',
         9: 'MR a mail rename domain name (EXPERIMENTAL)',

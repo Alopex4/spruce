@@ -139,21 +139,44 @@ class CookedPacket:
                                                     appHeaderLen:])
                 self.appLayer = formatAssistant(appProt, appField, appParse)
 
-        # rar packet decode
-        hexField = []
-        hexParse = []
-        hexdata = self.packet.pktData.hex()
-        hexdata = findall(r'.{2}', hexdata)
-        hexdata.extend([''] * 48)
-        hexdata = ' '.join(hexdata)
-        hexdata = findall(r'.{24}', hexdata)
-        for index, data in enumerate(zip(hexdata[0::2], hexdata[1::2])):
-            line = '0x{:04x}'.format(index)
-            hexField.append(line)
-            hexParse.append('{}  {}'.format(data[0], data[1]))
+        # decode prepare
+        rawData = self.packet.pktData.hex()
+        rawData = findall(r'.{2}', rawData)
+        rawData.extend([''] * 48)
+
+        # hex packet decode
+        hexData = ' '.join(rawData)
+        hexData = findall(r'.{24}', hexData)
+        hexField, hexParse = self._getDecodes(hexData)
         self.rawDecode = formatAssistant('Hex Format', hexField, hexParse)
 
         # utf-8 packet decode
+        chCodes = []
+        for ch in rawData:
+            if ch:
+                chCode = int(ch, base=16)
+                if chCode > 33 and chCode < 126:
+                    chCodes.append(chr(chCode))
+                else:
+                    chCodes.append('.')
+            else:
+                chCodes.append(ch)
+        utfData = ' '.join(chCodes)
+        utfData = findall(r'.{16}', utfData)
+        utfField, utfParse = self._getDecodes(utfData)
+        self.utfDecode = formatAssistant('UTF-8 Format', utfField, utfParse)
+
+    @staticmethod
+    def _getDecodes(decodeData):
+        field = []
+        parse = []
+        for index, data in enumerate(zip(decodeData[0::2], decodeData[1::2])):
+            if not any((data[0].strip(), data[1].strip())):
+                break
+            line = '0x{:04x}'.format(index)
+            field.append(line)
+            parse.append('{}  {}'.format(data[0], data[1]))
+        return field, parse
 
     @staticmethod
     def cookLayer(prot, mapping, packet):

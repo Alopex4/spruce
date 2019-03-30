@@ -477,7 +477,7 @@ class Ui_MainWindow(object):
         self.verboseInfoTab.setTabText(self.verboseInfoTab.indexOf(self.appTab),
                                        _translate("MainWindow", "application"))
         self.decodeInfoTab.setTabText(self.decodeInfoTab.indexOf(self.rawTab),
-                                      _translate("MainWindow", "raw decode"))
+                                      _translate("MainWindow", "hex decode"))
         self.decodeInfoTab.setTabText(self.decodeInfoTab.indexOf(self.utfTab),
                                       _translate("MainWindow", "utf decode"))
         self.menu_File.setTitle(_translate("MainWindow", "&File"))
