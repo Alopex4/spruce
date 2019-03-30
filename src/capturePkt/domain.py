@@ -127,27 +127,37 @@ class Domain(NetworkProtocol):
         self.numofAdditRRs = domain[5]
 
         self.packet = self.packet[12:]
-        self.question = self.questionParse(
-            self.packet) if self.numOfQues else 'No Questions'
+        self.question = self.questions() if self.numOfQues else 'No Questions'
+
+    def questions(self):
+        question = ''
+        for i in range(self.numOfQues):
+            subQes = self.questionParse(self.packet)
+            question = question + '\n' + subQes
+        return question
 
     def questionParse(self, pkt):
         queryList = []
 
         count = pkt[0]
-        while count != 0:
+        while count != 0 and count < 64:
             subQuery, *_ = unpack(self._getDomainName(count), pkt[1:count + 1])
             pkt = pkt[count + 1:]
             queryList.append(subQuery.decode('utf-8'))
             count = pkt[0]
 
-        pkt = pkt[count + 1:]
+        # pkt = pkt[count + 1:]
+        if count > 64:
+            pkt = pkt[2:]
+        else:
+            pkt = pkt[1:]
         queryStr = '.'.join(queryList)
         typeClass = unpack('!H H', pkt[:4])
         type = Domain.typeDict.get(typeClass[0], 'Unknown')
         classx = 'IN' if typeClass[1] == 1 else 'Unknown'
         self.packet = pkt[4:]
 
-        return queryStr + '\n' + type + '\n' + classx
+        return queryStr + '\n' + type + '\n' + classx + '\n'
 
     def _getDomainName(self, count):
         return '!{}s'.format(count)
