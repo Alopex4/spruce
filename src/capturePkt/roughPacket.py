@@ -22,7 +22,8 @@ class RoughPacket:
     UDP_TCPMapUpper = {20: 'FTP-data', 21: 'FTP', 22: 'SSH', 23: 'Telnet',
                        25: 'SMTP', 53: 'Domain', 67: 'DHCP', 68: 'DHCP',
                        69: 'TFTP', 80: 'HTTP', 110: 'POP3', 123: 'NTP',
-                       137: 'NBNS', 443: 'HTTPS', 5353: 'MDNS'}
+                       137: 'NBNS', 443: 'HTTPS', 5353: 'MDNS', 162: 'SNMP',
+                       161: 'SNMP'}
     ProtColorMap = {'ARP': QtGui.QColor(239, 83, 80, 255),
                     'IPv6': QtGui.QColor(171, 71, 188, 100),
                     'PPPoE-D': QtGui.QColor(236, 64, 122, 100),
@@ -49,6 +50,7 @@ class RoughPacket:
                     'RARP': QtGui.QColor(38, 166, 154, 100),
                     'MDNS': QtGui.QColor(173, 120, 77, 100),
                     'IPv6-ICMP': QtGui.QColor(146, 225, 50, 100),
+                    'SNMP': QtGui.QColor(86, 175, 150, 100),
                     }
 
     supportPort = set()
@@ -68,7 +70,9 @@ class RoughPacket:
         self.pktStack = 'Unknow'
         # Stack data it should be list because the oder in under consider
         self.pktProtStack = ['ethernet']
+        self.ethHeaderLen = 14
         self.pppExtendLen = 0
+        self.ipHeaderLen = 0
         self.roughCook()
 
     def roughCook(self):
@@ -82,7 +86,7 @@ class RoughPacket:
 
         # Set packet time
         cstSec = self.sec + RoughPacket.CST
-        pktDate = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(cstSec))
+        pktDate = time.strftime("%Y-%m-%d %H:%M:%S ", time.gmtime(cstSec))
         pktUsec = str(self.usec)[:3]
         self.pktTime = pktDate + pktUsec
 
@@ -114,14 +118,14 @@ class RoughPacket:
         # -------------
         # IP protocol continue analysis upper protocol
         if self.pktProt == 'IP':
-            ipHeaderLen = (self.pktData[14] & 15) * 4
+            self.ipHeaderLen = (self.pktData[14] & 15) * 4
             ipProt = int(self.pktData[23])
             self.pktProt = RoughPacket.IPMapUpper.get(ipProt, 'Unknow')
 
         # IPv6 protocol continue analysis upper protocol
         elif self.pktProt == 'IPv6':
             ipv6Prot = self.pktData[20]
-            ipHeaderLen = 40
+            self.ipHeaderLen = 40
             self.pktProt = RoughPacket.IPMapUpper.get(ipv6Prot, 'Unknow')
 
         elif self.pktProt == 'PPPoE-S':
@@ -129,7 +133,7 @@ class RoughPacket:
             if pppProt == 0x0021:
                 ipProt = int(self.pktData[31])
                 self.pktProt = RoughPacket.IPMapUpper.get(ipProt, 'Unknow')
-                ipHeaderLen = 20
+                self.ipHeaderLen = 20
                 self.pppExtendLen = 8
 
         self.appendProt(self.pktProt)
@@ -138,18 +142,15 @@ class RoughPacket:
         # Transport layer
         # ---------------
         # UDP/TCP protocol continue analysis application protocol
+        headerLen = self.ethHeaderLen + self.ipHeaderLen + self.pppExtendLen
         if self.pktProt == 'UDP':
             # 14 --> Ethernet, ipHeaderLen, 2 --> source port
-            rawSrcPort = (
-                self.pktData[
-                14 + ipHeaderLen + self.pppExtendLen + 0: 14 + ipHeaderLen + self.pppExtendLen + 2])
+            rawSrcPort = (self.pktData[headerLen + 0: headerLen + 2])
             srcPort, *_ = struct.unpack('!H', rawSrcPort)
             self.pktProt = RoughPacket.UDP_TCPMapUpper.get(srcPort,
                                                            'UDP')
             if self.pktProt == 'UDP':
-                rawDstPort = (
-                    self.pktData[
-                    14 + ipHeaderLen + self.pppExtendLen + 2: 14 + ipHeaderLen + self.pppExtendLen + 4])
+                rawDstPort = (self.pktData[headerLen + 2: headerLen + 4])
                 dstPort, *_ = struct.unpack('!H', rawDstPort)
                 self.pktProt = RoughPacket.UDP_TCPMapUpper.get(dstPort,
                                                                'UDP')
@@ -157,14 +158,11 @@ class RoughPacket:
 
         if self.pktProt == 'TCP':
             # 14 --> Ethernet, ipHeaderLen, 2 --> source port
-            rawSrcPort = (
-                self.pktData[14 + ipHeaderLen + 0: 14 + ipHeaderLen + 2])
+            rawSrcPort = (self.pktData[headerLen + 0: headerLen + 2])
             srcPort, *_ = struct.unpack('!H', rawSrcPort)
-            self.pktProt = RoughPacket.UDP_TCPMapUpper.get(srcPort,
-                                                           'TCP')
+            self.pktProt = RoughPacket.UDP_TCPMapUpper.get(srcPort, 'TCP')
             if self.pktProt == 'TCP':
-                rawDstPort = (
-                    self.pktData[14 + ipHeaderLen + 2: 14 + ipHeaderLen + 4])
+                rawDstPort = (self.pktData[headerLen + 2: headerLen + 4])
                 dstPort, *_ = struct.unpack('!H', rawDstPort)
                 self.pktProt = RoughPacket.UDP_TCPMapUpper.get(dstPort,
                                                                'TCP')

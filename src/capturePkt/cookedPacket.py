@@ -27,6 +27,7 @@ from capturePkt.icmpv6 import ICMPv6
 from capturePkt.hopopt import HOPOPT
 
 # Application layer
+from capturePkt.ntp import NTP
 from capturePkt.domain import Domain
 from capturePkt.telnet import Telnet
 from capturePkt.publicApp import PublicApp
@@ -55,8 +56,10 @@ class CookedPacket:
 
     # Application protocol mapping class
     AppMap = {'Unknown': NetworkProtocol, 'domain': Domain, 'telnet': Telnet,
-              'ssh': PublicApp, 'http': PublicApp, 'mdns': Domain,
-              'nbns': Domain}
+              'ssh': PublicApp, 'http': PublicApp, 'https': PublicApp,
+              'mdns': Domain, 'nbns': Domain, 'ftp': PublicApp,
+              'ftp-data': PublicApp, 'smtp': PublicApp, 'ntp': NTP,
+              'pop3': PublicApp, 'snmp': PublicApp}
 
     def __init__(self, packet):
         self.packet = packet
@@ -161,7 +164,7 @@ class CookedPacket:
                 if chCode > 33 and chCode < 126:
                     chCodes.append(chr(chCode))
                 else:
-                    chCodes.append('.')
+                    chCodes.append('·')
             else:
                 chCodes.append(ch)
         utfData = ' '.join(chCodes)

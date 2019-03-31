@@ -55,7 +55,7 @@ def hexToASCII(packet, padding):
             if chCode > 33 and chCode < 126:
                 chCodes.append(chr(chCode))
             else:
-                chCodes.append('.')
+                chCodes.append('·')
         else:
             chCodes.append(ch)
     data = ''.join(chCodes) + ' ' * padding
