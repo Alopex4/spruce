@@ -29,6 +29,7 @@ from capturePkt.hopopt import HOPOPT
 # Application layer
 from capturePkt.ntp import NTP
 from capturePkt.domain import Domain
+from capturePkt.tftp import TFTP
 from capturePkt.telnet import Telnet
 from capturePkt.publicApp import PublicApp
 
@@ -59,7 +60,7 @@ class CookedPacket:
               'ssh': PublicApp, 'http': PublicApp, 'https': PublicApp,
               'mdns': Domain, 'nbns': Domain, 'ftp': PublicApp,
               'ftp-data': PublicApp, 'smtp': PublicApp, 'ntp': NTP,
-              'pop3': PublicApp, 'snmp': PublicApp}
+              'pop3': PublicApp, 'snmp': PublicApp, 'tftp': TFTP}
 
     def __init__(self, packet):
         self.packet = packet
