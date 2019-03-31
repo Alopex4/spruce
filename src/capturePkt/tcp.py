@@ -50,7 +50,8 @@ class TCP(NetworkProtocol):
                   }
 
     def __init__(self, packet):
-        tcp = unpack('!H H I I H H H H', packet[:20])
+        self.packet = packet
+        tcp = unpack('!H H I I H H H H', self.packet[:20])
         self.srcPort = tcp[0]
         self.dstPort = tcp[1]
         self.seqNumber = tcp[2]
@@ -74,12 +75,25 @@ class TCP(NetworkProtocol):
         self.extendParse = tuple()
 
         if self.headerLen > 20:
-            self.remainParse(packet[20:])
+            self.remainParse()
 
-    def remainParse(self, packet):
-        self.option = TCP.optionDict.get(packet[0], 'Unknown')
-        self.extendField = ('Option',)
-        self.extendParse = (self.option,)
+    def remainParse(self):
+        optTotalLen = self.headerLen - 20
+        readLen = 0
+        self.packet = self.packet[20:]
+        self.extendField = ('Options (Extend TCP header)',)
+        self.extendParse = ('--------',)
+        while readLen < optTotalLen:
+            option = TCP.optionDict.get(self.packet[0], 'Unknown')
+            if option == 'No-Operation':
+                length = 1
+            else:
+                length = self.packet[1]
+            self.extendField = self.extendField + ('    Option', '    Length')
+            self.extendParse = self.extendParse + (
+                option, str(length) + ' (Bytes)')
+            readLen += length
+            self.packet = self.packet[length:]
 
     def getFields(self):
         return TCP.TCPFields + self.extendField

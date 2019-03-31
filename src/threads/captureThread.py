@@ -47,7 +47,7 @@ class CaptureThread(QtCore.QThread):
         # s.bind((self.device, 0x0800))
 
         while self.startFlag:
-            packet, _ = s.recvfrom(655351)
+            packet, _ = s.recvfrom(65535)
             self.index += 1
             tsSec, tsUsec = (int(ts.ljust(6, '0')) if len(ts) < 6 else int(ts)
                              for ts in str(round(time.time(), 6)).split('.'))
