@@ -37,10 +37,9 @@ from windows.shineMainWindow import ShineMainWindow
 
 class BrightMainWindow(ShineMainWindow):
     iconDir = '../icon'
-    netfieldNames = [
-        'Interface name', 'IP address', 'Mac address', 'Vendor',
-        'Gateway IP address', 'Gateway Mac address', 'Gateway Vendor'
-    ]
+    netfieldNames = ['Interface name', 'IP address', 'Mac address', 'Vendor',
+                     'Gateway IP address', 'Gateway Mac address',
+                     'Gateway Vendor']
     lanFieldNames = ['ip address', 'mac address', 'vendor', 'sort']
     pktFieldNames = ['No', 'Time', 'Source', 'Destination', 'Protocol',
                      'Length',
@@ -645,7 +644,7 @@ class BrightMainWindow(ShineMainWindow):
 
         self.menu_protocol.setEnabled(True)
         self.menu_length.setEnabled(True)
-        self.menu_time.setEnabled(True)
+        # self.menu_flow.setEnabled(True)
 
         self._resetTabs()
 
@@ -1095,6 +1094,12 @@ class BrightMainWindow(ShineMainWindow):
 
         # packet container
         self.rarePkts.clear()
+        self.searchPkts.clear()
+        self.timestamps.clear()
+        self.uploads.clear()
+        self.downloads.clear()
+        self.sents.clear()
+        self.recvs.clear()
         # Menu
         self.action_Save.setEnabled(False)
         self.action_Open.setEnabled(False)
@@ -1445,7 +1450,7 @@ class BrightMainWindow(ShineMainWindow):
             self.menuPackets_info.setEnabled(True)
             self.menu_Statistic.setEnabled(True)
             self.menu_protocol.setEnabled(True)
-            self.menu_time.setEnabled(True)
+            self.menu_flow.setEnabled(True)
             self.menu_length.setEnabled(True)
         self.action_Open.setEnabled(True)
         self.action_Start.setEnabled(True)

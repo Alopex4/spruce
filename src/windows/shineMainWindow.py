@@ -436,7 +436,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.action_Stop.setEnabled(False)
         self.action_Restart.setEnabled(False)
         self.action_Filter.setEnabled(False)
-        self.menu_time.setEnabled(False)
+        self.menu_flow.setEnabled(False)
         self.menu_protocol.setEnabled(False)
         self.menu_length.setEnabled(False)
 

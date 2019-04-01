@@ -210,25 +210,25 @@
      <property name="title">
       <string>&amp;protocol</string>
      </property>
-     <addaction name="action_Addr"/>
-     <addaction name="action_Layer"/>
-     <addaction name="action_Type"/>
+     <addaction name="action_ProBar"/>
+     <addaction name="action_ProHbar"/>
+     <addaction name="action_ProPie"/>
     </widget>
     <widget class="QMenu" name="menu_length">
      <property name="title">
       <string>&amp;length</string>
      </property>
-     <addaction name="action_PktLen"/>
-     <addaction name="action_UDPPktLen"/>
-     <addaction name="action_TCPPktLen"/>
+     <addaction name="action_LenBar"/>
+     <addaction name="action_LenHbar"/>
+     <addaction name="action_LenPie"/>
     </widget>
     <widget class="QMenu" name="menu_flow">
      <property name="title">
-      <string>&amp;flow</string>
+      <string>&amp;time</string>
      </property>
-     <addaction name="action_Input"/>
-     <addaction name="action_Output"/>
-     <addaction name="action_Speed"/>
+     <addaction name="action_FlowBar"/>
+     <addaction name="action_FlowHbar"/>
+     <addaction name="action_FlowPie"/>
     </widget>
     <addaction name="menu_protocol"/>
     <addaction name="menu_length"/>
@@ -637,49 +637,49 @@
     <string>&amp;restart</string>
    </property>
   </action>
-  <action name="action_Addr">
+  <action name="action_ProBar">
    <property name="text">
-    <string>&amp;adddress</string>
+    <string>&amp;bar</string>
    </property>
   </action>
-  <action name="action_Layer">
+  <action name="action_ProHbar">
    <property name="text">
-    <string>&amp;layer</string>
+    <string>&amp;hbar</string>
    </property>
   </action>
-  <action name="action_Type">
+  <action name="action_ProPie">
    <property name="text">
-    <string>&amp;type</string>
+    <string>&amp;pie</string>
    </property>
   </action>
-  <action name="action_PktLen">
+  <action name="action_LenBar">
    <property name="text">
-    <string>&amp;all</string>
+    <string>&amp;bar</string>
    </property>
   </action>
-  <action name="action_UDPPktLen">
+  <action name="action_LenHbar">
    <property name="text">
-    <string>&amp;UDP</string>
+    <string>&amp;hbar</string>
    </property>
   </action>
-  <action name="action_TCPPktLen">
+  <action name="action_LenPie">
    <property name="text">
-    <string>&amp;TCP</string>
+    <string>&amp;pie</string>
    </property>
   </action>
-  <action name="action_Input">
+  <action name="action_FlowBar">
    <property name="text">
-    <string>&amp;Input</string>
+    <string>&amp;bar</string>
    </property>
   </action>
-  <action name="action_Output">
+  <action name="action_FlowHbar">
    <property name="text">
-    <string>&amp;Output</string>
+    <string>&amp;hbar</string>
    </property>
   </action>
-  <action name="action_Speed">
+  <action name="action_FlowPie">
    <property name="text">
-    <string>&amp;Speed</string>
+    <string>&amp;pie</string>
    </property>
   </action>
   <action name="action_Stop">
