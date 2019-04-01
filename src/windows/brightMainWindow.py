@@ -95,6 +95,8 @@ class BrightMainWindow(ShineMainWindow):
         self.actionPktCSV.triggered.connect(self.pktCsvExport)
         self.actionPktJSON.triggered.connect(self.pktJsonExport)
         self.actionPktPlain.triggered.connect(self.pktPlainExport)
+        self.action_CtrlPan.triggered.connect(self.controlDock.setVisible)
+        self.action_ScanPan.triggered.connect(self.scanDock.setVisible)
         self.action_Open.triggered.connect(self.showOpenFile)
         self.action_Save.triggered.connect(self.showSaveFile)
         self.action_Start.triggered.connect(self.analysisButton.click)
@@ -120,6 +122,11 @@ class BrightMainWindow(ShineMainWindow):
 
         self.searchButton.clicked.connect(self.searchProt)
         self.searchLineEdit.returnPressed.connect(self.searchButton.click)
+
+        # Dock close mapping
+        self.controlDock.visibilityChanged.connect(
+            self.action_CtrlPan.setChecked)
+        self.scanDock.visibilityChanged.connect(self.action_ScanPan.setChecked)
 
         # Scan panel button mapping
         self.nodeListWidget.itemSelectionChanged.connect(self.changAnalBtn)
@@ -1205,8 +1212,9 @@ class BrightMainWindow(ShineMainWindow):
         except AttributeError:
             pass
         else:
-            #  Make sure it is IP address
+            #  Make sure it is IPv4 address
             if '.' in addr:
+                self.controlDock.setVisible(True)
                 self.controlTabManage.setCurrentIndex(sipTabIndex)
                 self.sipLineEdit.setText(addr)
                 self.sipButton.click()
@@ -1226,6 +1234,7 @@ class BrightMainWindow(ShineMainWindow):
         except AttributeError:
             pass
         else:
+            self.controlDock.setVisible(True)
             self.controlTabManage.setCurrentIndex(termIndex)
             self.termLineEdit.setText(term)
             self.termButton.click()
@@ -1523,7 +1532,7 @@ class BrightMainWindow(ShineMainWindow):
     # Parse packet
     # ------------
     def parsePacket(self, currentRow):
-        """ 
+        """
             Parse the packet
                 * Get current packet color to set background
                 * Get the packet protocol stack to parse

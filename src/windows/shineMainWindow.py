@@ -98,6 +98,11 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         openIcon = QtGui.QIcon(openFile)
         self.action_Open.setIcon(openIcon)
 
+        self.action_CtrlPan.setCheckable(True)
+        self.action_CtrlPan.setChecked(True)
+        self.action_ScanPan.setCheckable(True)
+        self.action_ScanPan.setChecked(True)
+
         exitFile = '{}/{}'.format(ShineMainWindow.iconDir, 'exit.ico')
         exitIcon = QtGui.QIcon(exitFile)
         self.action_close.setIcon(exitIcon)
@@ -152,10 +157,13 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.controlDock.setFeatures(
             QtWidgets.QDockWidget.DockWidgetMovable
-            | QtWidgets.QDockWidget.DockWidgetFloatable)
+            | QtWidgets.QDockWidget.DockWidgetFloatable
+            | QtWidgets.QDockWidget.DockWidgetClosable)
 
-        self.scanDock.setFeatures(QtWidgets.QDockWidget.DockWidgetMovable
-                                  | QtWidgets.QDockWidget.DockWidgetFloatable)
+        self.scanDock.setFeatures(
+            QtWidgets.QDockWidget.DockWidgetMovable
+            | QtWidgets.QDockWidget.DockWidgetFloatable
+            | QtWidgets.QDockWidget.DockWidgetClosable)
 
     def shineScanPanel(self):
         """ Set scan panel look much better """
