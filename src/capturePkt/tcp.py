@@ -40,12 +40,12 @@ class TCP(NetworkProtocol):
                   25: 'Unassigned (released 2000-12-18)',
                   26: 'TCP Compression Filter',
                   27: 'Quick-Start Response',
-                  28: 'User Timeout Option (also, other known unauthorized use) [***][1]',
+                  28: 'User Timeout Option (also, other known unauthorized use)',
                   29: 'TCP Authentication Option (TCP-AO)',
                   30: 'Multipath TCP (MPTCP)',
-                  31: 'Reserved (known unauthorized use without proper IANA assignment) [**]',
-                  32: 'Reserved (known unauthorized use without proper IANA assignment) [**]',
-                  33: 'Reserved (known unauthorized use without proper IANA assignment) [**]',
+                  31: 'Reserved (known unauthorized use without proper IANA assignment)',
+                  32: 'Reserved (known unauthorized use without proper IANA assignment)',
+                  33: 'Reserved (known unauthorized use without proper IANA assignment)',
                   34: 'TCP Fast Open Cookie',
                   }
 

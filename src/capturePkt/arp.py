@@ -16,8 +16,8 @@ class ARP(NetworkProtocol):
         arpHead = unpack('! H H B B H 6s 4s 6s 4s', packet)
         self.hardType = arpHead[0]
         self.protType = '0x{:04x}'.format(arpHead[1])
-        self.hardAddrLen = str(arpHead[2]) + ' Bytes'
-        self.protAddrLen = str(arpHead[3]) + ' Bytes'
+        self.hardAddrLen = str(arpHead[2]) + ' (Bytes)'
+        self.protAddrLen = str(arpHead[3]) + ' (Bytes)'
         self.op = self.defineOp(arpHead[4])
         self.sendEtheAddr = getMacAddr(arpHead[5])
         self.sendIPAddr = getIpv4(arpHead[6])
