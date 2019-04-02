@@ -16,6 +16,7 @@ import numpy as np
 from PyQt5 import QtGui
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
+from matplotlib.ticker import MaxNLocator
 
 # Capture packet manager
 from docutils.nodes import section
@@ -41,7 +42,8 @@ from windows.shineMainWindow import ShineMainWindow
 
 
 class BrightMainWindow(ShineMainWindow):
-    CST_time_zone = 8 * 60 * 60
+    # 60 * 60 * 8
+    CST_time_zone = 28800
     iconDir = '../icon'
     netfieldNames = ['Interface name', 'IP address', 'Mac address', 'Vendor',
                      'Gateway IP address', 'Gateway Mac address',
@@ -109,6 +111,7 @@ class BrightMainWindow(ShineMainWindow):
         self.action_Stop.triggered.connect(self.stopButton.click)
         self.action_Restart.triggered.connect(self.stopStart)
         self.action_IOflow.triggered.connect(self.ioFlowStats)
+        self.action_Speed.triggered.connect(self.speedStats)
         self.action_Filter.triggered.connect(self.settingFilterDict)
 
         # Config panel button mapping
@@ -699,63 +702,88 @@ class BrightMainWindow(ShineMainWindow):
     # --------
     def ioFlowStats(self):
         """
-            Input(Receive) package statistic
-            x axis --> time
-            y axis --> input Packet (receive)
+            Input Output package statistic
+            x axis --> second
+            y axis --> Input / Output per second packets
         """
 
         # print(self.recvs)
         # print(self.sents)
         # print(self.timestamps)
-        seconds = np.arange(1, len(self.recvs) + 1)
-        self.ioFlow = Ui_StatisticDialog()
-        self.ioFlow.figure.clear()
-        sentDiff = [
-            self.sents[i] - self.sents[i - 1] if i != 0 else self.sents[i] for i
-            in range(len(self.sents))]
-        recvDiff = [
-            self.recvs[i] - self.recvs[i - 1] if i != 0 else self.recvs[i] for i
-            in range(len(self.recvs))]
-        ax = self.ioFlow.figure.add_subplot(111)
-        ax.plot(
-            seconds,
-            sentDiff,
-            'r-o',
-            markersize=8,
-            alpha=0.7,
-            label='Input packages')
-        ax.plot(
-            seconds,
-            recvDiff,
-            'b-s',
-            markersize=8,
-            alpha=0.7,
-            label='Output packages',
-        )
-        start = int(str(self.timestamps[0]).split('.')[0]) + self.CST_time_zone
-        startDate = datetime.utcfromtimestamp(start).strftime(
-            '%Y-%m-%d %H:%M:%S')
-        end = int(str(self.timestamps[-1]).split('.')[0]) + self.CST_time_zone
-        endDate = datetime.utcfromtimestamp(end).strftime('%Y-%m-%d %H:%M:%S')
+        output, inputs, figureTitle = self.drawPrepare(self.sents, self.recvs,
+                                                       self.timestamps)
+        self.drawing(inputs, output, 'Input/Output flow', 'Input', 'Output',
+                     figureTitle, 'Second', 'Packages (packages/scecond)')
+        # print(input, output, seconds)
+        # print(self.sents, self.recvs)
 
+    def speedStats(self):
+        """
+             upload/download speed statistic
+            x axis --> second
+            y axis --> upload / download per second packets
+        """
+        figureTitle = self._subTitle(self.timestamps)
+        self.drawing(self.uploads, self.downloads, 'Upload/Download Speed',
+                     'Upload', 'Download', figureTitle, 'Second',
+                     'kiloByte (KB/scecond)')
+
+    def drawPrepare(self, data1, data2, ts):
+        """ Draw plot figure prepare"""
+
+        d1Diff = self._getDiff(data1)
+        d2Diff = self._getDiff(data2)
+        title = self._subTitle(ts)
+        return d1Diff, d2Diff, title
+
+    def _subTitle(self, ts):
+        """Generate time format sub title """
+        start = self._tsToDate(ts[0])
+        end = self._tsToDate(ts[-1])
         subTitle = 'Input/Output packages traffice figure'
-        title = '{} - {}\n{}'.format(startDate, endDate, subTitle)
-        ax.set_title(title)
-        ax.set_xlabel('Second', alpha=0.8, fontweight='bold')
-        ax.set_ylabel('Packages / Second', alpha=0.8, fontweight='bold')
+        title = '{} - {}\n{}'.format(start, end, subTitle)
+        return title
+
+    def _tsToDate(self, ts):
+        """ Convert timestamp to readable date string """
+
+        refineTS = int(str(ts).split('.')[0]) + self.CST_time_zone
+        date = datetime.utcfromtimestamp(refineTS).strftime('%Y-%m-%d %H:%M:%S')
+        return date
+
+    @staticmethod
+    def _getDiff(target):
+        """ Return Diff list """
+
+        diff = [target[i] - target[i - 1] if i != 0 else target[i] for i in
+                range(len(target))]
+        return diff
+
+    def drawing(self, data1, data2, windowTitle, y1labl, y2label, figureTitle,
+                xlabl, ylabel):
+        seconds = np.arange(1, len(self.timestamps) + 1)
+        self.ioFlow = Ui_StatisticDialog(subTitle=windowTitle)
+        self.ioFlow.figure.clear()
+        ax = self.ioFlow.figure.add_subplot(111)
+        ax.set_title(figureTitle)
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        ax.plot(seconds, data1, 'r-o', markersize=8, alpha=0.7, label=y1labl)
+        ax.plot(seconds, data2, 'b-D', markersize=8, alpha=0.7, label=y2label)
+        ax.set_xlabel(xlabl, alpha=0.8, fontweight='bold')
+        ax.set_ylabel(ylabel, alpha=0.8, fontweight='bold')
 
         ax.set_xticks(seconds)
-        ax.set_xticks(seconds)
+        # ax.set_yticks(range(max(input + output) + 3))
         ax.set_xlim(left=0)
-        ax.set_ylim(bottom=0)
+        ax.set_ylim(bottom=-1)
         ax.grid(color='green', alpha=0.8)
-        ax.legend(('cosinus', 'sinus'), loc='best')
+        ax.legend(loc='best')
         self.ioFlow.canvas.draw()
         self.ioFlow.exec_()
 
-        # -----------
-        # scan method
-        # -----------
+    # -----------
+    # scan method
+    # -----------
 
     def scanLanNet(self, scanTarget):
         """
