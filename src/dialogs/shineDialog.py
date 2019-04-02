@@ -371,8 +371,9 @@ class Ui_LoadDialog(QtWidgets.QDialog, shineLoadDialog):
 class Ui_StatisticDialog(shineStatisticDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setWindowTitle('Staistic Figure')
         self.setWindowIcon(QtGui.QIcon('../spruce.ico'))
-        self.setFixedSize(647, 400)
+        self.resize(809, 500)
 
 
 if __name__ == '__main__':

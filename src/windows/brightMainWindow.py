@@ -9,13 +9,17 @@ import subprocess
 from time import sleep
 from copy import deepcopy
 from functools import namedtuple
+from datetime import datetime
 
 import netifaces
+import numpy as np
 from PyQt5 import QtGui
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 
 # Capture packet manager
+from docutils.nodes import section
+
 from capturePkt.roughPacket import RoughPacket
 # Thread workers
 from threads.queryThread import QueryThread
@@ -37,6 +41,7 @@ from windows.shineMainWindow import ShineMainWindow
 
 
 class BrightMainWindow(ShineMainWindow):
+    CST_time_zone = 8 * 60 * 60
     iconDir = '../icon'
     netfieldNames = ['Interface name', 'IP address', 'Mac address', 'Vendor',
                      'Gateway IP address', 'Gateway Mac address',
@@ -699,15 +704,59 @@ class BrightMainWindow(ShineMainWindow):
             y axis --> input Packet (receive)
         """
 
-        print(self.recvs)
-        print(self.sents)
-        print(self.timestamps)
-        self.input = Ui_StatisticDialog()
-        self.input.exec_()
+        # print(self.recvs)
+        # print(self.sents)
+        # print(self.timestamps)
+        seconds = np.arange(1, len(self.recvs) + 1)
+        self.ioFlow = Ui_StatisticDialog()
+        self.ioFlow.figure.clear()
+        sentDiff = [
+            self.sents[i] - self.sents[i - 1] if i != 0 else self.sents[i] for i
+            in range(len(self.sents))]
+        recvDiff = [
+            self.recvs[i] - self.recvs[i - 1] if i != 0 else self.recvs[i] for i
+            in range(len(self.recvs))]
+        ax = self.ioFlow.figure.add_subplot(111)
+        ax.plot(
+            seconds,
+            sentDiff,
+            'r-o',
+            markersize=8,
+            alpha=0.7,
+            label='Input packages')
+        ax.plot(
+            seconds,
+            recvDiff,
+            'b-s',
+            markersize=8,
+            alpha=0.7,
+            label='Output packages',
+        )
+        start = int(str(self.timestamps[0]).split('.')[0]) + self.CST_time_zone
+        startDate = datetime.utcfromtimestamp(start).strftime(
+            '%Y-%m-%d %H:%M:%S')
+        end = int(str(self.timestamps[-1]).split('.')[0]) + self.CST_time_zone
+        endDate = datetime.utcfromtimestamp(end).strftime('%Y-%m-%d %H:%M:%S')
 
-    # -----------
-    # scan method
-    # -----------
+        subTitle = 'Input/Output packages traffice figure'
+        title = '{} - {}\n{}'.format(startDate, endDate, subTitle)
+        ax.set_title(title)
+        ax.set_xlabel('Second', alpha=0.8, fontweight='bold')
+        ax.set_ylabel('Packages / Second', alpha=0.8, fontweight='bold')
+
+        ax.set_xticks(seconds)
+        ax.set_xticks(seconds)
+        ax.set_xlim(left=0)
+        ax.set_ylim(bottom=0)
+        ax.grid(color='green', alpha=0.8)
+        ax.legend(('cosinus', 'sinus'), loc='best')
+        self.ioFlow.canvas.draw()
+        self.ioFlow.exec_()
+
+        # -----------
+        # scan method
+        # -----------
+
     def scanLanNet(self, scanTarget):
         """
             * Make sure it's a ip address at least has a dot
