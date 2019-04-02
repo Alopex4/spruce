@@ -102,14 +102,15 @@ class RoughPacket:
             srcIp, dstIp = struct.unpack('!4s 4s', self.pktData[26:34])
             self.pktSrc = getIpv4(srcIp)
             self.pktDst = getIpv4(dstIp)
-        elif self.pktProt in ('ARP', 'RARP', 'PPPoE-D', 'PPPoE-S'):
-            dstMac, srcMac = struct.unpack('!6s 6s', self.pktData[:12])
-            self.pktDst = getMacAddr(dstMac)
-            self.pktSrc = getMacAddr(srcMac)
         elif self.pktProt in ('IPv6', 'HOPOPT', 'IPv6-ICMP'):
             srcIpv6, dstIpv6 = struct.unpack('!16s 16s', self.pktData[22:54])
             self.pktSrc = getIpv6(srcIpv6)
             self.pktDst = getIpv6(dstIpv6)
+        # elif self.pktProt in ('ARP', 'RARP', 'PPPoE-D', 'PPPoE-S'):
+        else:
+            dstMac, srcMac = struct.unpack('!6s 6s', self.pktData[:12])
+            self.pktDst = getMacAddr(dstMac)
+            self.pktSrc = getMacAddr(srcMac)
 
         self.appendProt(self.pktProt)
 

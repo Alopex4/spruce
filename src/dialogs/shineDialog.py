@@ -3,7 +3,6 @@
 
 import sys
 
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 from time import sleep
@@ -13,6 +12,8 @@ from dialogs.authorDialog import Ui_Dialog as shineAuthorDialog
 from dialogs.filterDialog import Ui_Dialog as shineFilterDialog
 from dialogs.nodeDialog import Ui_Dialog as shineNodeDialog
 from dialogs.loadDialog import Ui_Dialog as shineLoadDialog
+from dialogs.statisticDialog import StatisticDialog as shineStatisticDialog
+
 
 # from rankDialog import Ui_Form as shineRankDialoge
 # from authorDialog import Ui_Dialog as shineAuthorDialog
@@ -365,6 +366,13 @@ class Ui_LoadDialog(QtWidgets.QDialog, shineLoadDialog):
         self.statusLabel.setText('Pleas Wait ... ')
         self.statusLabel.setFont(statusFont)
         self.statusLabel.setAlignment(QtCore.Qt.AlignCenter)
+
+
+class Ui_StatisticDialog(shineStatisticDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowIcon(QtGui.QIcon('../spruce.ico'))
+        self.setFixedSize(647, 400)
 
 
 if __name__ == '__main__':

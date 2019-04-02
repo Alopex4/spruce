@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import sys
+from PyQt5 import QtGui
+from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 
 # from mainWindow import Ui_MainWindow
@@ -18,5 +20,13 @@ class Spruce(BrightMainWindow):
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     spruce = Spruce()
-    spruce.show()
+
+    splash = QtWidgets.QSplashScreen(QtGui.QPixmap('../icon/spruce.ico'))
+    splash.showMessage('Loading ... ',
+                       QtCore.Qt.AlignCenter | QtCore.Qt.AlignBottom,
+                       QtCore.Qt.white)
+    splash.show()
+    app.processEvents()
+    QtCore.QTimer.singleShot(2500.0, splash.close)
+    QtCore.QTimer.singleShot(2500.0, spruce.show)
     sys.exit(app.exec_())

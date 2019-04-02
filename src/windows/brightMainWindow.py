@@ -32,6 +32,7 @@ from threads.parseThread import ParseThread
 from dialogs.shineDialog import ui_FilterDialog
 from dialogs.shineDialog import Ui_NodeDialog
 from dialogs.shineDialog import Ui_LoadDialog
+from dialogs.shineDialog import Ui_StatisticDialog
 from windows.shineMainWindow import ShineMainWindow
 
 
@@ -102,6 +103,7 @@ class BrightMainWindow(ShineMainWindow):
         self.action_Start.triggered.connect(self.analysisButton.click)
         self.action_Stop.triggered.connect(self.stopButton.click)
         self.action_Restart.triggered.connect(self.stopStart)
+        self.action_IOflow.triggered.connect(self.ioFlowStats)
         self.action_Filter.triggered.connect(self.settingFilterDict)
 
         # Config panel button mapping
@@ -686,6 +688,22 @@ class BrightMainWindow(ShineMainWindow):
             self.LoadDialog.exec_()
         else:
             self.LoadDialog.close()
+
+    # --------
+    # staistic
+    # --------
+    def ioFlowStats(self):
+        """
+            Input(Receive) package statistic
+            x axis --> time
+            y axis --> input Packet (receive)
+        """
+
+        print(self.recvs)
+        print(self.sents)
+        print(self.timestamps)
+        self.input = Ui_StatisticDialog()
+        self.input.exec_()
 
     # -----------
     # scan method
