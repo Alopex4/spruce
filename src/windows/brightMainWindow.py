@@ -17,6 +17,7 @@ import numpy as np
 from PyQt5 import QtGui
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
+from matplotlib import cm
 from matplotlib.ticker import MaxNLocator
 
 # Capture packet manager
@@ -113,6 +114,7 @@ class BrightMainWindow(ShineMainWindow):
         self.action_Restart.triggered.connect(self.stopStart)
         self.action_IOflow.triggered.connect(self.ioFlowStats)
         self.action_Speed.triggered.connect(self.speedStats)
+        self.action_Addr.triggered.connect(self.addressStats)
         self.action_Gobal.triggered.connect(self.ioSpeedStats)
         self.action_Filter.triggered.connect(self.settingFilterDict)
 
@@ -699,9 +701,9 @@ class BrightMainWindow(ShineMainWindow):
         else:
             self.LoadDialog.close()
 
-    # --------
-    # staistic
-    # --------
+    # ---------------
+    # flow statistics
+    # ---------------
     def ioFlowStats(self):
         """
             Input Output package statistic
@@ -721,7 +723,7 @@ class BrightMainWindow(ShineMainWindow):
 
     def speedStats(self):
         """
-             upload/download speed statistic
+             upload/download speed statistics
             x axis --> second
             y axis --> upload / download per second packets
         """
@@ -791,7 +793,7 @@ class BrightMainWindow(ShineMainWindow):
         self.ioFlow.exec_()
 
     def ioSpeedStats(self):
-        """ The I/O and Speed statistic figure """
+        """ The I/O and Speed statistics figure """
 
         ioData = OrderedDict()
         ioData['Output'] = self.sents[-1]
@@ -815,6 +817,7 @@ class BrightMainWindow(ShineMainWindow):
 
         self._drawMultiPlot(212, 'KiloByte', 'KB', 'Upload/Download Statistics',
                             spKey, spValues, 'Red')
+        self.ioFlow.canvas.draw()
         self.ioFlow.exec_()
 
     def _drawMultiPlot(self, posit, ylabel, plotLabl, title, keys, values,
@@ -829,7 +832,40 @@ class BrightMainWindow(ShineMainWindow):
             ax.text(a, b + 0.05, '%.0f' % b, ha='center', va='bottom',
                     fontsize=12)
         ax.legend(loc='best')
-        self.ioFlow.canvas.draw()
+
+    # -------------------
+    # protocol statistics
+    # -------------------
+    def addressStats(self):
+        """ Address statistics """
+
+        statDict = OrderedDict()
+        addrList = [(pkt.pktSrc, pkt.pktDst) for pkt in self.rarePkts]
+
+        for key1, key2 in addrList:
+            statDict[key1] = statDict.get(key1, 0) + 1
+            statDict[key2] = statDict.get(key2, 0) + 1
+        names = statDict.keys()
+        sizes = statDict.values()
+        windowTitle = ' Address statistics '
+
+        porcent = [s / sum(sizes) * 100 for s in sizes]
+        labels = ['{0} - {1:1.2f} %'.format(i, j) for i, j in
+                  zip(names, porcent)]
+
+        self.addrStat = Ui_StatisticDialog(subTitle=windowTitle)
+        self.addrStat.figure.clear()
+        ax = self.addrStat.figure.add_subplot(111)
+        ax.set_title('Address statistics')
+
+        colors = cm.rainbow(np.arange(len(sizes)) / len(sizes))
+
+        ax.pie(sizes, colors=colors, labeldistance=1.2, autopct='%3.2f%%',
+               shadow=True, startangle=90, pctdistance=0.6)
+        ax.axis('equal')
+        ax.legend(labels, loc='best')
+        self.addrStat.canvas.draw()
+        self.addrStat.exec_()
 
     # -----------
     # scan method
