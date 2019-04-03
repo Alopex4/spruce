@@ -115,6 +115,8 @@ class BrightMainWindow(ShineMainWindow):
         self.action_IOflow.triggered.connect(self.ioFlowStats)
         self.action_Speed.triggered.connect(self.speedStats)
         self.action_Addr.triggered.connect(self.addressStats)
+        self.action_Layer.triggered.connect(self.layerStats)
+        self.action_Type.triggered.connect(self.typeStats)
         self.action_Gobal.triggered.connect(self.ioSpeedStats)
         self.action_Filter.triggered.connect(self.settingFilterDict)
 
@@ -853,19 +855,61 @@ class BrightMainWindow(ShineMainWindow):
         labels = ['{0} - {1:1.2f} %'.format(i, j) for i, j in
                   zip(names, porcent)]
 
-        self.addrStat = Ui_StatisticDialog(subTitle=windowTitle)
-        self.addrStat.figure.clear()
-        ax = self.addrStat.figure.add_subplot(111)
-        ax.set_title('Address statistics')
+        self.drawPie(windowTitle, 'Address statistics', sizes, labels)
 
-        colors = cm.rainbow(np.arange(len(sizes)) / len(sizes))
+    def layerStats(self):
+        """ Layers statistics """
 
-        ax.pie(sizes, colors=colors, labeldistance=1.2, autopct='%3.2f%%',
+        statDict = OrderedDict()
+        for pkt in self.rarePkts:
+            itme = '|'.join(pkt.pktProtStack)
+            statDict[itme] = statDict.get(itme, 0) + 1
+
+        labels = statDict.keys()
+        sizes = statDict.values()
+        windowTitle = ' Layers statistics '
+        self.drawPie(windowTitle, 'Layers Statistics', sizes, labels)
+
+    def typeStats(self):
+        """ Protocol types statistics """
+
+        statDict = OrderedDict()
+        for pkt in self.rarePkts:
+            for prot in pkt.pktProtStack[1:]:
+                statDict[prot] = statDict.get(prot, 0) + 1
+        labels = statDict.keys()
+        sizes = statDict.values()
+        xValue = [x for x in range(max(sizes))]
+        windowTitle = ' Protocol types statistics '
+
+        # self.drawPie(windowTitle, 'Type Statistics', sizes, labels)
+        self.protStats = Ui_StatisticDialog(subTitle=windowTitle)
+        self.protStats.figure.clear()
+        ax = self.protStats.figure.add_subplot(111)
+        ax.set_title('Protocols statistics')
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        ax.barh(list(labels), list(sizes), alpha=0.6,
+                tick_label=list(labels), label='packages')
+        ax.set_xlabel('Packages', alpha=0.8, fontweight='bold')
+        ax.set_ylabel('Protocols', alpha=0.8, fontweight='bold')
+        ax.legend(loc='best')
+        self.protStats.canvas.draw()
+        self.protStats.exec_()
+
+    def drawPie(self, windowTitle, pipTitle, data, labels):
+        """ Draw the pip figure """
+
+        self.pipStat = Ui_StatisticDialog(subTitle=windowTitle)
+        self.pipStat.figure.clear()
+        ax = self.pipStat.figure.add_subplot(111)
+        ax.set_title(pipTitle)
+        colors = cm.rainbow(np.arange(len(data)) / len(data))
+        ax.pie(data, colors=colors, labeldistance=1.2, autopct='%3.2f%%',
                shadow=True, startangle=90, pctdistance=0.6)
         ax.axis('equal')
         ax.legend(labels, loc='best')
-        self.addrStat.canvas.draw()
-        self.addrStat.exec_()
+        self.pipStat.canvas.draw()
+        self.pipStat.exec_()
 
     # -----------
     # scan method
