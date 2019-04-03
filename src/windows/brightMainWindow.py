@@ -10,6 +10,7 @@ from time import sleep
 from copy import deepcopy
 from functools import namedtuple
 from datetime import datetime
+from collections import OrderedDict
 
 import netifaces
 import numpy as np
@@ -112,6 +113,7 @@ class BrightMainWindow(ShineMainWindow):
         self.action_Restart.triggered.connect(self.stopStart)
         self.action_IOflow.triggered.connect(self.ioFlowStats)
         self.action_Speed.triggered.connect(self.speedStats)
+        self.action_Gobal.triggered.connect(self.ioSpeedStats)
         self.action_Filter.triggered.connect(self.settingFilterDict)
 
         # Config panel button mapping
@@ -738,6 +740,7 @@ class BrightMainWindow(ShineMainWindow):
 
     def _subTitle(self, ts):
         """Generate time format sub title """
+
         start = self._tsToDate(ts[0])
         end = self._tsToDate(ts[-1])
         subTitle = 'Input/Output packages traffice figure'
@@ -761,6 +764,12 @@ class BrightMainWindow(ShineMainWindow):
 
     def drawing(self, data1, data2, windowTitle, y1labl, y2label, figureTitle,
                 xlabl, ylabel):
+        """
+            Drawing the plot figure
+                * set x_value (seconds)
+                * set y_value (packages/speed)
+        """
+
         seconds = np.arange(1, len(self.timestamps) + 1)
         self.ioFlow = Ui_StatisticDialog(subTitle=windowTitle)
         self.ioFlow.figure.clear()
@@ -780,6 +789,47 @@ class BrightMainWindow(ShineMainWindow):
         ax.legend(loc='best')
         self.ioFlow.canvas.draw()
         self.ioFlow.exec_()
+
+    def ioSpeedStats(self):
+        """ The I/O and Speed statistic figure """
+
+        ioData = OrderedDict()
+        ioData['Output'] = self.sents[-1]
+        ioData['Input'] = self.recvs[-1]
+        ioData['Total'] = self.sents[-1] + self.recvs[-1]
+        ioKey = ioData.keys()
+        ioValues = ioData.values()
+
+        speedData = OrderedDict()
+        speedData['Upload'] = sum(self.uploads)
+        speedData['Download'] = sum(self.downloads)
+        speedData['Total'] = sum(self.uploads + self.downloads)
+        spKey = speedData.keys()
+        spValues = speedData.values()
+
+        windowTitle = 'Gobal I/O and Speed'
+        self.ioFlow = Ui_StatisticDialog(subTitle=windowTitle)
+        self.ioFlow.figure.clear()
+        self._drawMultiPlot(211, 'Packets', 'Packet', 'Input/Ouput Statistics',
+                            ioKey, ioValues, 'Blue')
+
+        self._drawMultiPlot(212, 'KiloByte', 'KB', 'Upload/Download Statistics',
+                            spKey, spValues, 'Red')
+        self.ioFlow.exec_()
+
+    def _drawMultiPlot(self, posit, ylabel, plotLabl, title, keys, values,
+                       color):
+        ax = self.ioFlow.figure.add_subplot(posit)
+        ax.set_title(title)
+        ax.set_ylabel(ylabel)
+        ax.set_ylim(top=list(values)[-1] + 2)
+        ax.bar(keys, values, alpha=0.6, label=plotLabl, color=color)
+        ax.grid(color='green', alpha=0.6, axis='x')
+        for a, b in zip(keys, values):
+            ax.text(a, b + 0.05, '%.0f' % b, ha='center', va='bottom',
+                    fontsize=12)
+        ax.legend(loc='best')
+        self.ioFlow.canvas.draw()
 
     # -----------
     # scan method
