@@ -117,6 +117,10 @@ class BrightMainWindow(ShineMainWindow):
         self.action_Addr.triggered.connect(self.addressStats)
         self.action_Layer.triggered.connect(self.layerStats)
         self.action_Type.triggered.connect(self.typeStats)
+        self.action_PktLen.triggered.connect(
+            lambda: self.pktLenStats('ethernet'))
+        self.action_TCPPktLen.triggered.connect(lambda: self.pktLenStats('tcp'))
+        self.action_UDPPktLen.triggered.connect(lambda: self.pktLenStats('udp'))
         self.action_Gobal.triggered.connect(self.ioSpeedStats)
         self.action_Filter.triggered.connect(self.settingFilterDict)
 
@@ -924,6 +928,24 @@ class BrightMainWindow(ShineMainWindow):
         ax.legend(loc='best')
         self.protStats.canvas.draw()
         self.protStats.exec_()
+
+    # -----------------
+    # length statistics
+    # -----------------
+    def pktLenStats(self, filter):
+        """ Packages length statistics """
+
+        statDict = OrderedDict()
+        for pkt in self.rarePkts:
+            if filter in pkt.pktProtStack:
+                lens = '{} Bytes'.format(pkt.pktLen)
+                statDict[lens] = statDict.get(lens, 0) + 1
+        length = statDict.keys()
+        amount = statDict.values()
+        windowTitle = ' Packages Length Statistics '
+        figTitle = '{} Packages Length Statistics'.format(filter.title())
+        labels = self._precentLabel(length, amount)
+        self.drawPie(windowTitle, figTitle, amount, labels)
 
     # -----------
     # scan method

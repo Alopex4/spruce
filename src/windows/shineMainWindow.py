@@ -123,6 +123,42 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         filterIcon = QtGui.QIcon(filterFile)
         self.action_Filter.setIcon(filterIcon)
 
+        ioFile = '{}/{}'.format(ShineMainWindow.iconDir, 'io.ico')
+        ioIcon = QtGui.QIcon(ioFile)
+        self.action_IOflow.setIcon(ioIcon)
+
+        updonwFile = '{}/{}'.format(ShineMainWindow.iconDir, 'updown.ico')
+        updownIcon = QtGui.QIcon(updonwFile)
+        self.action_Speed.setIcon(updownIcon)
+
+        globalFile = '{}/{}'.format(ShineMainWindow.iconDir, 'global.ico')
+        globalIcon = QtGui.QIcon(globalFile)
+        self.action_Gobal.setIcon(globalIcon)
+
+        addrFile = '{}/{}'.format(ShineMainWindow.iconDir, 'addr.ico')
+        addrIcon = QtGui.QIcon(addrFile)
+        self.action_Addr.setIcon(addrIcon)
+
+        layerFile = '{}/{}'.format(ShineMainWindow.iconDir, 'layer.ico')
+        layerIcon = QtGui.QIcon(layerFile)
+        self.action_Layer.setIcon(layerIcon)
+
+        protsFile = '{}/{}'.format(ShineMainWindow.iconDir, 'prots.ico')
+        protsIcon = QtGui.QIcon(protsFile)
+        self.action_Type.setIcon(protsIcon)
+
+        allFile = '{}/{}'.format(ShineMainWindow.iconDir, 'all.ico')
+        allIcon = QtGui.QIcon(allFile)
+        self.action_PktLen.setIcon(allIcon)
+
+        tcpFile = '{}/{}'.format(ShineMainWindow.iconDir, 'tcp.ico')
+        tcpIcon = QtGui.QIcon(tcpFile)
+        self.action_TCPPktLen.setIcon(tcpIcon)
+
+        udpFile = '{}/{}'.format(ShineMainWindow.iconDir, 'udp.ico')
+        udpIcon = QtGui.QIcon(udpFile)
+        self.action_UDPPktLen.setIcon(udpIcon)
+
         authorFile = '{}/{}'.format(ShineMainWindow.iconDir, 'author.ico')
         authorIcon = QtGui.QIcon(authorFile)
         self.action_Author.setIcon(authorIcon)
