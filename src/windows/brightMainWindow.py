@@ -713,15 +713,11 @@ class BrightMainWindow(ShineMainWindow):
             y axis --> Input / Output per second packets
         """
 
-        # print(self.recvs)
-        # print(self.sents)
-        # print(self.timestamps)
         output, inputs, figureTitle = self.drawPrepare(self.sents, self.recvs,
                                                        self.timestamps)
-        self.drawing(inputs, output, 'Input/Output flow', 'Input', 'Output',
-                     figureTitle, 'Second', 'Packages (packages/scecond)')
-        # print(input, output, seconds)
-        # print(self.sents, self.recvs)
+        self.drawIOUpDown(inputs, output, 'Input/Output flow', 'Input',
+                          'Output',
+                          figureTitle, 'Second', 'Packages (packages/scecond)')
 
     def speedStats(self):
         """
@@ -729,10 +725,11 @@ class BrightMainWindow(ShineMainWindow):
             x axis --> second
             y axis --> upload / download per second packets
         """
+
         figureTitle = self._subTitle(self.timestamps)
-        self.drawing(self.uploads, self.downloads, 'Upload/Download Speed',
-                     'Upload', 'Download', figureTitle, 'Second',
-                     'kiloByte (KB/scecond)')
+        self.drawIOUpDown(self.uploads, self.downloads, 'Upload/Download Speed',
+                          'Upload', 'Download', figureTitle, 'Second',
+                          'kiloByte (KB/scecond)')
 
     def drawPrepare(self, data1, data2, ts):
         """ Draw plot figure prepare"""
@@ -766,8 +763,8 @@ class BrightMainWindow(ShineMainWindow):
                 range(len(target))]
         return diff
 
-    def drawing(self, data1, data2, windowTitle, y1labl, y2label, figureTitle,
-                xlabl, ylabel):
+    def drawIOUpDown(self, data1, data2, windowTitle, y1labl, y2label,
+                     figureTitle, xlabl, ylabel):
         """
             Drawing the plot figure
                 * set x_value (seconds)
@@ -779,17 +776,15 @@ class BrightMainWindow(ShineMainWindow):
         self.ioFlow.figure.clear()
         ax = self.ioFlow.figure.add_subplot(111)
         ax.set_title(figureTitle)
-        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
         ax.plot(seconds, data1, 'r-o', markersize=8, alpha=0.7, label=y1labl)
         ax.plot(seconds, data2, 'b-D', markersize=8, alpha=0.7, label=y2label)
         ax.set_xlabel(xlabl, alpha=0.8, fontweight='bold')
         ax.set_ylabel(ylabel, alpha=0.8, fontweight='bold')
 
-        ax.set_xticks(seconds)
-        # ax.set_yticks(range(max(input + output) + 3))
+        # ax.set_xticks(seconds)
         ax.set_xlim(left=0)
         ax.set_ylim(bottom=-1)
-        ax.grid(color='green', alpha=0.8)
+        ax.grid(color='green', alpha=0.6, linestyle=':')
         ax.legend(loc='best')
         self.ioFlow.canvas.draw()
         self.ioFlow.exec_()
@@ -814,24 +809,26 @@ class BrightMainWindow(ShineMainWindow):
         windowTitle = 'Gobal I/O and Speed'
         self.ioFlow = Ui_StatisticDialog(subTitle=windowTitle)
         self.ioFlow.figure.clear()
-        self._drawMultiPlot(211, 'Packets', 'Packet', 'Input/Ouput Statistics',
+        self.drawGlobalPlot(211, 'Packets', 'Packet', 'Input/Ouput Statistics',
                             ioKey, ioValues, 'Blue')
 
-        self._drawMultiPlot(212, 'KiloByte', 'KB', 'Upload/Download Statistics',
+        self.drawGlobalPlot(212, 'KiloByte', 'KB', 'Upload/Download Statistics',
                             spKey, spValues, 'Red')
         self.ioFlow.canvas.draw()
         self.ioFlow.exec_()
 
-    def _drawMultiPlot(self, posit, ylabel, plotLabl, title, keys, values,
+    def drawGlobalPlot(self, posit, ylabel, plotLabl, title, keys, values,
                        color):
         ax = self.ioFlow.figure.add_subplot(posit)
         ax.set_title(title)
         ax.set_ylabel(ylabel)
         ax.set_ylim(top=list(values)[-1] + 2)
         ax.bar(keys, values, alpha=0.6, label=plotLabl, color=color)
-        ax.grid(color='green', alpha=0.6, axis='x')
-        for a, b in zip(keys, values):
-            ax.text(a, b + 0.05, '%.0f' % b, ha='center', va='bottom',
+        ax.grid(color='green', alpha=0.6, axis='x', linestyle=':')
+        for k, v in zip(keys, values):
+            # ha--> horizontalalignment
+            # va --> verticalalignment
+            ax.text(k, v, str(round(v, 3)), ha='center', va='bottom',
                     fontsize=12)
         ax.legend(loc='best')
 
@@ -844,31 +841,59 @@ class BrightMainWindow(ShineMainWindow):
         statDict = OrderedDict()
         addrList = [(pkt.pktSrc, pkt.pktDst) for pkt in self.rarePkts]
 
-        for key1, key2 in addrList:
-            statDict[key1] = statDict.get(key1, 0) + 1
-            statDict[key2] = statDict.get(key2, 0) + 1
-        names = statDict.keys()
-        sizes = statDict.values()
+        for srcAddr, dstAddr in addrList:
+            statDict[srcAddr] = statDict.get(srcAddr, 0) + 1
+            statDict[dstAddr] = statDict.get(dstAddr, 0) + 1
+        addrs = statDict.keys()
+        amount = statDict.values()
         windowTitle = ' Address statistics '
 
-        porcent = [s / sum(sizes) * 100 for s in sizes]
-        labels = ['{0} - {1:1.2f} %'.format(i, j) for i, j in
-                  zip(names, porcent)]
+        # porcent = [s / sum(amount) * 100 for s in amount]
+        labels = self._precentLabel(addrs, amount)
 
-        self.drawPie(windowTitle, 'Address statistics', sizes, labels)
+        self.drawPie(windowTitle, 'Address statistics', amount, labels)
 
     def layerStats(self):
         """ Layers statistics """
 
         statDict = OrderedDict()
         for pkt in self.rarePkts:
-            itme = '|'.join(pkt.pktProtStack)
+            itme = ' | '.join(pkt.pktProtStack)
             statDict[itme] = statDict.get(itme, 0) + 1
 
-        labels = statDict.keys()
-        sizes = statDict.values()
+        layers = statDict.keys()
+        amount = statDict.values()
         windowTitle = ' Layers statistics '
-        self.drawPie(windowTitle, 'Layers Statistics', sizes, labels)
+        labels = self._precentLabel(layers, amount)
+        self.drawPie(windowTitle, 'Layers Statistics', amount, labels)
+
+    @staticmethod
+    def _precentLabel(keys, values):
+        """ Precent stickly to text label """
+
+        porcent = [s / sum(values) * 100 for s in values]
+        labels = ['{0} - {1:1.2f} %'.format(i, j) for i, j in
+                  zip(keys, porcent)]
+        return labels
+
+    def drawPie(self, windowTitle, pipTitle, data, labels):
+        """ Draw the pip axes """
+
+        self.pipStat = Ui_StatisticDialog(subTitle=windowTitle)
+        self.pipStat.figure.clear()
+        colors = cm.rainbow(np.arange(len(data)) / len(data))
+
+        ax = self.pipStat.figure.add_subplot(111)
+        ax.set_title(pipTitle)
+        # ax.pie(data, colors=colors, labeldistance=1.2, autopct='%3.2f%%',
+        #        shadow=True, startangle=90, pctdistance=0.6)
+        ax.pie(data, colors=colors, labeldistance=1.2, shadow=True,
+               startangle=90, pctdistance=0.6)
+        # make it like a circle
+        ax.axis('equal')
+        ax.legend(labels, loc='best')
+        self.pipStat.canvas.draw()
+        self.pipStat.exec_()
 
     def typeStats(self):
         """ Protocol types statistics """
@@ -877,9 +902,9 @@ class BrightMainWindow(ShineMainWindow):
         for pkt in self.rarePkts:
             for prot in pkt.pktProtStack[1:]:
                 statDict[prot] = statDict.get(prot, 0) + 1
-        labels = statDict.keys()
-        sizes = statDict.values()
-        xValue = [x for x in range(max(sizes))]
+        prots = statDict.keys()
+        amount = statDict.values()
+        xValue = [x for x in range(max(amount))]
         windowTitle = ' Protocol types statistics '
 
         # self.drawPie(windowTitle, 'Type Statistics', sizes, labels)
@@ -887,29 +912,18 @@ class BrightMainWindow(ShineMainWindow):
         self.protStats.figure.clear()
         ax = self.protStats.figure.add_subplot(111)
         ax.set_title('Protocols statistics')
-        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.barh(list(labels), list(sizes), alpha=0.6,
-                tick_label=list(labels), label='packages')
+        ax.barh(list(prots), list(amount), alpha=0.6,
+                tick_label=list(prots), label='packages')
         ax.set_xlabel('Packages', alpha=0.8, fontweight='bold')
         ax.set_ylabel('Protocols', alpha=0.8, fontweight='bold')
+
+        for k, v in zip(amount, prots):
+            # ha--> horizontalalignment
+            # va --> verticalalignment
+            ax.text(k, v, str(k), ha='center', va='bottom', fontsize=12)
         ax.legend(loc='best')
         self.protStats.canvas.draw()
         self.protStats.exec_()
-
-    def drawPie(self, windowTitle, pipTitle, data, labels):
-        """ Draw the pip figure """
-
-        self.pipStat = Ui_StatisticDialog(subTitle=windowTitle)
-        self.pipStat.figure.clear()
-        ax = self.pipStat.figure.add_subplot(111)
-        ax.set_title(pipTitle)
-        colors = cm.rainbow(np.arange(len(data)) / len(data))
-        ax.pie(data, colors=colors, labeldistance=1.2, autopct='%3.2f%%',
-               shadow=True, startangle=90, pctdistance=0.6)
-        ax.axis('equal')
-        ax.legend(labels, loc='best')
-        self.pipStat.canvas.draw()
-        self.pipStat.exec_()
 
     # -----------
     # scan method
