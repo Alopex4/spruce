@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import os
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
@@ -13,6 +14,7 @@ from dialogs.filterDialog import Ui_Dialog as shineFilterDialog
 from dialogs.nodeDialog import Ui_Dialog as shineNodeDialog
 from dialogs.loadDialog import Ui_Dialog as shineLoadDialog
 from dialogs.statisticDialog import StatisticDialog as shineStatisticDialog
+from dialogs.helpDialog import Ui_Dialog as shineHelpDialog
 
 
 # from rankDialog import Ui_Form as shineRankDialoge
@@ -20,6 +22,8 @@ from dialogs.statisticDialog import StatisticDialog as shineStatisticDialog
 # from filterDialog import Ui_Dialog as shineFilterDialog
 # from nodeDialog import Ui_Dialog as shineNodeDialog
 # from loadDialog import Ui_Dialog as shineLoadDialog
+# from statisticDialog import StatisticDialog as shineStatisticDialog
+# from helpDialog import Ui_Dialog as shineHelpDialog
 
 
 class Ui_RankDialog(QtWidgets.QDialog, shineRankDialoge):
@@ -377,8 +381,19 @@ class Ui_StatisticDialog(shineStatisticDialog):
         self.resize(809, 500)
 
 
+class Ui_HelpDialog(QtWidgets.QDialog, shineHelpDialog):
+
+    def __init__(self, parent=None):
+        super(QtWidgets.QDialog, self).__init__(parent)
+        self.setupUi(self)
+        self.setWindowTitle("Help Page")
+        self.setWindowIcon(QtGui.QIcon('../spruce.ico'))
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Ok)
+        self.resize(350, 566)
+
+
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-    author = Ui_LoadDialog()
+    author = Ui_HelpDialog()
     author.show()
     sys.exit(app.exec_())

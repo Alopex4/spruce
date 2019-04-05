@@ -15,6 +15,7 @@ from PyQt5 import QtWidgets
 from windows.mainWindow import Ui_MainWindow
 from dialogs.shineDialog import Ui_RankDialog
 from dialogs.shineDialog import Ui_AuthorDialog
+from dialogs.shineDialog import Ui_HelpDialog
 
 ROOT = 1
 NETWORK = 2
@@ -381,6 +382,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.action_Rank.triggered.connect(self.showRankDialog)
         self.action_Author.triggered.connect(self.showAuthorDialog)
         self.action_RefreshRank.triggered.connect(self.refreshRank)
+        self.action_Help.triggered.connect(self.helpDialog)
 
     def showRankDialog(self):
         """
@@ -432,6 +434,17 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.rank = self.getRank()
         self.allWidgetInit()
+
+    def helpDialog(self):
+        """ Display the help information """
+
+        helpFile = '../static/help.html'
+        self.helpDialog = Ui_HelpDialog()
+        with open(helpFile, 'r') as f:
+            pageText = f.read()
+            self.helpDialog.helpTextBro.setText(pageText)
+
+        self.helpDialog.exec_()
 
     # --------------
     # widget initial
