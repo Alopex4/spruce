@@ -3,9 +3,9 @@
 
 from struct import unpack
 
-from capturePkt.general import getIpv4, getIdentifier
-from capturePkt.networkProtocol import NetworkProtocol
-from capturePkt.ipv4 import IPv4
+from src.capturePkt.general import getIpv4, getIdentifier
+from src.capturePkt.networkProtocol import NetworkProtocol
+from src.capturePkt.ipv4 import IPv4
 
 
 class PPPoES(NetworkProtocol):

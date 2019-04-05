@@ -3,8 +3,8 @@
 
 from struct import unpack
 
-from capturePkt.general import hexToASCII
-from capturePkt.networkProtocol import NetworkProtocol
+from src.capturePkt.general import hexToASCII
+from src.capturePkt.networkProtocol import NetworkProtocol
 
 
 class TFTP(NetworkProtocol):

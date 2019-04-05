@@ -7,7 +7,7 @@ from string import printable
 from struct import unpack
 from socket import ntohl
 
-from capturePkt.networkProtocol import NetworkProtocol
+from src.capturePkt.networkProtocol import NetworkProtocol
 
 
 class ICMP(NetworkProtocol):

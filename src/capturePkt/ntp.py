@@ -4,8 +4,8 @@
 import time
 from struct import unpack
 
-from capturePkt.networkProtocol import NetworkProtocol
-from capturePkt.general import getIpv4
+from src.capturePkt.networkProtocol import NetworkProtocol
+from src.capturePkt.general import getIpv4
 
 
 class NTP(NetworkProtocol):

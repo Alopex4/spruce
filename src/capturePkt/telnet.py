@@ -5,7 +5,7 @@ from re import findall
 from string import printable
 from struct import unpack
 
-from capturePkt.networkProtocol import NetworkProtocol
+from src.capturePkt.networkProtocol import NetworkProtocol
 
 
 class Telnet(NetworkProtocol):

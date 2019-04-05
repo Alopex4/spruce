@@ -8,13 +8,13 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 from time import sleep
 
-from dialogs.rankDialog import Ui_Form as shineRankDialoge
-from dialogs.authorDialog import Ui_Dialog as shineAuthorDialog
-from dialogs.filterDialog import Ui_Dialog as shineFilterDialog
-from dialogs.nodeDialog import Ui_Dialog as shineNodeDialog
-from dialogs.loadDialog import Ui_Dialog as shineLoadDialog
-from dialogs.statisticDialog import StatisticDialog as shineStatisticDialog
-from dialogs.helpDialog import Ui_Dialog as shineHelpDialog
+from src.dialogs.rankDialog import Ui_Form as shineRankDialoge
+from src.dialogs.authorDialog import Ui_Dialog as shineAuthorDialog
+from src.dialogs.filterDialog import Ui_Dialog as shineFilterDialog
+from src.dialogs.nodeDialog import Ui_Dialog as shineNodeDialog
+from src.dialogs.loadDialog import Ui_Dialog as shineLoadDialog
+from src.dialogs.statisticDialog import StatisticDialog as shineStatisticDialog
+from src.dialogs.helpDialog import Ui_Dialog as shineHelpDialog
 
 
 # from rankDialog import Ui_Form as shineRankDialoge
@@ -35,7 +35,7 @@ class Ui_RankDialog(QtWidgets.QDialog, shineRankDialoge):
     def __init__(self, parent=None):
         super(QtWidgets.QDialog, self).__init__(parent)
         self.setupUi(self)
-        self.setWindowIcon(QtGui.QIcon('../spruce.ico'))
+        self.setWindowIcon(QtGui.QIcon('icon/spruce.ico'))
         self.setWindowTitle('current state')
         self.setFixedSize(220, 136)
 
@@ -68,7 +68,7 @@ class Ui_AuthorDialog(QtWidgets.QDialog, shineAuthorDialog):
         super(QtWidgets.QDialog, self).__init__(parent)
         self.setupUi(self)
 
-        parentDir = '../icon'
+        parentDir = 'icon'
         spruceFile = '{}/{}'.format(parentDir, 'spruce.ico')
         spruceIco = QtGui.QPixmap(spruceFile)
 
@@ -107,7 +107,7 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
     def initUi(self):
         """ Initial the filter dialog UI """
 
-        self.setWindowIcon(QtGui.QIcon('../spruce.ico'))
+        self.setWindowIcon(QtGui.QIcon('icon/spruce.ico'))
         self.setWindowTitle('packets filter')
         self.setFixedSize(260, 420)
 
@@ -301,7 +301,7 @@ class Ui_NodeDialog(QtWidgets.QDialog, shineNodeDialog):
     def __init__(self, parent=None):
         super(QtWidgets.QDialog, self).__init__(parent)
         self.setupUi(self)
-        self.setWindowIcon(QtGui.QIcon('../spruce.ico'))
+        self.setWindowIcon(QtGui.QIcon('icon/spruce.ico'))
         self.setWindowTitle('node information')
         self.setFixedSize(247, 400)
         self._setIcons()
@@ -311,7 +311,7 @@ class Ui_NodeDialog(QtWidgets.QDialog, shineNodeDialog):
     def _setIcons(self):
         """ set node icons """
 
-        parentDir = '../icon'
+        parentDir = 'icon'
         ipFile = '{}/{}'.format(parentDir, 'ip.ico')
         ipIco = QtGui.QPixmap(ipFile)
         macFile = '{}/{}'.format(parentDir, 'mac.ico')
@@ -351,7 +351,7 @@ class Ui_LoadDialog(QtWidgets.QDialog, shineLoadDialog):
     def __init__(self, parent=None):
         super(QtWidgets.QDialog, self).__init__(parent)
         self.setupUi(self)
-        self.setWindowIcon(QtGui.QIcon('../spruce.ico'))
+        self.setWindowIcon(QtGui.QIcon('icon/spruce.ico'))
         self.setFixedSize(272, 440)
         self.initUI()
 
@@ -377,7 +377,7 @@ class Ui_StatisticDialog(shineStatisticDialog):
         super().__init__(parent)
         title = 'Statictic Figure: ' + subTitle
         self.setWindowTitle(title)
-        self.setWindowIcon(QtGui.QIcon('../spruce.ico'))
+        self.setWindowIcon(QtGui.QIcon('icon/spruce.ico'))
         self.resize(809, 500)
 
 
@@ -387,7 +387,7 @@ class Ui_HelpDialog(QtWidgets.QDialog, shineHelpDialog):
         super(QtWidgets.QDialog, self).__init__(parent)
         self.setupUi(self)
         self.setWindowTitle("Help Page")
-        self.setWindowIcon(QtGui.QIcon('../spruce.ico'))
+        self.setWindowIcon(QtGui.QIcon('icon/spruce.ico'))
         self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Ok)
         self.resize(350, 566)
 

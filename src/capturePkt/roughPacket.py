@@ -6,7 +6,7 @@ import socket
 import struct
 
 from PyQt5 import QtGui
-from capturePkt.general import getMacAddr, getIpv4, getIpv6
+from src.capturePkt.general import getMacAddr, getIpv4, getIpv6
 
 
 class RoughPacket:

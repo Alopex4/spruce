@@ -3,8 +3,8 @@
 
 from struct import unpack
 
-from capturePkt.general import getIpv4, getMacAddr
-from capturePkt.networkProtocol import NetworkProtocol
+from src.capturePkt.general import getIpv4, getMacAddr
+from src.capturePkt.networkProtocol import NetworkProtocol
 
 
 class DHCP(NetworkProtocol):

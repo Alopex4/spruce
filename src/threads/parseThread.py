@@ -3,7 +3,7 @@
 
 from PyQt5 import QtCore
 
-from capturePkt.cookedPacket import CookedPacket
+from src.capturePkt.cookedPacket import CookedPacket
 
 
 class ParseThread(QtCore.QThread):

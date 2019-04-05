@@ -4,7 +4,7 @@
 
 from struct import unpack
 
-from capturePkt.networkProtocol import NetworkProtocol
+from src.capturePkt.networkProtocol import NetworkProtocol
 
 
 # http://jhengda.blogspot.com/2009/12/ppp-over-ethernet-pppoe.html

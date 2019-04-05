@@ -23,30 +23,30 @@ from matplotlib.ticker import MaxNLocator
 # Capture packet manager
 from docutils.nodes import section
 
-from capturePkt.roughPacket import RoughPacket
+from src.capturePkt.roughPacket import RoughPacket
 # Thread workers
-from threads.queryThread import QueryThread
-from threads.termsThread import TermsThread
-from threads.scanThread import ScanThread
-from threads.trafficThread import TrafficThread
-from threads.poisonThread import PoisonThread
-from threads.captureThread import CaptureThread
-from threads.openThread import OpenThread
-from threads.saveThread import SaveThread
-from threads.searchThread import SearchThread
-from threads.parseThread import ParseThread
+from src.threads.queryThread import QueryThread
+from src.threads.termsThread import TermsThread
+from src.threads.scanThread import ScanThread
+from src.threads.trafficThread import TrafficThread
+from src.threads.poisonThread import PoisonThread
+from src.threads.captureThread import CaptureThread
+from src.threads.openThread import OpenThread
+from src.threads.saveThread import SaveThread
+from src.threads.searchThread import SearchThread
+from src.threads.parseThread import ParseThread
 # Menu open dialogs
-from dialogs.shineDialog import ui_FilterDialog
-from dialogs.shineDialog import Ui_NodeDialog
-from dialogs.shineDialog import Ui_LoadDialog
-from dialogs.shineDialog import Ui_StatisticDialog
-from windows.shineMainWindow import ShineMainWindow
+from src.dialogs.shineDialog import ui_FilterDialog
+from src.dialogs.shineDialog import Ui_NodeDialog
+from src.dialogs.shineDialog import Ui_LoadDialog
+from src.dialogs.shineDialog import Ui_StatisticDialog
+from src.windows.shineMainWindow import ShineMainWindow
 
 
 class BrightMainWindow(ShineMainWindow):
     # 60 * 60 * 8
     CST_time_zone = 28800
-    iconDir = '../icon'
+    iconDir = 'icon'
     netfieldNames = ['Interface name', 'IP address', 'Mac address', 'Vendor',
                      'Gateway IP address', 'Gateway Mac address',
                      'Gateway Vendor']
@@ -271,7 +271,8 @@ class BrightMainWindow(ShineMainWindow):
         """
 
         macOui = macAddr[:8].replace(':', '').upper()
-        csvFileLoc = '{}/{}'.format('../static/', 'oui.csv')
+        # csvFileLoc = '{}/{}'.format('../static/', 'oui.csv')
+        csvFileLoc = '{}/{}'.format('static/', 'oui.csv')
         with open(csvFileLoc, 'r') as csvFile:
             ouiReader = csv.reader(csvFile, delimiter=',')
             for row in ouiReader:

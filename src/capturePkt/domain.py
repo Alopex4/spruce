@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from struct import unpack
 
-from capturePkt.networkProtocol import NetworkProtocol
+from src.capturePkt.networkProtocol import NetworkProtocol
 
 
 class Domain(NetworkProtocol):

@@ -12,10 +12,10 @@ from PyQt5 import QtGui
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 
-from windows.mainWindow import Ui_MainWindow
-from dialogs.shineDialog import Ui_RankDialog
-from dialogs.shineDialog import Ui_AuthorDialog
-from dialogs.shineDialog import Ui_HelpDialog
+from src.windows.mainWindow import Ui_MainWindow
+from src.dialogs.shineDialog import Ui_RankDialog
+from src.dialogs.shineDialog import Ui_AuthorDialog
+from src.dialogs.shineDialog import Ui_HelpDialog
 
 ROOT = 1
 NETWORK = 2
@@ -46,7 +46,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])/([1-9]|[1-2][0-9]|3[0-2])$"
     )
 
-    iconDir = '../icon'
+    iconDir = 'icon'
 
     def __init__(self, parent=None):
         super(QtWidgets.QMainWindow, self).__init__(parent)
@@ -438,7 +438,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def helpDialog(self):
         """ Display the help information """
 
-        helpFile = '../static/help.html'
+        helpFile = 'static/help.html'
         self.helpDialog = Ui_HelpDialog()
         with open(helpFile, 'r') as f:
             pageText = f.read()

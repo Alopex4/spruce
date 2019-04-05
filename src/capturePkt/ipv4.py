@@ -3,8 +3,8 @@
 
 from struct import unpack
 
-from capturePkt.general import getIpv4
-from capturePkt.networkProtocol import NetworkProtocol
+from src.capturePkt.general import getIpv4
+from src.capturePkt.networkProtocol import NetworkProtocol
 
 
 class IPv4(NetworkProtocol):

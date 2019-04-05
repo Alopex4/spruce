@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from capturePkt.networkProtocol import NetworkProtocol
-from capturePkt.general import hexToASCII
+from src.capturePkt.networkProtocol import NetworkProtocol
+from src.capturePkt.general import hexToASCII
 
 
 class PublicApp(NetworkProtocol):

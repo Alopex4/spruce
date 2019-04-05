@@ -9,7 +9,7 @@ from PyQt5 import QtWidgets
 # from mainWindow import Ui_MainWindow
 # from shineMainWindow import ShineMainWindow
 # from brightMainWindow import BrightMainWindow
-from windows.brightMainWindow import BrightMainWindow
+from src.windows.brightMainWindow import BrightMainWindow
 
 
 class Spruce(BrightMainWindow):
@@ -17,16 +17,16 @@ class Spruce(BrightMainWindow):
         super().__init__()
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
+def main():
     app = QtWidgets.QApplication(sys.argv)
-    spruce = Spruce()
-
-    splash = QtWidgets.QSplashScreen(QtGui.QPixmap('../icon/spruce.ico'))
+    splash = QtWidgets.QSplashScreen(QtGui.QPixmap('icon/spruce.ico'))
     splash.showMessage('Loading ... ',
                        QtCore.Qt.AlignCenter | QtCore.Qt.AlignBottom,
                        QtCore.Qt.white)
-    splash.show()
+    spruce = Spruce()
     app.processEvents()
+    splash.show()
     QtCore.QTimer.singleShot(2500.0, splash.close)
     QtCore.QTimer.singleShot(2500.0, spruce.show)
     sys.exit(app.exec_())
