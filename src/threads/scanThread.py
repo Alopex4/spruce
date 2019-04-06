@@ -106,7 +106,7 @@ class ScanThread(QtCore.QThread):
         """
 
         macOui = macAddr[:8].replace(':', '').upper()
-        csvFileLoc = '{}/{}'.format('../static/', 'oui.csv')
+        csvFileLoc = '{}/{}'.format('static/', 'oui.csv')
         with open(csvFileLoc, 'r') as csvFile:
             ouiReader = csv.reader(csvFile, delimiter=',')
             for row in ouiReader:
