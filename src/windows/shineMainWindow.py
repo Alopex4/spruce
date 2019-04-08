@@ -3,6 +3,7 @@
 
 import os
 import sys
+import ctypes
 import socket
 import subprocess
 from builtins import StopAsyncIteration
@@ -46,7 +47,11 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])/([1-9]|[1-2][0-9]|3[0-2])$"
     )
 
-    iconDir = 'icon'
+    fileLoc = os.path.split(os.path.realpath(__file__))[0]
+    mainUpperDir = os.path.abspath(os.path.join(fileLoc, "../"))
+    upperDir = os.path.abspath(os.path.join(fileLoc, "../.."))
+    iconDir = '{}/{}'.format(upperDir, 'icon')
+
 
     def __init__(self, parent=None):
         super(QtWidgets.QMainWindow, self).__init__(parent)
@@ -331,7 +336,11 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def rootPrivilegeCheck(self):
         """ Return 1 if effect user id equal 0 else return 0 """
 
-        return 1 if os.getegid() == 0 else 0
+        try:
+            is_admin = os.getegid() == 0
+        except AttributeError:
+            is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+        return 1 if is_admin else 0
 
     def networkStartUpCheck(self):
         """ Return 2 if network is startup else return 0 """
@@ -345,15 +354,6 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return 2
         except Exception:
             return 0
-
-        # test_web = 'http://ipinfo.io/ip'
-        # timeout = 0.5
-        # try:
-        #     page = requests.get(test_web, timeout=timeout)
-        #     return 2
-        # except (requests.ConnectionError, requests.ConnectTimeout,
-        #         requests.ReadTimeout):
-        #     return 0
 
     def ipRoutingCheck(self):
         """ Return 4 if ip routing is open else return 0"""
@@ -438,7 +438,8 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def helpDialog(self):
         """ Display the help information """
 
-        helpFile = 'static/help.html'
+        staticDir = '{}/{}'.format(self.upperDir, 'static')
+        helpFile = '{}/{}'.format(staticDir, 'help.html')
         self.helpDialog = Ui_HelpDialog()
         with open(helpFile, 'r') as f:
             pageText = f.read()

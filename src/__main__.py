@@ -17,16 +17,20 @@ class Spruce(BrightMainWindow):
         super().__init__()
 
 
-# if __name__ == '__main__':
 def main():
     app = QtWidgets.QApplication(sys.argv)
-    splash = QtWidgets.QSplashScreen(QtGui.QPixmap('icon/spruce.ico'))
-    splash.showMessage('Loading ... ',
+    iconLoc = '{}/{}'.format(Spruce.iconDir, 'spruce.ico')
+    splash = QtWidgets.QSplashScreen(QtGui.QPixmap(iconLoc))
+    statusFont = QtGui.QFont()
+    statusFont.setBold(True)
+    statusFont.setPointSize(16)
+    splash.setFont(statusFont)
+    splash.showMessage('Loading ... ...',
                        QtCore.Qt.AlignCenter | QtCore.Qt.AlignBottom,
                        QtCore.Qt.white)
     spruce = Spruce()
     app.processEvents()
     splash.show()
-    QtCore.QTimer.singleShot(2500.0, splash.close)
-    QtCore.QTimer.singleShot(2500.0, spruce.show)
+    QtCore.QTimer.singleShot(2500, splash.close)
+    QtCore.QTimer.singleShot(2500, spruce.show)
     sys.exit(app.exec_())

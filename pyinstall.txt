@@ -1,0 +1,6 @@
+#Deprecate
+pyinstaller spruce.py --hidden-import prettytable --hidden-import scapy  --hidden-import request --hidden-import ctype --add-data icon/\*.ico:icon --add-data static/help.html:static --add-data static/oui.csv:static
+
+
+pyinstaller spruce.py --hidden-import prettytable --hidden-import scapy  --hidden-import request --hidden-import ctype  --hidden-import netifaces --add-data icon/\*.ico:icon --add-data static/help.html:static --add-data static/oui.csv:static 
+

@@ -5,6 +5,7 @@ import os
 import csv
 import json
 import struct
+import platform
 import subprocess
 from time import sleep
 from copy import deepcopy
@@ -19,9 +20,10 @@ from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 from matplotlib import cm
 from matplotlib.ticker import MaxNLocator
+from scapy.all import srp, Ether, ARP, conf
 
 # Capture packet manager
-from docutils.nodes import section
+# from docutils.nodes import section
 
 from src.capturePkt.roughPacket import RoughPacket
 # Thread workers
@@ -46,7 +48,6 @@ from src.windows.shineMainWindow import ShineMainWindow
 class BrightMainWindow(ShineMainWindow):
     # 60 * 60 * 8
     CST_time_zone = 28800
-    iconDir = 'icon'
     netfieldNames = ['Interface name', 'IP address', 'Mac address', 'Vendor',
                      'Gateway IP address', 'Gateway Mac address',
                      'Gateway Vendor']
@@ -254,10 +255,20 @@ class BrightMainWindow(ShineMainWindow):
 
         self.gwIpAddr = netifaces.gateways()['default'][netifaces.AF_INET][0]
         if self.nicType == 'original':
-            cmd = "cat /proc/net/arp | grep '{}'| grep '{}' | xargs  | cut -d ' ' -f4".format(
-                '0x2', self.gwIpAddr)
-            r = subprocess.check_output(cmd, shell=True)
-            self.gwMacAddr = r.decode('utf-8').replace('\n', '')
+            if platform.system() == 'Linux':
+                cmd = "cat /proc/net/arp | grep '{}'| grep '{}' | xargs  | cut -d ' ' -f4".format(
+                    '0x2', self.gwIpAddr)
+                r = subprocess.check_output(cmd, shell=True)
+                self.gwMacAddr = r.decode('utf-8').replace('\n', '')
+            else:
+                # For windows get Gateway MAC
+                conf.verb = 0
+                ans, unas = srp(
+                    Ether(src="90:48:9a:72:1d:55") / ARP(pdst='192.168.100.1'),
+                    timeout=2, iface=self.inetName)
+                for sed, rcv in ans:
+                    mac = rcv.sprintf(r"%Ether.src%")
+                self.macAddr = mac
             self.gwVendor = self._macQueryVendor(self.gwMacAddr)
         elif self.nicType == 'ppp':
             self.gwMacAddr = '`ppp` link no gateway mac'
@@ -271,8 +282,11 @@ class BrightMainWindow(ShineMainWindow):
         """
 
         macOui = macAddr[:8].replace(':', '').upper()
-        # csvFileLoc = '{}/{}'.format('../static/', 'oui.csv')
-        csvFileLoc = '{}/{}'.format('static/', 'oui.csv')
+        fileLoc = os.path.split(os.path.realpath(__file__))[0]
+        upperDir = os.path.abspath(os.path.join(fileLoc, "../.."))
+        csvFileLoc = upperDir + '/static/oui.csv'
+        # print(csvFileLoc)
+        # csvFileLoc = '{}/{}'.format('static', 'oui.csv')
         with open(csvFileLoc, 'r') as csvFile:
             ouiReader = csv.reader(csvFile, delimiter=',')
             for row in ouiReader:
@@ -1057,7 +1071,7 @@ class BrightMainWindow(ShineMainWindow):
             item = QtWidgets.QListWidgetItem()
             item.setText('{} ({})'.format(node.vendor[:14], node.ipAddr))
             nodeIcon = self._selectIco(node.sort)
-            icoFile = '{}/{}'.format(BrightMainWindow.iconDir, nodeIcon)
+            icoFile = '{}/{}'.format(ShineMainWindow.iconDir, nodeIcon)
             item.setIcon(QtGui.QIcon(icoFile))
             self.nodeListWidget.addItem(item)
 

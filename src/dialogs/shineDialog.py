@@ -26,6 +26,14 @@ from src.dialogs.helpDialog import Ui_Dialog as shineHelpDialog
 # from helpDialog import Ui_Dialog as shineHelpDialog
 
 
+class IconLoc:
+    """ Define the icon location """
+
+    fileLoc = os.path.split(os.path.realpath(__file__))[0]
+    upperDir = os.path.abspath(os.path.join(fileLoc, "../.."))
+    iconDir = '{}/{}'.format(upperDir, 'icon')
+
+
 class Ui_RankDialog(QtWidgets.QDialog, shineRankDialoge):
     """
         Rank dialog widget.
@@ -35,7 +43,7 @@ class Ui_RankDialog(QtWidgets.QDialog, shineRankDialoge):
     def __init__(self, parent=None):
         super(QtWidgets.QDialog, self).__init__(parent)
         self.setupUi(self)
-        self.setWindowIcon(QtGui.QIcon('icon/spruce.ico'))
+        # self.setWindowIcon(QtGui.QIcon(IconLoc.appIconDir))
         self.setWindowTitle('current state')
         self.setFixedSize(220, 136)
 
@@ -50,14 +58,16 @@ class Ui_RankDialog(QtWidgets.QDialog, shineRankDialoge):
         self.netLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.netStateLabel.setAlignment(QtCore.Qt.AlignCenter)
 
+        self.routingLabel.setText('ip routing\n(For Linux only)')
         self.routingLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.routingStateLabel.setAlignment(QtCore.Qt.AlignCenter)
 
+        self.dumpLabel.setText('tcpdump\n(For Linux only)')
         self.dumpLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.dumpStateLabel.setAlignment(QtCore.Qt.AlignCenter)
 
 
-class Ui_AuthorDialog(QtWidgets.QDialog, shineAuthorDialog):
+class Ui_AuthorDialog(QtWidgets.QDialog, shineAuthorDialog, IconLoc):
     """
         Author dialog widget.
         Display the author informaiton
@@ -68,11 +78,11 @@ class Ui_AuthorDialog(QtWidgets.QDialog, shineAuthorDialog):
         super(QtWidgets.QDialog, self).__init__(parent)
         self.setupUi(self)
 
-        parentDir = 'icon'
+        parentDir = IconLoc.iconDir
         spruceFile = '{}/{}'.format(parentDir, 'spruce.ico')
         spruceIco = QtGui.QPixmap(spruceFile)
 
-        self.setWindowIcon(QtGui.QIcon(spruceIco))
+        # self.setWindowIcon(QtGui.QIcon(spruceIco))
         self.setWindowTitle('about author')
         self.setFixedSize(272, 440)
         self.iconLabel.clear()
@@ -107,7 +117,6 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
     def initUi(self):
         """ Initial the filter dialog UI """
 
-        self.setWindowIcon(QtGui.QIcon('icon/spruce.ico'))
         self.setWindowTitle('packets filter')
         self.setFixedSize(260, 420)
 
@@ -301,7 +310,6 @@ class Ui_NodeDialog(QtWidgets.QDialog, shineNodeDialog):
     def __init__(self, parent=None):
         super(QtWidgets.QDialog, self).__init__(parent)
         self.setupUi(self)
-        self.setWindowIcon(QtGui.QIcon('icon/spruce.ico'))
         self.setWindowTitle('node information')
         self.setFixedSize(247, 400)
         self._setIcons()
@@ -346,12 +354,11 @@ class Ui_NodeDialog(QtWidgets.QDialog, shineNodeDialog):
         self.nodeTypeLineEdit.setAlignment(QtCore.Qt.AlignCenter)
 
 
-class Ui_LoadDialog(QtWidgets.QDialog, shineLoadDialog):
+class Ui_LoadDialog(QtWidgets.QDialog, shineLoadDialog, IconLoc):
 
     def __init__(self, parent=None):
         super(QtWidgets.QDialog, self).__init__(parent)
         self.setupUi(self)
-        self.setWindowIcon(QtGui.QIcon('icon/spruce.ico'))
         self.setFixedSize(272, 440)
         self.initUI()
 
@@ -359,7 +366,7 @@ class Ui_LoadDialog(QtWidgets.QDialog, shineLoadDialog):
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
 
-        loadFile = '../icon/loading.png'
+        loadFile =IconLoc.iconDir + '/loading.png'
         loadMovie = QtGui.QPixmap(loadFile)
         self.moveLabel.setPixmap(loadMovie)
         self.moveLabel.setAlignment(QtCore.Qt.AlignCenter)
@@ -377,7 +384,6 @@ class Ui_StatisticDialog(shineStatisticDialog):
         super().__init__(parent)
         title = 'Statictic Figure: ' + subTitle
         self.setWindowTitle(title)
-        self.setWindowIcon(QtGui.QIcon('icon/spruce.ico'))
         self.resize(809, 500)
 
 
@@ -386,10 +392,9 @@ class Ui_HelpDialog(QtWidgets.QDialog, shineHelpDialog):
     def __init__(self, parent=None):
         super(QtWidgets.QDialog, self).__init__(parent)
         self.setupUi(self)
-        self.setWindowTitle("Help Page")
-        self.setWindowIcon(QtGui.QIcon('icon/spruce.ico'))
+        self.setWindowTitle("Help")
         self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Ok)
-        self.resize(350, 566)
+        self.resize(480, 600)
 
 
 if __name__ == '__main__':
