@@ -79,7 +79,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Task 1 1:0.61803
         self.resize(1000, 618)
         # Task 2
-        self.setWindowTitle('spruce -- a mix ethernet analysis tool')
+        self.setWindowTitle('spruce -- a versatile network sniffer')
         # Task 3
         spruceIcon = '{}/{}'.format(ShineMainWindow.iconDir, 'spruce.ico')
         self.setWindowIcon(QtGui.QIcon(spruceIcon))

@@ -34,3 +34,7 @@ def main():
     QtCore.QTimer.singleShot(2500, splash.close)
     QtCore.QTimer.singleShot(2500, spruce.show)
     sys.exit(app.exec_())
+
+
+if __name__ == '__main__':
+    main()

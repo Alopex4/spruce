@@ -23,20 +23,20 @@ understand what packets you capture and how the network flow
 during this period.
  
 
-![start screen](shoot/start.png)
+![start screen](https://raw.githubusercontent.com/Alopex4/spruce/master/shoot/start.png?token=Ac0AsBXS3M5olE-wNzQwT2eLYV53Nw_yks5cqxhxwA%3D%3D)
 
 ## Installation
 
 OS X & Linux:
 
 ```sh
-pip3 install spurce-x
+pip3 install spurce-sniffer
 ```
 
 ## Usage example
 
 ```sh
-sudo spruce
+sudo spruce-sniffer
 ```
 
 Make sure under root privilege to run the software.
@@ -49,7 +49,15 @@ You can built the software from source code to frozen distribute version.
 # Example of `pyinstaller`
 
 cd spruce
-pyinstaller spruce.py --hidden-import prettytable --hidden-import scapy  --hidden-import request --hidden-import ctype  --hidden-import netifaces --add-data icon/\*.ico:icon --add-data static/help.html:static --add-data static/oui.csv:static 
+pyinstaller spruce.py   \
+--hidden-import prettytable \
+--hidden-import scapy   \
+--hidden-import request \
+--hidden-import ctype   \
+--hidden-import netifaces   \
+--add-data icon/\*.ico:icon \
+--add-data static/help.html:static \
+--add-data static/oui.csv:static 
 
 ```
 
