@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
 import csv
 
 from PyQt5 import QtWidgets
@@ -106,7 +107,10 @@ class ScanThread(QtCore.QThread):
         """
 
         macOui = macAddr[:8].replace(':', '').upper()
-        csvFileLoc = '{}/{}'.format('static', 'oui.csv')
+        fileLoc = os.path.split(os.path.realpath(__file__))[0]
+        upperDir = os.path.abspath(os.path.join(fileLoc, "../.."))
+        csvFileLoc = upperDir + '/static/oui.csv'
+        # csvFileLoc = '{}/{}'.format('static', 'oui.csv')
         with open(csvFileLoc, 'r') as csvFile:
             ouiReader = csv.reader(csvFile, delimiter=',')
             for row in ouiReader:
