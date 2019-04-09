@@ -10,7 +10,7 @@ HERE = pathlib.Path(__file__).parent
 # The text of the README file
 README = (HERE / "README.md").read_text()
 
-version = '0.1.0'
+version = '0.1.1'
 
 requires_lib = ['PyQt5>=5.12.1', 'requests>=2.21.0', 'netifaces>=0.10.9',
                 'numpy>=1.11.0', 'matplotlib>=3.0.3', 'scapy>=2.4.0',

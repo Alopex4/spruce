@@ -3,10 +3,8 @@
 
 import os
 import sys
-import ctypes
 import socket
 import subprocess
-from builtins import StopAsyncIteration
 
 # import requests
 from PyQt5 import QtGui
@@ -51,7 +49,6 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     mainUpperDir = os.path.abspath(os.path.join(fileLoc, "../"))
     upperDir = os.path.abspath(os.path.join(fileLoc, "../.."))
     iconDir = '{}/{}'.format(upperDir, 'icon')
-
 
     def __init__(self, parent=None):
         super(QtWidgets.QMainWindow, self).__init__(parent)
@@ -336,11 +333,7 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def rootPrivilegeCheck(self):
         """ Return 1 if effect user id equal 0 else return 0 """
 
-        try:
-            is_admin = os.getegid() == 0
-        except AttributeError:
-            is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
-        return 1 if is_admin else 0
+        return 1 if os.getegid() == 0 else 0
 
     def networkStartUpCheck(self):
         """ Return 2 if network is startup else return 0 """
