@@ -20,7 +20,7 @@ class QueryThread(QtCore.QThread):
         # Destroyed while thread is still running
         # Solution https://blog.csdn.net/suli_fly/article/details/21627535
         self.quit()
-        self.wait()
+        # self.wait()
 
     def run(self):
         self.finishSignal.emit(False)

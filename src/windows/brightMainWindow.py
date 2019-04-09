@@ -20,7 +20,7 @@ from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 from matplotlib import cm
 from matplotlib.ticker import MaxNLocator
-from scapy.all import srp, Ether, ARP, conf
+# from scapy.all import srp, Ether, ARP, conf
 
 # Capture packet manager
 # from docutils.nodes import section
@@ -260,15 +260,15 @@ class BrightMainWindow(ShineMainWindow):
                     '0x2', self.gwIpAddr)
                 r = subprocess.check_output(cmd, shell=True)
                 self.gwMacAddr = r.decode('utf-8').replace('\n', '')
-            else:
-                # For windows get Gateway MAC
-                conf.verb = 0
-                ans, unas = srp(
-                    Ether(src="90:48:9a:72:1d:55") / ARP(pdst='192.168.100.1'),
-                    timeout=2, iface=self.inetName)
-                for sed, rcv in ans:
-                    mac = rcv.sprintf(r"%Ether.src%")
-                self.macAddr = mac
+            # else:
+            #     # For windows get Gateway MAC
+            #     conf.verb = 0
+            #     ans, unas = srp(
+            #         Ether(src="90:48:9a:72:1d:55") / ARP(pdst='192.168.100.1'),
+            #         timeout=2, iface=self.inetName)
+            #     for sed, rcv in ans:
+            #         mac = rcv.sprintf(r"%Ether.src%")
+            #     self.macAddr = mac
             self.gwVendor = self._macQueryVendor(self.gwMacAddr)
         elif self.nicType == 'ppp':
             self.gwMacAddr = '`ppp` link no gateway mac'
@@ -976,7 +976,8 @@ class BrightMainWindow(ShineMainWindow):
             When the scan parameter is wrong, emit tips message
         """
 
-        if '.' in scanTarget:
+        connect = self.networkStartUpCheck()
+        if '.' in scanTarget and connect:
             self.nodeListWidget.setCurrentRow(-1)
             self.nodeItems.clear()
             self.nodeListWidget.clear()

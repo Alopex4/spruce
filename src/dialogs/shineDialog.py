@@ -58,11 +58,9 @@ class Ui_RankDialog(QtWidgets.QDialog, shineRankDialoge):
         self.netLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.netStateLabel.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.routingLabel.setText('ip routing\n(For Linux only)')
         self.routingLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.routingStateLabel.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.dumpLabel.setText('tcpdump\n(For Linux only)')
         self.dumpLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.dumpStateLabel.setAlignment(QtCore.Qt.AlignCenter)
 
