@@ -1,0 +1,7 @@
+  Since China’s access to the Internet on May 17, 1994, the Internet has made a dramatic change in our lives over the past 25 years. Because of the network, we broke the barriers of space and mastered global information; because of the network, we broke the time limit and surfed around the clock.
+  Behind the changes, we should not neglect a group of people who are constantly working hard for today's colorful and convenient life--network engineers. With the continuous development of the economy and the Internet, the demand for highly qualified employees of computer networks will continue to expand. However, the study of the network is not an easy task. The fragmentation of the knowledge points of the discipline and the abstraction of the network protocol raise the threshold of learning. The learning of the network must be based on text and practice.
+  The system is based on providing a friendly computer network learning platform for "quasi-network engineers", providing network engineers with a portable network tool to solve basic network troubleshooting, LAN information statistics and other related issues.
+  The system uses the current popular Python3 language as the main programming language, the graphical user interface uses PyQt5, and the running platform is Linux.
+  The system is fully functional and can meet the vast majority of network engineers' requirements for Ethernet supervision, such as collection of local NIC information, packet capture, and application of filters.
+
+Key Word: Protocol analysis, LAN monitoring, sniffer
