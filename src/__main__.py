@@ -19,7 +19,7 @@ class Spruce(BrightMainWindow):
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
-    iconLoc = '{}/{}'.format(Spruce.iconDir, 'spruce.ico')
+    iconLoc = '{}/{}'.format(Spruce.iconDir, 'spruce.png')
     splash = QtWidgets.QSplashScreen(QtGui.QPixmap(iconLoc))
     statusFont = QtGui.QFont()
     statusFont.setBold(True)

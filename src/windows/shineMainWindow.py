@@ -562,15 +562,20 @@ class ShineMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             'Specific an ip you want to query (defulat: query your public ip)')
 
         demoQueryText = """{
-    "ip": "8.8.8.8",
-    "hostname": "google-public-dns-a.google.com",
+    "as": "AS15169 Google LLC",
     "city": "Mountain View",
-    "region": "California",
-    "country": "US",
-    "loc": "37.3860,-122.0840",
-    "postal": "94035",
-    "phone": "650",
-    "org": "AS15169 Google LLC"
+    "country": "United States",
+    "countryCode": "US",
+    "isp": "Level 3 Communications",
+    "lat": 37.4229,
+    "lon": -122.085,
+    "org": "Google Inc.",
+    "query": "8.8.8.8",
+    "region": "CA",
+    "regionName": "California",
+    "status": "success",
+    "timezone": "America/Los_Angeles",
+    "zip": "94043"
 }
         """
         self.sipTextEdit.setPlaceholderText(demoQueryText)

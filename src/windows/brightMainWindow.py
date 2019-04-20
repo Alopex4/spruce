@@ -1121,7 +1121,9 @@ class BrightMainWindow(ShineMainWindow):
     def queryDisplay(self, jsonStr):
         """ Display the json text in textEdit """
 
-        self.sipTextEdit.setText(jsonStr)
+        parsed = json.loads(jsonStr)
+        prettyJson = json.dumps(parsed, indent=4, sort_keys=True)
+        self.sipTextEdit.setText(prettyJson)
 
     # -----------
     # Terms query
