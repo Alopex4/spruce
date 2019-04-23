@@ -299,7 +299,7 @@ class ui_FilterDialog(QtWidgets.QDialog, shineFilterDialog):
         self.filterSignal.emit(self.recvFilterDict)
 
 
-class Ui_NodeDialog(QtWidgets.QDialog, shineNodeDialog):
+class Ui_NodeDialog(QtWidgets.QDialog, shineNodeDialog, IconLoc):
     """
         Node dialog widget.
         Display the node informaiton
@@ -317,7 +317,7 @@ class Ui_NodeDialog(QtWidgets.QDialog, shineNodeDialog):
     def _setIcons(self):
         """ set node icons """
 
-        parentDir = 'icon'
+        parentDir = IconLoc.iconDir
         ipFile = '{}/{}'.format(parentDir, 'ip.ico')
         ipIco = QtGui.QPixmap(ipFile)
         macFile = '{}/{}'.format(parentDir, 'mac.ico')

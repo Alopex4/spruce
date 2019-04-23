@@ -1,0 +1,136 @@
+性能分析
+    测试环境
+        测试概述
+            本次系统测试将会在主机为Linux(Ubuntu 16.04)系统下的宿主机(同样为Ubuntu16.04)下进行，虚拟机管理器(virtual machine monitor)工具选择的是VMM(Virtual Machine Manager)，其版本号为1.4.2。
+        主机环境
+            主机的基本情况表
+                 alopex@alpha
+                 OS: Ubuntu 16.04 xenial
+                 Kernel: x86_64 Linux 4.15.0-47-generic
+                 Uptime: 1h 13m
+                 Packages: 2373
+                 Shell: bash 4.3.48
+                 Resolution: 1366x768
+                 DE: Unity 7.4.5
+                 WM: Compiz
+                 WM Theme: Flatabulous 
+                 GTK Theme: Flatabulous [GTK2/3]
+                 Icon Theme: Oranchelo-Classic-Folders
+                 Font: WenQuanYi Micro Hei 11
+                 CPU: Intel Core i5-4210M CPU @ 3.2GHz
+                 GPU: GeForce 840M
+                 RAM: 1762MiB / 6823MiB
+ 
+            主机详细情况表
+            System:    Host: alpha Kernel: 4.15.0-47-generic x86_64 (64 bit) Desktop: Unity 7.4.5  Distro: Ubuntu 16.04 xenial
+            Machine:   System: LENOVO (portable) product: 20C5A081CD v: ThinkPad Edge E440
+                       Mobo: LENOVO model: 20C5A081CD v: SDK0E50518 STD Bios: LENOVO v: J9ET88WW (2.08 ) date: 05/20/2014
+            CPU:       Dual core Intel Core i5-4210M (-HT-MCP-) cache: 3072 KB 
+                       clock speeds: max: 3200 MHz 1: 1123 MHz 2: 1378 MHz 3: 1439 MHz 4: 1299 MHz
+            Graphics:  Card-1: Intel 4th Gen Core Processor Integrated Graphics Controller
+                       Card-2: NVIDIA GM108M [GeForce 840M]
+                       Display Server: X.Org 1.19.6 driver: nvidia Resolution: 1366x768@59.97hz
+                       GLX Renderer: GeForce 840M/PCIe/SSE2 GLX Version: 4.5.0 NVIDIA 384.130
+            Audio:     Card-1 Intel 8 Series/C220 Series High Definition Audio Controller driver: snd_hda_intel
+                       Card-2 Intel Xeon E3-1200 v3/4th Gen Core Processor HD Audio Controller driver: snd_hda_intel
+                       Sound: Advanced Linux Sound Architecture v: k4.15.0-47-generic
+            Network:   Card-1: Realtek RTL8111/8168/8411 PCI Express Gigabit Ethernet Controller driver: r8169
+                       IF: enp4s0 state: down mac: 28:d2:44:c8:34:c2
+                       Card-2: Realtek RTL8723BE PCIe Wireless Network Adapter driver: rtl8723be
+                       IF: wlp5s0 state: up mac: 90:48:9a:72:1d:55
+                       WAN IP: 221.4.182.46 IF: virbr0-nic ip-v4: N/A
+                       IF: virbr0 ip-v4: 192.168.122.1 IF: wlp5s0 ip-v4: 192.168.100.3 IF: enp4s0 ip-v4: N/A
+            Drives:    HDD Total Size: 1000.2GB (11.1% used) ID-1: /dev/sda model: HGST_HTS541010B7 size: 1000.2GB
+            Partition: ID-1: / size: 76G used: 39G (54%) fs: ext4 dev: /dev/sda8
+                       ID-2: swap-1 size: 7.36GB used: 0.00GB (0%) fs: swap dev: /dev/sda9
+            RAID:      No RAID devices: /proc/mdstat, md_mod kernel module present
+            Sensors:   System Temperatures: cpu: 53.0C mobo: N/A gpu: 48C
+                       Fan Speeds (in rpm): cpu: 0
+            Processes: CPU: % used - top 5 active
+                       1: cpu: 5.3% command: compiz pid: 4527
+                       2: cpu: 4.2% command: Xorg pid: 2749
+                       3: cpu: 2.4% command: sda7 (started by: mount.ntfs) pid: 6224
+                       4: cpu: 0.9% daemon: ~irq/30-rmi4_smb~ pid: 671
+                       5: cpu: 0.7% daemon: ~irq/32-nvidia~ pid: 3086
+                       Memory: MB / % used - top 5 active
+                       1: mem: 165.57MB (2.4%) command: compiz pid: 4527
+                       2: mem: 82.53MB (1.2%) command: Xorg pid: 2749
+                       3: mem: 74.07MB (1.0%) command: fcitx-qimpanel pid: 4668
+                       4: mem: 53.32MB (0.7%) command: evolution-calendar-factory pid: 4531
+                       5: mem: 51.46MB (0.7%) command: nautilus pid: 4558
+            Info:      Processes: 238 Uptime: 1:00 Memory: 937.6/6823.5MB Client: Shell (bash) inxi: 2.2.35 
+    启用前硬件运行状态
+            宿主机为新安装主机，安装系统为Ubuntu16.04。
+            软件包安装如下：
+                包名                目的
+                inxi                产生主机的硬件信息 
+                openssh-server      便于对命令结果拷贝工作
+                python3-pip         便于对python软件的安装
+                python3-tk          Tk图形接口开发工具
+                python3-venv        产生一个虚拟环境
+                screenfetch         产生基本的系统信息
+            宿主机的基本情况表
+                 sprucetest@sprucetest
+                 OS: Ubuntu 16.04 xenial
+                 Kernel: x86_64 Linux 4.8.0-36-generic
+                 Uptime: 10m
+                 Packages: 1742
+                 Shell: bash 4.3.46
+                 Resolution: 1366x768
+                 WM: Compiz
+                 WM Theme: Ambiance
+                 CPU: 2x Westmere E56xx/L56xx/X56xx (IBRS update) @ 2.594GHz
+                 RAM: 762MiB / 1999MiB
+            宿主机详细情况表
+            System:    Host: sprucetest Kernel: 4.8.0-36-generic x86_64 (64 bit) Desktop: N/A Distro: Ubuntu 16.04 xenial
+            Machine:   System: QEMU product: Standard PC (i440FX + PIIX 1996) v: pc-i440fx-xenial
+                       Mobo: N/A model: N/A Bios: Sea v: Ubuntu-1.8.2-1ubuntu1 date: 04/01/2014
+            CPU(s):    2 Single core Westmere E56xx/L56xx/X56xx (IBRS update)s (-HT-SMP-) cache: 8192 KB 
+                       clock speeds: max: 2593 MHz 1: 2593 MHz 2: 2593 MHz
+            Graphics:  Card: Red Hat QXL paravirtual graphic card
+                       Display Server: X.Org 1.19.6 drivers: (unloaded: fbdev,vesa) Resolution: 1366x768@59.97hz
+                       GLX Renderer: N/A GLX Version: N/A
+            Audio:     Card Intel 82801FB/FBM/FR/FW/FRW (ICH6 Family) High Definition Audio Controller driver: snd_hda_intel
+                       Sound: Advanced Linux Sound Architecture v: k4.8.0-36-generic
+            Network:   Card: Realtek RTL-8100/8101L/8139 PCI Fast Ethernet Adapter driver: 8139cp
+                       IF: ens3 state: up speed: 100 Mbps duplex: full mac: 52:54:00:a3:37:b1
+                       WAN IP: 221.4.182.46 IF: ens3 ip-v4: 192.168.122.254
+            Drives:    HDD Total Size: 21.5GB (29.2% used) ID-1: /dev/sda model: QEMU_HARDDISK size: 21.5GB
+            Partition: ID-1: / size: 18G used: 4.0G (24%) fs: ext4 dev: /dev/sda1
+                       ID-2: swap-1 size: 2.14GB used: 0.00GB (0%) fs: swap dev: /dev/sda5
+            RAID:      No RAID devices: /proc/mdstat, md_mod kernel module present
+            Sensors:   None detected - is lm-sensors installed and configured?
+            Processes: CPU: % used - top 5 active
+                       1: cpu: 5.3% command: compiz pid: 1634
+                       2: cpu: 0.8% command: Xorg pid: 915
+                       3: cpu: 0.3% command: gnome-software pid: 1660
+                       4: cpu: 0.2% command: init pid: 1
+                       5: cpu: 0.0% daemon: ~kworker/u4:0~ pid: 7218
+                       Memory: MB / % used - top 5 active
+                       1: mem: 256.84MB (12.8%) command: compiz pid: 1634
+                       2: mem: 87.93MB (4.3%) command: gnome-software pid: 1660
+                       3: mem: 67.98MB (3.3%) command: Xorg pid: 915
+                       4: mem: 59.02MB (2.9%) command: evolution-calendar-factory pid: 1686
+                       5: mem: 51.51MB (2.5%) command: evolution-calendar-factory-subprocess pid: 1755
+            Info:      Processes: 191 Uptime: 13 min Memory: 766.7/1999.8MB Client: Shell (bash) inxi: 2.2.35 
+    启用后(空转/正常/高负载)运行状态记录
+        本次测试使用的python解析器为CPython3，其版本为3.5.2。CPython安装所使用的编译器为GCC，其版本为5.4.0 20160609。spruce安装环境将会在虚拟环境下进行，虚拟环境提供工具为venv。安装方式为通过pip工具直接下载位于pypi上的软件包，进行本地安装。
+        安装方式部分过程如下图所示。
+        [fig1]
+        [fig2]
+        软件运行方式与展示
+        [fig3]
+        [fig4]
+        以下将通过软件在三种状态下硬件的相关信息，空转为软件启动但不做任何操作的情况；正常为软件在普通场景经下进行抓包的情况如浏览网页；高负载是在极端环境下如下载大文件时的表现情况。
+        
+
+                                尚未启动        空转        正常        高负载
+        CPU
+        内存
+        网速峰值
+        软件流畅度
+        数据包捕获比值
+        是否出现无响应
+
+    小结
+         
